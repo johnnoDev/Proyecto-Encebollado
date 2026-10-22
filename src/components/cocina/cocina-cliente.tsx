@@ -17,6 +17,7 @@ import {
   textoEspera,
 } from "@/lib/cocina";
 import { cn } from "@/lib/utils";
+import { useMedia } from "@/hooks/use-media";
 import { useMontado } from "@/store/hidratar";
 import { usePedidos } from "@/store/pedidos";
 import type { EstadoPedido, Pedido } from "@/types/menu";
@@ -120,9 +121,43 @@ export function CocinaCliente() {
     setSonido((v) => !v);
   };
 
+  // En celular las columnas son pestañas; desde md se ven las tres a la vez.
+  const conPestanas = !useMedia("(min-width: 768px)");
+  const pestanas = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const moverPestana = (e: React.KeyboardEvent, i: number) => {
+    const destino =
+      e.key === "ArrowRight" ? (i + 1) % COLUMNAS.length
+      : e.key === "ArrowLeft" ? (i - 1 + COLUMNAS.length) % COLUMNAS.length
+      : e.key === "Home" ? 0
+      : e.key === "End" ? COLUMNAS.length - 1
+      : null;
+    if (destino === null) return;
+    e.preventDefault();
+    setVista(COLUMNAS[destino].id);
+    pestanas.current[destino]?.focus();
+  };
+
+  // «Deshacer» se monta junto con el aviso: se enfoca después de montarlo.
+  const enfocarDeshacer = useRef(false);
+  useEffect(() => {
+    if (cambio && enfocarDeshacer.current) {
+      // Al cambiar de aviso conviven el que sale y el que entra: el nuevo es el último.
+      [...document.querySelectorAll<HTMLButtonElement>("[data-deshacer]")].at(-1)?.focus();
+      enfocarDeshacer.current = false;
+    }
+  }, [cambio]);
+
   const avanzar = (pedido: Pedido) => {
     const a = siguienteEstado[pedido.estado];
     if (!a) return;
+    // El foco no se pierde cuando la comanda cambia de columna: pasa a la
+    // siguiente acción de la misma columna o, si no queda ninguna, a «Deshacer».
+    const columna = document.querySelector<HTMLElement>(`[data-columna="${pedido.estado}"]`);
+    const acciones = [...(columna?.querySelectorAll<HTMLButtonElement>("button[data-accion]") ?? [])];
+    const siguiente = acciones[acciones.findIndex((b) => b.dataset.accion === pedido.id) + 1] ?? acciones.at(-2);
+    if (siguiente && siguiente.dataset.accion !== pedido.id) requestAnimationFrame(() => siguiente.focus());
+    else enfocarDeshacer.current = true;
     cambiarEstado(pedido.id, a);
     setCambio({ id: ++ultimoIdCambio, pedido, de: pedido.estado, a });
     clearTimeout(temporizador.current);
@@ -176,14 +211,21 @@ export function CocinaCliente() {
           aria-label="Estados de pedido"
           className="sticky top-0 z-30 border-b border-crema/15 bg-oceano md:hidden"
         >
-          <div role="tablist" className="mx-auto flex max-w-7xl px-2">
-            {COLUMNAS.map((c) => (
+          <div role="tablist" aria-label="Estados de pedido" className="mx-auto flex max-w-7xl px-2">
+            {COLUMNAS.map((c, i) => (
               <button
                 key={c.id}
+                ref={(el) => {
+                  pestanas.current[i] = el;
+                }}
                 type="button"
                 role="tab"
+                id={`pestana-${c.id}`}
+                aria-controls={`panel-${c.id}`}
                 aria-selected={vista === c.id}
+                tabIndex={vista === c.id ? 0 : -1}
                 onClick={() => setVista(c.id)}
+                onKeyDown={(e) => moverPestana(e, i)}
                 className={cn(
                   "relative flex h-14 flex-1 items-center justify-center gap-2 text-cuerpo font-semibold transition-colors",
                   vista === c.id ? "text-crema" : "text-crema/65",
@@ -207,7 +249,10 @@ export function CocinaCliente() {
           {COLUMNAS.map((c) => (
             <section
               key={c.id}
-              aria-labelledby={`col-${c.id}`}
+              id={`panel-${c.id}`}
+              data-columna={c.id}
+              role={conPestanas ? "tabpanel" : undefined}
+              aria-labelledby={conPestanas ? `pestana-${c.id}` : `col-${c.id}`}
               className={cn("min-w-0", vista !== c.id && "max-md:hidden")}
             >
               <h2 id={`col-${c.id}`} className="mb-3 flex items-center gap-2 max-md:sr-only">
@@ -260,6 +305,7 @@ export function CocinaCliente() {
               <button
                 type="button"
                 onClick={deshacer}
+                data-deshacer
                 className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg px-3 text-cuerpo font-semibold text-oceano underline decoration-oceano/40 underline-offset-4 hover:bg-oceano/8"
               >
                 <Undo2 className="size-4" aria-hidden="true" />
@@ -381,6 +427,7 @@ function Ticket({
         <button
           type="button"
           onClick={onAvanzar}
+          data-accion={pedido.id}
           className={cn(
             "mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold transition-[transform,background-color] duration-150 motion-safe:active:scale-[0.98]",
             pedido.estado === "nuevo" &&
