@@ -17,6 +17,10 @@ function cargar(ruta) {
     exports, crypto, structuredClone, Intl, Date,
     require: (nombre) => {
       if (nombre === "zustand/middleware") return { persist: (inicializar) => inicializar };
+      if (nombre.startsWith("@/") && nombre.endsWith(".json")) {
+        const datos = JSON.parse(fs.readFileSync(`src/${nombre.slice(2)}`, "utf8"));
+        return { ...datos, default: datos };
+      }
       if (nombre.startsWith("@/")) return cargar(`src/${nombre.slice(2)}.ts`);
       return require(nombre);
     },
@@ -139,4 +143,26 @@ test("listos: se guarda cuándo quedó listo y se borra al volver atrás", () =>
   assert.ok(MINUTOS_ENFRIA > 0);
   assert.equal("listoEn" in conEstado(listo, "preparando", 0), false);
   assert.equal(conEstado(listo, "entregado", 0).listoEn, 10 * 60000);
+});
+
+test("admin: lee precios escritos a mano y rechaza los inválidos", () => {
+  const { leerPrecio, precioEditable } = cargar("src/lib/admin.ts");
+  assert.equal(leerPrecio("3,50").valor, 3.5);
+  assert.equal(leerPrecio(" $4.5 ").valor, 4.5);
+  assert.equal(leerPrecio("4").valor, 4);
+  for (const malo of ["", "abc", "3,555", "-2", "0,10", "120"]) assert.equal(leerPrecio(malo).ok, false, malo);
+  assert.equal(precioEditable(3.5), "3,50");
+});
+
+test("admin: los ajustes iguales al menú original no se guardan", () => {
+  const { useMenu, platoOriginal } = cargar("src/store/menu.ts");
+  const original = platoOriginal("chifles");
+  useMenu.getState().ajustarPlato("chifles", { precio: 1.75 });
+  assert.equal(useMenu.getState().ajustes.chifles.precio, 1.75);
+  assert.equal(useMenu.getState().platos.find((p) => p.id === "chifles").precio, 1.75);
+  useMenu.getState().ajustarPlato("chifles", { precio: original.precio });
+  assert.equal(useMenu.getState().ajustes.chifles, undefined);
+  useMenu.getState().ajustarPlato("chifles", { disponible: false });
+  useMenu.getState().quitarAjuste("chifles");
+  assert.equal(useMenu.getState().platos.find((p) => p.id === "chifles").disponible, original.disponible);
 });

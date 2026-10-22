@@ -11,10 +11,24 @@ type Ajuste = Partial<Pick<Plato, "precio" | "disponible">>;
 type MenuState = Menu & {
   ajustes: Record<string, Ajuste>;
   ajustarPlato: (id: string, ajuste: Ajuste) => void;
+  /** Devuelve un plato a lo que dice menu.json. */
+  quitarAjuste: (id: string) => void;
   restablecer: () => void;
 };
 
 const semilla = menuInicial as Menu;
+
+/** El plato tal como viene en menu.json, para comparar y restablecer. */
+export const platoOriginal = (id: string) => semilla.platos.find((p) => p.id === id);
+
+/** Guarda solo lo que difiere del JSON: un ajuste igual al original se borra. */
+export function limpiarAjuste(id: string, ajuste: Ajuste): Ajuste | null {
+  const original = platoOriginal(id);
+  const limpio: Ajuste = {};
+  if (ajuste.precio !== undefined && ajuste.precio !== original?.precio) limpio.precio = ajuste.precio;
+  if (ajuste.disponible !== undefined && ajuste.disponible !== original?.disponible) limpio.disponible = ajuste.disponible;
+  return Object.keys(limpio).length > 0 ? limpio : null;
+}
 
 const aplicar = (ajustes: Record<string, Ajuste>) =>
   semilla.platos.map((p) => ({ ...p, ...ajustes[p.id] }));
@@ -26,7 +40,16 @@ export const useMenu = create<MenuState>()(
       ajustes: {},
       ajustarPlato: (id, ajuste) =>
         set((s) => {
-          const ajustes = { ...s.ajustes, [id]: { ...s.ajustes[id], ...ajuste } };
+          const ajustes = { ...s.ajustes };
+          const limpio = limpiarAjuste(id, { ...s.ajustes[id], ...ajuste });
+          if (limpio) ajustes[id] = limpio;
+          else delete ajustes[id];
+          return { ajustes, platos: aplicar(ajustes) };
+        }),
+      quitarAjuste: (id) =>
+        set((s) => {
+          const ajustes = { ...s.ajustes };
+          delete ajustes[id];
           return { ajustes, platos: aplicar(ajustes) };
         }),
       restablecer: () => set({ ajustes: {}, platos: semilla.platos }),

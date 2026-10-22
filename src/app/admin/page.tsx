@@ -1,4 +1,8 @@
-// Pendiente: pantalla aún no implementada.
-export default function Page() {
-  return <main className="p-6 font-heading text-2xl">Administración</main>;
+import type { Metadata } from "next";
+import { AdminCliente } from "@/components/admin/admin-cliente";
+
+export const metadata: Metadata = { title: "Administración" };
+
+export default function AdminPage() {
+  return <AdminCliente />;
 }
