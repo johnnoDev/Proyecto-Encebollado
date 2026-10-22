@@ -351,8 +351,18 @@ function FilaAdmin({
         )}
       </div>
       <div className="col-span-2 flex items-start justify-between gap-4 sm:col-span-1 sm:contents">
-        <CampoPrecio plato={plato} montado={montado} onCambiar={onCambiar} />
-        <Interruptor plato={plato} montado={montado} onCambiar={onCambiar} />
+        {montado ? (
+          <>
+            <CampoPrecio plato={plato} montado={montado} onCambiar={onCambiar} />
+            <Interruptor plato={plato} montado={montado} onCambiar={onCambiar} />
+          </>
+        ) : (
+          // Antes de leer los ajustes guardados el precio aún puede cambiar: esqueleto, no un valor.
+          <>
+            <span aria-hidden="true" className="h-11 w-32 animate-pulse rounded-xl bg-tostado/8 motion-reduce:animate-none" />
+            <span aria-hidden="true" className="h-11 w-36 animate-pulse rounded-full bg-tostado/8 motion-reduce:animate-none" />
+          </>
+        )}
       </div>
     </li>
   );
@@ -474,7 +484,7 @@ function CampoPrecio({
       )}
       {error && (
         <p id={`${id}-error`} className="mt-1 max-w-48 text-sm font-semibold text-pretty text-aji-texto">
-          {error}
+          {error} Se mantiene {precio(plato.precio)}.
         </p>
       )}
     </div>
