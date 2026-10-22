@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, MotionConfig, useReducedMotion } from "motion/react";
-import { ArrowRight, Bell, BellOff, Check, Flame, Undo2 } from "lucide-react";
+import { ArrowRight, Bell, BellOff, Check, Flame, Play, Undo2 } from "lucide-react";
 import { brand } from "@/config/brand";
 import {
   columnasCocina,
@@ -123,6 +123,38 @@ export function CocinaCliente() {
     setSonido((v) => !v);
   };
 
+  // Turno: un solo toque deja la tablet lista para la cocina (timbre encendido
+  // y pantalla que no se apaga). Es el gesto que el navegador exige para el audio.
+  const [turno, setTurno] = useState(false);
+  const bloqueo = useRef<WakeLockSentinel | null>(null);
+
+  const pedirPantallaEncendida = async () => {
+    try {
+      bloqueo.current = (await navigator.wakeLock?.request("screen")) ?? null;
+    } catch {
+      // Sin permiso o sin soporte: el turno funciona igual, solo sin bloqueo.
+    }
+  };
+
+  useEffect(() => {
+    if (!turno) return;
+    // El bloqueo se suelta al ocultar la pestaña; al volver se pide de nuevo.
+    const alVolver = () => {
+      if (document.visibilityState === "visible") void pedirPantallaEncendida();
+    };
+    document.addEventListener("visibilitychange", alVolver);
+    return () => {
+      document.removeEventListener("visibilitychange", alVolver);
+      void bloqueo.current?.release();
+    };
+  }, [turno]);
+
+  const empezarTurno = () => {
+    if (!sonido) alternarSonido();
+    void pedirPantallaEncendida();
+    setTurno(true);
+  };
+
   // En celular las columnas son pestañas; desde md se ven las tres a la vez.
   const conPestanas = !useMedia("(min-width: 768px)");
   const pestanas = useRef<(HTMLButtonElement | null)[]>([]);
@@ -189,13 +221,23 @@ export function CocinaCliente() {
             type="button"
             onClick={alternarSonido}
             aria-pressed={sonido}
-            aria-label={sonido ? "Timbre de pedidos nuevos activado. Apagar" : "Activar timbre de pedidos nuevos"}
+            aria-label="Timbre de pedidos nuevos"
             className={cn(
-              "grid size-11 place-items-center rounded-full border transition-colors",
-              sonido ? "border-dorado bg-dorado text-tostado" : "border-crema/30 text-crema/80 hover:border-crema/60",
+              "flex h-11 items-center gap-2 rounded-full border px-3 text-sm font-semibold transition-colors",
+              sonido
+                ? "w-11 justify-center border-dorado bg-dorado px-0 text-tostado"
+                : turno
+                  ? "border-aji bg-aji-texto text-white"
+                  : "w-11 justify-center border-crema/30 px-0 text-crema/80 hover:border-crema/60",
             )}
           >
             {sonido ? <Bell className="size-5" aria-hidden="true" /> : <BellOff className="size-5" aria-hidden="true" />}
+            {/* Con el turno empezado, un timbre apagado se dice con palabras, no solo con un icono. */}
+            {!sonido && turno && (
+              <span aria-hidden="true">
+                <span className="max-sm:hidden">Sonido apagado · </span>Activar
+              </span>
+            )}
           </button>
           <Link
             href={`/menu?mesa=${mesaDemo}`}
@@ -246,6 +288,28 @@ export function CocinaCliente() {
             ))}
           </div>
         </nav>
+
+        {montado && !turno && (
+          <section
+            aria-label="Empezar turno"
+            className="mx-auto mt-4 flex max-w-7xl flex-col gap-3 px-4 sm:px-6 md:mt-0 md:mb-5 md:flex-row md:items-center"
+          >
+            <div className="flex flex-1 flex-col gap-3 rounded-2xl border-2 border-dashed border-dorado/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-cuerpo text-pretty text-crema/90">
+                <strong className="font-heading text-linea text-crema">¿Empieza el turno?</strong>{" "}
+                Activa el timbre de pedidos nuevos y mantén la pantalla encendida.
+              </p>
+              <button
+                type="button"
+                onClick={empezarTurno}
+                className="flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-dorado px-5 text-base font-semibold text-tostado transition-transform motion-safe:active:scale-[0.98]"
+              >
+                <Play className="size-4 fill-current" aria-hidden="true" />
+                Empezar turno
+              </button>
+            </div>
+          </section>
+        )}
 
         <main className="mx-auto grid max-w-7xl gap-6 px-4 pt-5 sm:px-6 md:grid-cols-3 md:pt-2">
           {COLUMNAS.map((c) => (
