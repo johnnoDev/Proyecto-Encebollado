@@ -241,23 +241,24 @@ function Ticket({
         aria-label={`Pedido ${pedido.numero}, ${nombreDestino(pedido)}, ${platos} ${platos === 1 ? "plato" : "platos"}`}
         className={cn(papel, "rounded-b-[12px] px-4 pt-5 pb-4")}
       >
-        <header className="flex items-start justify-between gap-3 border-b-2 border-tostado pb-3">
-          <div className="min-w-0">
-            <p className="font-heading text-titulo leading-none font-bold tabular-nums text-oceano">{pedido.numero}</p>
-            <p
-              className={cn(
-                "mt-1.5 flex items-center gap-1 text-sm tabular-nums",
-                demorado ? "font-semibold text-aji-texto" : "text-tostado/75",
-              )}
-            >
-              {demorado && <Flame className="size-4" aria-hidden="true" />}
-              {textoEspera(minutos)}
-              {demorado && <span className="sr-only"> (demorado)</span>}
-            </p>
+        {/* En cocina se trabaja por mesa: el destino es el título; el número, la referencia. */}
+        <header className="border-b-2 border-tostado pb-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="min-w-0 font-heading text-titular leading-none font-bold text-oceano">{nombreDestino(pedido)}</p>
+            <span className="shrink-0 rounded-[5px] border-[1.5px] border-tostado/40 px-1.5 text-sm font-semibold whitespace-nowrap tabular-nums text-tostado/80">
+              {pedido.numero}
+            </span>
           </div>
-          <span className="mt-0.5 shrink-0 -rotate-3 rounded-[5px] border-2 border-oceano px-2 py-0.5 font-heading text-linea font-bold text-oceano">
-            {nombreDestino(pedido)}
-          </span>
+          <p
+            className={cn(
+              "mt-1.5 flex items-center gap-1 text-sm tabular-nums",
+              demorado ? "font-semibold text-aji-texto" : "text-tostado/75",
+            )}
+          >
+            {demorado && <Flame className="size-4" aria-hidden="true" />}
+            {textoEspera(minutos)}
+            {demorado && <span className="sr-only"> (demorado)</span>}
+          </p>
         </header>
 
         <ul className="divide-y divide-dashed divide-tostado/25">
