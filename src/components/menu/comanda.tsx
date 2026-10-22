@@ -167,7 +167,8 @@ export function TiraComanda({
           showCloseButton={comun.sello === null}
           className="max-h-[88dvh] gap-0 border-0 bg-transparent p-0 shadow-none [&>[data-slot=sheet-close]]:top-6 [&>[data-slot=sheet-close]]:right-4 [&>[data-slot=sheet-close]]:size-10 [&>[data-slot=sheet-close]]:rounded-full [&>[data-slot=sheet-close]]:text-oceano"
         >
-          <div className={cn(papel, "flex max-h-[88dvh] min-h-0 flex-col pt-5")}>
+          {/* Altura mínima estable: quitar líneas no hace saltar la hoja bajo el dedo. */}
+          <div className={cn(papel, "flex max-h-[88dvh] min-h-[min(62dvh,560px)] flex-col pt-5")}>
             <ContenidoComanda {...comun} enHoja aviso={aviso} />
           </div>
         </SheetContent>
