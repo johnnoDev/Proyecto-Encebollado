@@ -8,6 +8,9 @@ type CarritoState = {
   lineas: LineaCarrito[];
   agregar: (linea: Omit<LineaCarrito, "lineaId">) => void;
   cambiarCantidad: (lineaId: string, cantidad: number) => void;
+  /** Quita la línea y devuelve lo necesario para deshacerlo. */
+  quitar: (lineaId: string) => { linea: LineaCarrito; indice: number } | null;
+  restaurar: (linea: LineaCarrito, indice: number) => void;
   vaciar: () => void;
 };
 
@@ -16,7 +19,7 @@ const mismaSeleccion = (a: LineaCarrito["seleccion"], b: LineaCarrito["seleccion
 
 export const useCarrito = create<CarritoState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       lineas: [],
       agregar: (linea) =>
         set((s) => {
@@ -41,6 +44,19 @@ export const useCarrito = create<CarritoState>()(
               ? s.lineas.filter((l) => l.lineaId !== lineaId)
               : s.lineas.map((l) => (l.lineaId === lineaId ? { ...l, cantidad } : l)),
         })),
+      quitar: (lineaId) => {
+        const indice = get().lineas.findIndex((l) => l.lineaId === lineaId);
+        if (indice < 0) return null;
+        const linea = get().lineas[indice];
+        set((s) => ({ lineas: s.lineas.filter((l) => l.lineaId !== lineaId) }));
+        return { linea, indice };
+      },
+      restaurar: (linea, indice) =>
+        set((s) =>
+          s.lineas.some((l) => l.lineaId === linea.lineaId)
+            ? s
+            : { lineas: [...s.lineas.slice(0, indice), linea, ...s.lineas.slice(indice)] },
+        ),
       vaciar: () => set({ lineas: [] }),
     }),
     { name: "carrito", skipHydration: true },

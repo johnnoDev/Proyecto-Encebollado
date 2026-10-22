@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MotionConfig } from "motion/react";
-import { ComandaLateral, TiraComanda, type AvisoAnotado } from "@/components/menu/comanda";
+import { AvisoEscritorio, ComandaLateral, TiraComanda, type AvisoComanda } from "@/components/menu/comanda";
 import { EncabezadoMenu } from "@/components/menu/encabezado-menu";
 import { FichaPlato } from "@/components/menu/ficha-plato";
 import { FilaPlato } from "@/components/menu/fila-plato";
@@ -35,19 +35,42 @@ export function MenuCliente() {
   const [platoAbierto, setPlatoAbierto] = useState<Plato | null>(null);
   const [comandaAbierta, setComandaAbierta] = useState(false);
   const [selectorMesa, setSelectorMesa] = useState(false);
-  const [aviso, setAviso] = useState<AvisoAnotado>(null);
+  const [aviso, setAviso] = useState<AvisoComanda>(null);
   const [enviando, iniciarEnvio] = useTransition();
   const temporizador = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const enviado = useRef(false);
 
   useEffect(() => () => clearTimeout(temporizador.current), []);
+
+  const avisar = (nuevo: NonNullable<AvisoComanda>, ms: number) => {
+    setAviso(nuevo);
+    clearTimeout(temporizador.current);
+    temporizador.current = setTimeout(() => setAviso(null), ms);
+  };
 
   const anotar = (linea: Omit<LineaCarrito, "lineaId">) => {
     agregar(linea);
     setPlatoAbierto(null);
     const texto = `${linea.cantidad > 1 ? `${linea.cantidad} × ` : ""}${linea.nombre}${linea.detalle ? ` · ${linea.detalle.toLowerCase()}` : ""}`;
-    setAviso({ id: Date.now(), texto });
-    clearTimeout(temporizador.current);
-    temporizador.current = setTimeout(() => setAviso(null), 2600);
+    avisar({ id: Date.now(), tipo: "anotado", texto }, 2600);
+  };
+
+  // Quitar nunca es definitivo al instante: el aviso ofrece deshacerlo.
+  const quitar = (lineaId: string) => {
+    const quitada = useCarrito.getState().quitar(lineaId);
+    if (!quitada) return;
+    avisar(
+      {
+        id: Date.now(),
+        tipo: "quitado",
+        texto: quitada.linea.nombre,
+        onDeshacer: () => {
+          useCarrito.getState().restaurar(quitada.linea, quitada.indice);
+          setAviso(null);
+        },
+      },
+      5000,
+    );
   };
 
   const elegir = (plato: Plato) => {
@@ -71,7 +94,9 @@ export function MenuCliente() {
   const enviar = () => {
     if (!mesa) return setSelectorMesa(true);
     const lineas = useCarrito.getState().lineas;
-    if (lineas.length === 0) return;
+    // Un doble toque no crea dos pedidos.
+    if (lineas.length === 0 || enviado.current) return;
+    enviado.current = true;
     iniciarEnvio(() => {
       const pedido = usePedidos
         .getState()
@@ -82,7 +107,7 @@ export function MenuCliente() {
     });
   };
 
-  const comun = { mesa, montado, enviando, onEnviar: enviar };
+  const comun = { mesa, montado, enviando, onEnviar: enviar, onQuitar: quitar };
 
   return (
     <MotionConfig reducedMotion="user">
@@ -138,9 +163,10 @@ export function MenuCliente() {
         onAbrir={() => setComandaAbierta(true)}
         onCerrar={() => setComandaAbierta(false)}
       />
+      <AvisoEscritorio aviso={aviso} />
       <FichaPlato plato={platoAbierto} onCerrar={() => setPlatoAbierto(null)} onAnotar={anotar} />
       <p aria-live="polite" className="sr-only">
-        {aviso ? `Anotado en la comanda: ${aviso.texto}` : ""}
+        {aviso ? `${aviso.tipo === "anotado" ? "Anotado en" : "Quitado de"} la comanda: ${aviso.texto}` : ""}
       </p>
     </MotionConfig>
   );

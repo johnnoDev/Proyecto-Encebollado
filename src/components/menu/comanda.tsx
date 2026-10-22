@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronUp, LoaderCircle } from "lucide-react";
+import { ChevronUp, LoaderCircle, Trash2, Undo2 } from "lucide-react";
 import { Contador } from "@/components/menu/contador";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { precio } from "@/lib/formato";
@@ -17,14 +17,74 @@ const papel =
 
 const nPlatos = (n: number) => `${n} ${n === 1 ? "plato" : "platos"}`;
 
-export type AvisoAnotado = { id: number; texto: string } | null;
+export type AvisoComanda = {
+  id: number;
+  tipo: "anotado" | "quitado";
+  texto: string;
+  onDeshacer?: () => void;
+} | null;
 
 type Comun = {
   mesa: string | null | undefined;
   montado: boolean;
   enviando: boolean;
   onEnviar: () => void;
+  onQuitar: (lineaId: string) => void;
 };
+
+/** Papelito que confirma lo anotado o lo quitado (con «Deshacer»). */
+function PapelAviso({ aviso, className }: { aviso: AvisoComanda; className?: string }) {
+  return (
+    <AnimatePresence>
+      {aviso && (
+        <motion.div
+          key={aviso.id}
+          data-superficie="clara"
+          initial={{ y: 14, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 8, opacity: 0 }}
+          transition={{ duration: 0.35, ease: TINTA }}
+          className={cn(
+            "flex items-center gap-3 rounded-lg border border-dashed border-tostado/30 bg-crema py-2 pr-2 pl-4 text-tostado shadow-[0_10px_24px_-8px_rgb(0_0_0/0.5)]",
+            className,
+          )}
+        >
+          <motion.p
+            aria-hidden="true"
+            initial={{ clipPath: "inset(0 100% 0 0)" }}
+            animate={{ clipPath: "inset(0 0% 0 0)" }}
+            transition={{ duration: 0.7, delay: 0.1, ease: TINTA }}
+            className="min-w-0 flex-1 py-0.5 text-[0.9rem] leading-snug"
+          >
+            <span className={cn("font-semibold", aviso.tipo === "anotado" ? "text-aji-texto" : "text-oceano")}>
+              {aviso.tipo === "anotado" ? "Anotado · " : "Quitado · "}
+            </span>
+            {aviso.texto}
+          </motion.p>
+          {aviso.onDeshacer && (
+            <button
+              type="button"
+              onClick={aviso.onDeshacer}
+              className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg px-3 text-[0.9rem] font-semibold text-oceano underline decoration-oceano/40 underline-offset-4 hover:bg-oceano/8"
+            >
+              <Undo2 className="size-4" aria-hidden="true" />
+              Deshacer
+            </button>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/** Aviso en escritorio: flota alineado con la columna de la comanda. */
+export function AvisoEscritorio({ aviso }: { aviso: AvisoComanda }) {
+  return (
+    <div className="pointer-events-none fixed right-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))] bottom-6 z-40 hidden w-[380px] lg:block [&>*]:pointer-events-auto">
+      <PapelAviso aviso={aviso} />
+    </div>
+  );
+}
 
 /** Tira plegada fija abajo (celular). Tocarla abre la comanda completa. */
 export function TiraComanda({
@@ -33,38 +93,15 @@ export function TiraComanda({
   onAbrir,
   onCerrar,
   ...comun
-}: Comun & { aviso: AvisoAnotado; abierta: boolean; onAbrir: () => void; onCerrar: () => void }) {
+}: Comun & { aviso: AvisoComanda; abierta: boolean; onAbrir: () => void; onCerrar: () => void }) {
   const lineas = useCarrito((s) => s.lineas);
   const n = platosEnCarrito(lineas);
-  const { mesa, montado, enviando, onEnviar } = comun;
+  const { mesa, montado } = comun;
 
   return (
     <>
       <div className="fixed inset-x-0 bottom-0 z-40 lg:hidden">
-        <AnimatePresence>
-          {aviso && (
-            <motion.div
-              key={aviso.id}
-              data-superficie="clara"
-              aria-hidden="true"
-              initial={{ y: 14, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 8, opacity: 0 }}
-              transition={{ duration: 0.35, ease: TINTA }}
-              className="mx-3 mb-2 rounded-lg border border-dashed border-tostado/30 bg-crema px-4 py-2.5 text-tostado shadow-[0_10px_24px_-8px_rgb(0_0_0/0.5)]"
-            >
-              <motion.p
-                initial={{ clipPath: "inset(0 100% 0 0)" }}
-                animate={{ clipPath: "inset(0 0% 0 0)" }}
-                transition={{ duration: 0.7, delay: 0.1, ease: TINTA }}
-                className="text-[0.9rem] leading-snug"
-              >
-                <span className="font-semibold text-aji-texto">Anotado · </span>
-                {aviso.texto}
-              </motion.p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <PapelAviso aviso={aviso} className="mx-3 mb-2" />
         <div className="drop-shadow-[0_-8px_24px_rgb(0_0_0/0.35)]">
           <div data-superficie="clara" className={cn(papel, "pt-3.5 pb-[max(0.75rem,env(safe-area-inset-bottom))]")}>
             <div className="mx-auto flex max-w-2xl items-center gap-3 px-4">
@@ -95,7 +132,15 @@ export function TiraComanda({
                 </span>
                 {n > 0 && <ChevronUp className="size-5 shrink-0 text-oceano" aria-hidden="true" />}
               </button>
-              {montado && n > 0 && <BotonEnviar enviando={enviando} onEnviar={onEnviar} compacto />}
+              {montado && n > 0 && (
+                <button
+                  type="button"
+                  onClick={onAbrir}
+                  className="flex h-12 shrink-0 items-center justify-center rounded-2xl bg-aji-texto px-5 text-[0.95rem] font-semibold text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] active:scale-[0.98]"
+                >
+                  Revisar y enviar
+                </button>
+              )}
               {montado && n === 0 && (
                 <span className="max-w-[9.5rem] text-right text-[0.8rem] leading-snug text-tostado/70">
                   Toca un plato para anotarlo
@@ -112,7 +157,7 @@ export function TiraComanda({
           className="max-h-[88dvh] gap-0 border-0 bg-transparent p-0 shadow-none [&>[data-slot=sheet-close]]:top-6 [&>[data-slot=sheet-close]]:right-4 [&>[data-slot=sheet-close]]:size-10 [&>[data-slot=sheet-close]]:rounded-full [&>[data-slot=sheet-close]]:text-oceano"
         >
           <div className={cn(papel, "flex max-h-[88dvh] min-h-0 flex-col pt-5")}>
-            <ContenidoComanda {...comun} enHoja />
+            <ContenidoComanda {...comun} enHoja aviso={aviso} />
           </div>
         </SheetContent>
       </Sheet>
@@ -134,7 +179,15 @@ export function ComandaLateral(comun: Comun) {
   );
 }
 
-function ContenidoComanda({ mesa, montado, enviando, onEnviar, enHoja }: Comun & { enHoja?: boolean }) {
+function ContenidoComanda({
+  mesa,
+  montado,
+  enviando,
+  onEnviar,
+  onQuitar,
+  enHoja,
+  aviso,
+}: Comun & { enHoja?: boolean; aviso?: AvisoComanda }) {
   const lineas = useCarrito((s) => s.lineas);
   const cambiarCantidad = useCarrito((s) => s.cambiarCantidad);
   const total = totalCarrito(lineas);
@@ -176,11 +229,26 @@ function ContenidoComanda({ mesa, montado, enviando, onEnviar, enHoja }: Comun &
         <ul>
           <AnimatePresence initial={false}>
             {lineas.map((linea) => (
-              <Linea key={linea.lineaId} linea={linea} onCantidad={(c) => cambiarCantidad(linea.lineaId, c)} />
+              <Linea
+                key={linea.lineaId}
+                linea={linea}
+                onCantidad={(c) => cambiarCantidad(linea.lineaId, c)}
+                onQuitar={() => onQuitar(linea.lineaId)}
+              />
             ))}
           </AnimatePresence>
         </ul>
       </div>
+
+      {enHoja && (
+        <>
+          {/* Con la hoja abierta, lo de afuera queda inerte: el aviso vive aquí. */}
+          <PapelAviso aviso={aviso ?? null} className="mx-4 mt-3 shadow-none sm:mx-5" />
+          <p aria-live="polite" className="sr-only">
+            {aviso?.tipo === "quitado" ? `Quitado de la comanda: ${aviso.texto}` : ""}
+          </p>
+        </>
+      )}
 
       {montado && n > 0 && (
         <footer className="border-t-2 border-tostado px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
@@ -198,7 +266,15 @@ function ContenidoComanda({ mesa, montado, enviando, onEnviar, enHoja }: Comun &
   );
 }
 
-function Linea({ linea, onCantidad }: { linea: LineaCarrito; onCantidad: (c: number) => void }) {
+function Linea({
+  linea,
+  onCantidad,
+  onQuitar,
+}: {
+  linea: LineaCarrito;
+  onCantidad: (c: number) => void;
+  onQuitar: () => void;
+}) {
   return (
     <motion.li
       layout="position"
@@ -230,26 +306,31 @@ function Linea({ linea, onCantidad }: { linea: LineaCarrito; onCantidad: (c: num
         <Contador
           valor={linea.cantidad}
           onCambiar={onCantidad}
-          minimo={0}
           tamano="sm"
           etiqueta={`Cantidad de ${linea.nombre}`}
-          className="col-span-2 justify-self-start"
+          className="justify-self-start"
         />
+        <button
+          type="button"
+          onClick={onQuitar}
+          aria-label={`Quitar ${linea.nombre} de la comanda`}
+          className="flex h-11 items-center gap-1.5 justify-self-end rounded-lg px-2 text-[0.85rem] font-semibold text-tostado/75 transition-colors hover:bg-tostado/6 hover:text-aji-texto"
+        >
+          <Trash2 className="size-4" aria-hidden="true" />
+          Quitar
+        </button>
       </div>
     </motion.li>
   );
 }
 
-function BotonEnviar({ enviando, onEnviar, compacto }: { enviando: boolean; onEnviar: () => void; compacto?: boolean }) {
+function BotonEnviar({ enviando, onEnviar }: { enviando: boolean; onEnviar: () => void }) {
   return (
     <button
       type="button"
       onClick={onEnviar}
       disabled={enviando}
-      className={cn(
-        "flex items-center justify-center gap-2 rounded-2xl bg-aji-texto font-semibold text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] active:scale-[0.98] disabled:opacity-70",
-        compacto ? "h-12 shrink-0 px-5 text-[0.95rem]" : "h-14 w-full text-base",
-      )}
+      className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-aji-texto text-base font-semibold text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] active:scale-[0.98] disabled:opacity-70"
     >
       {enviando && <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />}
       {enviando ? "Enviando…" : "Enviar a cocina"}
