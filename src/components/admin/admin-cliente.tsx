@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, MotionConfig } from "motion/react";
@@ -21,6 +21,32 @@ type Estado = Pick<Plato, "precio" | "disponible">;
 type Aviso = { id: number; texto: string; deshacer: () => void } | null;
 
 let ultimoIdAviso = 0;
+
+/** Tiempo del aviso con «Deshacer»: se pausa mientras se mira o se enfoca. */
+const DURACION_AVISO = 8000;
+
+/**
+ * Altura que tapa el teclado virtual (0 sin teclado): el aviso se coloca encima
+ * para que «Deshacer» no quede oculto mientras se edita un precio.
+ */
+function useAlturaTeclado() {
+  return useSyncExternalStore(
+    (avisar) => {
+      const vv = window.visualViewport;
+      vv?.addEventListener("resize", avisar);
+      vv?.addEventListener("scroll", avisar);
+      return () => {
+        vv?.removeEventListener("resize", avisar);
+        vv?.removeEventListener("scroll", avisar);
+      };
+    },
+    () => {
+      const vv = window.visualViewport;
+      return vv ? Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop)) : 0;
+    },
+    () => 0,
+  );
+}
 
 export function AdminCliente() {
   useRehidratar();
@@ -43,10 +69,17 @@ export function AdminCliente() {
     [],
   );
 
+  const alturaTeclado = useAlturaTeclado();
+  const pausarAviso = () => clearTimeout(temporizador.current);
+  const reanudarAviso = () => {
+    clearTimeout(temporizador.current);
+    temporizador.current = setTimeout(() => setAviso(null), DURACION_AVISO);
+  };
+
   const avisar = (texto: string, deshacer: () => void) => {
     setAviso({ id: ++ultimoIdAviso, texto, deshacer });
     clearTimeout(temporizador.current);
-    temporizador.current = setTimeout(() => setAviso(null), 5000);
+    temporizador.current = setTimeout(() => setAviso(null), DURACION_AVISO);
   };
 
   /** Cada cambio guarda cómo estaba el plato para poder deshacerlo. */
@@ -242,7 +275,12 @@ export function AdminCliente() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 8, opacity: 0 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md items-center gap-3 rounded-lg border border-dashed border-tostado/30 bg-crema py-2 pr-2 pl-4 text-tostado shadow-[0_10px_24px_-8px_rgb(0_0_0/0.5)]"
+              onMouseEnter={pausarAviso}
+              onMouseLeave={reanudarAviso}
+              onFocus={pausarAviso}
+              onBlur={reanudarAviso}
+              style={{ bottom: `calc(max(0.75rem, env(safe-area-inset-bottom)) + ${alturaTeclado}px)` }}
+              className="fixed inset-x-3 z-40 mx-auto flex max-w-md items-center gap-3 rounded-lg border border-dashed border-tostado/30 bg-crema py-2 pr-2 pl-4 text-tostado shadow-[0_10px_24px_-8px_rgb(0_0_0/0.5)]"
             >
               <p className="min-w-0 flex-1 text-cuerpo leading-snug">{aviso.texto}</p>
               <button
