@@ -1,9 +1,17 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState, useTransition } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MotionConfig } from "motion/react";
-import { AvisoEscritorio, ComandaLateral, TiraComanda, type AvisoComanda } from "@/components/menu/comanda";
+import {
+  AvisoEscritorio,
+  ComandaLateral,
+  ESPERA_ENVIO_MS,
+  TiraComanda,
+  type AvisoComanda,
+  type SelloEnvio,
+} from "@/components/menu/comanda";
+import { brand } from "@/config/brand";
 import { EncabezadoMenu } from "@/components/menu/encabezado-menu";
 import { FichaPlato } from "@/components/menu/ficha-plato";
 import { FilaPlato } from "@/components/menu/fila-plato";
@@ -36,11 +44,17 @@ export function MenuCliente() {
   const [comandaAbierta, setComandaAbierta] = useState(false);
   const [selectorMesa, setSelectorMesa] = useState(false);
   const [aviso, setAviso] = useState<AvisoComanda>(null);
-  const [enviando, iniciarEnvio] = useTransition();
+  const [sello, setSello] = useState<SelloEnvio>(null);
   const temporizador = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const enviado = useRef(false);
+  const envio = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  useEffect(() => () => clearTimeout(temporizador.current), []);
+  useEffect(
+    () => () => {
+      clearTimeout(temporizador.current);
+      clearTimeout(envio.current);
+    },
+    [],
+  );
 
   const avisar = (nuevo: NonNullable<AvisoComanda>, ms: number) => {
     setAviso(nuevo);
@@ -91,23 +105,30 @@ export function MenuCliente() {
     router.replace(`/menu?mesa=${m}`, { scroll: false });
   };
 
+  // Enviar sella la comanda «A COCINA» y deja un margen real para deshacer:
+  // el pedido solo se crea cuando ese margen termina.
   const enviar = () => {
     if (!mesa) return setSelectorMesa(true);
-    const lineas = useCarrito.getState().lineas;
-    // Un doble toque no crea dos pedidos.
-    if (lineas.length === 0 || enviado.current) return;
-    enviado.current = true;
-    iniciarEnvio(() => {
+    // Mientras está sellada, un segundo toque no crea otro pedido.
+    if (useCarrito.getState().lineas.length === 0 || sello) return;
+    const hora = new Intl.DateTimeFormat(brand.locale, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date());
+    setSello({ hora });
+    envio.current = setTimeout(() => {
+      const lineas = useCarrito.getState().lineas;
       const pedido = usePedidos
         .getState()
         .crear({ lineas, total: totalCarrito(lineas), modalidad: "mesa", mesa });
       useCarrito.getState().vaciar();
-      setComandaAbierta(false);
       router.push(`/pedido/${pedido.id}`);
-    });
+    }, ESPERA_ENVIO_MS);
   };
 
-  const comun = { mesa, montado, enviando, onEnviar: enviar, onQuitar: quitar };
+  const cancelarEnvio = () => {
+    clearTimeout(envio.current);
+    setSello(null);
+  };
+
+  const comun = { mesa, montado, sello, onEnviar: enviar, onCancelarEnvio: cancelarEnvio, onQuitar: quitar };
 
   return (
     <MotionConfig reducedMotion="user">
@@ -161,12 +182,16 @@ export function MenuCliente() {
         aviso={aviso}
         abierta={comandaAbierta}
         onAbrir={() => setComandaAbierta(true)}
-        onCerrar={() => setComandaAbierta(false)}
+        onCerrar={() => !sello && setComandaAbierta(false)}
       />
       <AvisoEscritorio aviso={aviso} />
       <FichaPlato plato={platoAbierto} onCerrar={() => setPlatoAbierto(null)} onAnotar={anotar} />
       <p aria-live="polite" className="sr-only">
-        {aviso ? `${aviso.tipo === "anotado" ? "Anotado en" : "Quitado de"} la comanda: ${aviso.texto}` : ""}
+        {sello
+          ? `Comanda sellada para cocina. Se envía en ${ESPERA_ENVIO_MS / 1000} segundos; puedes deshacerlo.`
+          : aviso
+            ? `${aviso.tipo === "anotado" ? "Anotado en" : "Quitado de"} la comanda: ${aviso.texto}`
+            : ""}
       </p>
     </MotionConfig>
   );

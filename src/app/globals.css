@@ -127,3 +127,14 @@
     outline-color: var(--oceano);
   }
 }
+
+/* Cuenta regresiva del envío a cocina (es información, no adorno: se mantiene
+   aun con movimiento reducido). */
+@keyframes vaciar-barra {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}

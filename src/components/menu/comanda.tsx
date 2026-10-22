@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronUp, LoaderCircle, Trash2, Undo2 } from "lucide-react";
+import { ChevronUp, Trash2, Undo2 } from "lucide-react";
 import { Contador } from "@/components/menu/contador";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { precio } from "@/lib/formato";
@@ -24,11 +24,18 @@ export type AvisoComanda = {
   onDeshacer?: () => void;
 } | null;
 
+/** Margen real para deshacer el envío: el pedido se crea al terminar. */
+export const ESPERA_ENVIO_MS = 4000;
+
+/** Comanda sellada «A COCINA», a la espera de salir. */
+export type SelloEnvio = { hora: string } | null;
+
 type Comun = {
   mesa: string | null | undefined;
   montado: boolean;
-  enviando: boolean;
+  sello: SelloEnvio;
   onEnviar: () => void;
+  onCancelarEnvio: () => void;
   onQuitar: (lineaId: string) => void;
 };
 
@@ -154,6 +161,7 @@ export function TiraComanda({
       <Sheet open={abierta} onOpenChange={(v) => (v ? onAbrir() : onCerrar())}>
         <SheetContent
           side="bottom"
+          showCloseButton={comun.sello === null}
           className="max-h-[88dvh] gap-0 border-0 bg-transparent p-0 shadow-none [&>[data-slot=sheet-close]]:top-6 [&>[data-slot=sheet-close]]:right-4 [&>[data-slot=sheet-close]]:size-10 [&>[data-slot=sheet-close]]:rounded-full [&>[data-slot=sheet-close]]:text-oceano"
         >
           <div className={cn(papel, "flex max-h-[88dvh] min-h-0 flex-col pt-5")}>
@@ -182,8 +190,9 @@ export function ComandaLateral(comun: Comun) {
 function ContenidoComanda({
   mesa,
   montado,
-  enviando,
+  sello,
   onEnviar,
+  onCancelarEnvio,
   onQuitar,
   enHoja,
   aviso,
@@ -214,7 +223,29 @@ function ContenidoComanda({
         </span>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 sm:px-6">
+      <div
+        inert={sello !== null}
+        className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 sm:px-6"
+      >
+        <AnimatePresence>
+          {sello && (
+            <motion.div
+              key="sello"
+              className="pointer-events-none absolute inset-0 z-10 grid place-items-center"
+              initial={{ opacity: 0, scale: 1.9, rotate: -16 }}
+              animate={{ opacity: 1, scale: 1, rotate: -9 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ type: "spring", stiffness: 700, damping: 26, mass: 0.8 }}
+            >
+              <div className="rounded-md border-[3.5px] border-aji-texto bg-crema/85 px-5 pt-2 pb-2.5 text-center text-aji-texto shadow-[0_0_0_4px_var(--crema),0_0_0_5.5px_var(--aji-texto)]">
+                <p className="font-heading text-[2.4rem] leading-none font-black tracking-[0.06em]">A COCINA</p>
+                <p className="mt-1.5 text-[0.8rem] font-bold tracking-[0.14em] tabular-nums">
+                  MESA {mesa} · {sello.hora}
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         {montado && n === 0 && (
           <div>
             <p className="pt-4 pb-1 text-[0.95rem] leading-relaxed text-tostado/70">
@@ -256,10 +287,34 @@ function ContenidoComanda({
             <span className="text-base font-semibold">Total</span>
             <span className="font-heading text-[1.75rem] font-bold text-oceano tabular-nums">{precio(total)}</span>
           </div>
-          <BotonEnviar enviando={enviando} onEnviar={onEnviar} />
-          <p className="mt-2.5 text-center text-[0.8rem] text-tostado/70">
-            {mesa ? `Cocina lo recibe al instante y te lo llevamos a la mesa ${mesa}.` : "Antes de enviar, dinos en qué mesa estás."}
-          </p>
+          {sello ? (
+            <>
+              <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-tostado/10">
+                <div
+                  className="h-full origin-left rounded-full bg-aji-texto"
+                  style={{ animation: `vaciar-barra ${ESPERA_ENVIO_MS}ms linear forwards` }}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={onCancelarEnvio}
+                className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl border-2 border-oceano text-base font-semibold text-oceano transition-colors hover:bg-oceano/8 active:scale-[0.98]"
+              >
+                <Undo2 className="size-5" aria-hidden="true" />
+                Deshacer, aún no
+              </button>
+              <p className="mt-2.5 text-center text-[0.8rem] text-tostado/70">Saliendo a cocina…</p>
+            </>
+          ) : (
+            <>
+              <BotonEnviar onEnviar={onEnviar} />
+              <p className="mt-2.5 text-center text-[0.8rem] text-tostado/70">
+                {mesa
+                  ? `Cocina lo recibe al instante y te lo llevamos a la mesa ${mesa}.`
+                  : "Antes de enviar, dinos en qué mesa estás."}
+              </p>
+            </>
+          )}
         </footer>
       )}
     </>
@@ -324,16 +379,14 @@ function Linea({
   );
 }
 
-function BotonEnviar({ enviando, onEnviar }: { enviando: boolean; onEnviar: () => void }) {
+function BotonEnviar({ onEnviar }: { onEnviar: () => void }) {
   return (
     <button
       type="button"
       onClick={onEnviar}
-      disabled={enviando}
-      className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-aji-texto text-base font-semibold text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] active:scale-[0.98] disabled:opacity-70"
+      className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-aji-texto text-base font-semibold text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] active:scale-[0.98] "
     >
-      {enviando && <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />}
-      {enviando ? "Enviando…" : "Enviar a cocina"}
+      Enviar a cocina
     </button>
   );
 }
