@@ -17,13 +17,17 @@ import {
 import { cn } from "@/lib/utils";
 import type { GrupoOpciones, LineaCarrito, Plato } from "@/types/menu";
 
+/** Línea de la comanda que se está editando (selección y cantidad de partida). */
+export type Edicion = { lineaId: string; seleccion: Seleccion; cantidad: number } | null;
+
 type Props = {
   plato: Plato | null;
+  edicion?: Edicion;
   onCerrar: () => void;
   onAnotar: (linea: Omit<LineaCarrito, "lineaId">) => void;
 };
 
-export function FichaPlato({ plato, onCerrar, onAnotar }: Props) {
+export function FichaPlato({ plato, edicion = null, onCerrar, onAnotar }: Props) {
   const escritorio = useMedia("(min-width: 1024px)");
   return (
     <Sheet open={plato !== null} onOpenChange={(abierto) => !abierto && onCerrar()}>
@@ -31,15 +35,22 @@ export function FichaPlato({ plato, onCerrar, onAnotar }: Props) {
         side={escritorio ? "right" : "bottom"}
         className="gap-0 overflow-hidden border-0 bg-crema p-0 text-tostado data-[side=bottom]:max-h-[94dvh] data-[side=bottom]:rounded-t-[22px] data-[side=right]:w-full data-[side=right]:sm:max-w-md [&>[data-slot=sheet-close]]:top-4 [&>[data-slot=sheet-close]]:right-4 [&>[data-slot=sheet-close]]:size-10 [&>[data-slot=sheet-close]]:rounded-full [&>[data-slot=sheet-close]]:bg-crema/15 [&>[data-slot=sheet-close]]:text-crema [&>[data-slot=sheet-close]]:hover:bg-crema/25"
       >
-        {plato && <Contenido key={plato.id} plato={plato} onAnotar={onAnotar} />}
+        {plato && (
+          <Contenido
+            key={`${plato.id}-${edicion?.lineaId ?? "nuevo"}`}
+            plato={plato}
+            edicion={edicion}
+            onAnotar={onAnotar}
+          />
+        )}
       </SheetContent>
     </Sheet>
   );
 }
 
-function Contenido({ plato, onAnotar }: { plato: Plato; onAnotar: Props["onAnotar"] }) {
-  const [seleccion, setSeleccion] = useState<Seleccion>(() => seleccionInicial(plato));
-  const [cantidad, setCantidad] = useState(1);
+function Contenido({ plato, edicion, onAnotar }: { plato: Plato; edicion: Edicion; onAnotar: Props["onAnotar"] }) {
+  const [seleccion, setSeleccion] = useState<Seleccion>(() => edicion?.seleccion ?? seleccionInicial(plato));
+  const [cantidad, setCantidad] = useState(edicion?.cantidad ?? 1);
   const unitario = precioUnitario(plato, seleccion);
   const incompleto = faltaObligatorio(plato, seleccion);
 
@@ -83,10 +94,10 @@ function Contenido({ plato, onAnotar }: { plato: Plato; onAnotar: Props["onAnota
           type="button"
           onClick={anotar}
           disabled={incompleto}
-          aria-label={`Anotar en la comanda, ${precio(unitario * cantidad)}`}
+          aria-label={`${edicion ? "Guardar cambios" : "Anotar en la comanda"}, ${precio(unitario * cantidad)}`}
           className="flex h-14 flex-1 items-center justify-between gap-3 rounded-2xl bg-aji-texto px-5 text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] active:scale-[0.98] disabled:opacity-50"
         >
-          <span className="text-base font-semibold">Anotar</span>
+          <span className="text-base font-semibold">{edicion ? "Guardar cambios" : "Anotar"}</span>
           <span className="font-heading text-lg font-bold tabular-nums">{precio(unitario * cantidad)}</span>
         </button>
       </div>

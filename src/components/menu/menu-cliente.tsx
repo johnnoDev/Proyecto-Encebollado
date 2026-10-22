@@ -13,7 +13,7 @@ import {
 } from "@/components/menu/comanda";
 import { brand } from "@/config/brand";
 import { EncabezadoMenu } from "@/components/menu/encabezado-menu";
-import { FichaPlato } from "@/components/menu/ficha-plato";
+import { FichaPlato, type Edicion } from "@/components/menu/ficha-plato";
 import { FilaPlato } from "@/components/menu/fila-plato";
 import { idSeccion, PestanasCategorias } from "@/components/menu/pestanas-categorias";
 import { detalleSeleccion, precioUnitario, seleccionInicial } from "@/lib/pedido";
@@ -23,6 +23,10 @@ import { mesaValida, useMesa, useMesaActual } from "@/store/mesa";
 import { useMenu } from "@/store/menu";
 import { usePedidos } from "@/store/pedidos";
 import type { LineaCarrito, Plato } from "@/types/menu";
+
+/** Identificadores para que cada aviso reinicie su animación. */
+let ultimoIdAviso = 0;
+const nuevoIdAviso = () => ++ultimoIdAviso;
 
 /** Lee ?mesa= del QR. Aislado en su propio Suspense para que la carta se prerenderice. */
 function SincronizarMesa() {
@@ -41,6 +45,7 @@ export function MenuCliente() {
   const mesa = useMesaActual();
 
   const [platoAbierto, setPlatoAbierto] = useState<Plato | null>(null);
+  const [edicion, setEdicion] = useState<Edicion>(null);
   const [comandaAbierta, setComandaAbierta] = useState(false);
   const [selectorMesa, setSelectorMesa] = useState(false);
   const [aviso, setAviso] = useState<AvisoComanda>(null);
@@ -65,10 +70,41 @@ export function MenuCliente() {
   };
 
   const anotar = (linea: Omit<LineaCarrito, "lineaId">) => {
+    if (edicion) return guardarEdicion(linea);
     agregar(linea);
     setPlatoAbierto(null);
     const texto = `${linea.cantidad > 1 ? `${linea.cantidad} × ` : ""}${linea.nombre}${linea.detalle ? ` · ${linea.detalle.toLowerCase()}` : ""}`;
-    avisar({ id: Date.now(), tipo: "anotado", texto }, 2600);
+    avisar({ id: nuevoIdAviso(), tipo: "anotado", texto }, 2600);
+  };
+
+  const esEscritorio = () => window.matchMedia("(min-width: 1024px)").matches;
+
+  // Cambiar una línea abre su ficha con lo ya elegido. En el celular la comanda
+  // se cierra mientras tanto (una hoja a la vez) y vuelve al guardar o cerrar.
+  const editar = (lineaId: string) => {
+    const linea = useCarrito.getState().lineas.find((l) => l.lineaId === lineaId);
+    const plato = linea && platos.find((p) => p.id === linea.platoId);
+    if (!linea || !plato) return;
+    setEdicion({ lineaId, seleccion: linea.seleccion, cantidad: linea.cantidad });
+    setComandaAbierta(false);
+    setPlatoAbierto(plato);
+  };
+
+  const guardarEdicion = (linea: Omit<LineaCarrito, "lineaId">) => {
+    if (!edicion) return;
+    useCarrito.getState().reemplazar(edicion.lineaId, linea);
+    setEdicion(null);
+    setPlatoAbierto(null);
+    if (!esEscritorio()) setComandaAbierta(true);
+    const texto = `${linea.nombre}${linea.detalle ? ` · ${linea.detalle.toLowerCase()}` : ""}`;
+    avisar({ id: nuevoIdAviso(), tipo: "cambiado", texto }, 2600);
+  };
+
+  const cerrarFicha = () => {
+    const veniaDeLaComanda = edicion !== null;
+    setPlatoAbierto(null);
+    setEdicion(null);
+    if (veniaDeLaComanda && !esEscritorio()) setComandaAbierta(true);
   };
 
   // Quitar nunca es definitivo al instante: el aviso ofrece deshacerlo.
@@ -77,7 +113,7 @@ export function MenuCliente() {
     if (!quitada) return;
     avisar(
       {
-        id: Date.now(),
+        id: nuevoIdAviso(),
         tipo: "quitado",
         texto: quitada.linea.nombre,
         onDeshacer: () => {
@@ -149,7 +185,7 @@ export function MenuCliente() {
 
   const platoDisponible = (id: string) => platos.find((p) => p.id === id)?.disponible ?? false;
 
-  const comun = { mesa, montado, sello, onEnviar: enviar, onCancelarEnvio: cancelarEnvio, onQuitar: quitar };
+  const comun = { mesa, montado, sello, onEnviar: enviar, onCancelarEnvio: cancelarEnvio, onQuitar: quitar, onEditar: editar };
 
   return (
     <MotionConfig reducedMotion="user">
@@ -207,12 +243,12 @@ export function MenuCliente() {
         onCerrar={() => !sello && setComandaAbierta(false)}
       />
       <AvisoEscritorio aviso={aviso} />
-      <FichaPlato plato={platoAbierto} onCerrar={() => setPlatoAbierto(null)} onAnotar={anotar} />
+      <FichaPlato plato={platoAbierto} edicion={edicion} onCerrar={cerrarFicha} onAnotar={anotar} />
       <p aria-live="polite" className="sr-only">
         {sello
           ? `Comanda sellada para cocina. Se envía en ${ESPERA_ENVIO_MS / 1000} segundos; puedes deshacerlo.`
           : aviso
-            ? `${aviso.tipo === "anotado" ? "Anotado en" : "Quitado de"} la comanda: ${aviso.texto}`
+            ? `${{ anotado: "Anotado en", quitado: "Quitado de", cambiado: "Cambiado en" }[aviso.tipo]} la comanda: ${aviso.texto}`
             : ""}
       </p>
     </MotionConfig>

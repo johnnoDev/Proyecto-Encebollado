@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronUp, Trash2, Undo2 } from "lucide-react";
+import { ChevronUp, PencilLine, Trash2, Undo2 } from "lucide-react";
 import { Contador } from "@/components/menu/contador";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { precio } from "@/lib/formato";
@@ -20,7 +20,7 @@ const nPlatos = (n: number) => `${n} ${n === 1 ? "plato" : "platos"}`;
 
 export type AvisoComanda = {
   id: number;
-  tipo: "anotado" | "quitado";
+  tipo: "anotado" | "quitado" | "cambiado";
   texto: string;
   onDeshacer?: () => void;
 } | null;
@@ -38,6 +38,8 @@ type Comun = {
   onEnviar: () => void;
   onCancelarEnvio: () => void;
   onQuitar: (lineaId: string) => void;
+  /** Reabre la ficha de una línea con opciones para cambiarla. */
+  onEditar: (lineaId: string) => void;
 };
 
 /** Papelito que confirma lo anotado o lo quitado (con «Deshacer»). */
@@ -64,8 +66,8 @@ function PapelAviso({ aviso, className }: { aviso: AvisoComanda; className?: str
             transition={{ duration: 0.7, delay: 0.1, ease: TINTA }}
             className="min-w-0 flex-1 py-0.5 text-[0.9rem] leading-snug"
           >
-            <span className={cn("font-semibold", aviso.tipo === "anotado" ? "text-aji-texto" : "text-oceano")}>
-              {aviso.tipo === "anotado" ? "Anotado · " : "Quitado · "}
+            <span className={cn("font-semibold", aviso.tipo === "quitado" ? "text-oceano" : "text-aji-texto")}>
+              {{ anotado: "Anotado · ", quitado: "Quitado · ", cambiado: "Cambiado · " }[aviso.tipo]}
             </span>
             {aviso.texto}
           </motion.p>
@@ -195,6 +197,7 @@ function ContenidoComanda({
   onEnviar,
   onCancelarEnvio,
   onQuitar,
+  onEditar,
   enHoja,
   aviso,
 }: Comun & { enHoja?: boolean; aviso?: AvisoComanda }) {
@@ -270,6 +273,8 @@ function ContenidoComanda({
                 key={linea.lineaId}
                 linea={linea}
                 agotada={agotadas.has(linea.lineaId)}
+                editable={(platos.find((p) => p.id === linea.platoId)?.grupos.length ?? 0) > 0}
+                onEditar={() => onEditar(linea.lineaId)}
                 onCantidad={(c) => cambiarCantidad(linea.lineaId, c)}
                 onQuitar={() => onQuitar(linea.lineaId)}
               />
@@ -338,11 +343,15 @@ function ContenidoComanda({
 function Linea({
   linea,
   agotada,
+  editable,
+  onEditar,
   onCantidad,
   onQuitar,
 }: {
   linea: LineaCarrito;
   agotada: boolean;
+  editable: boolean;
+  onEditar: () => void;
   onCantidad: (c: number) => void;
   onQuitar: () => void;
 }) {
@@ -362,13 +371,40 @@ function Linea({
           transition={{ duration: 0.7, delay: 0.12, ease: TINTA }}
           className="min-w-0"
         >
-          <p className={cn("font-heading text-[1.1rem] leading-snug font-semibold", agotada && "line-through decoration-aji-texto/70")}>
-            {linea.nombre}
-          </p>
+          {editable && !agotada ? (
+            <button
+              type="button"
+              onClick={onEditar}
+              aria-label={`Cambiar ${linea.nombre}${linea.detalle ? `: ${linea.detalle}` : ""}`}
+              className="group/editar -mx-1 rounded-md px-1 text-left"
+            >
+              <span className="font-heading text-[1.1rem] leading-snug font-semibold">{linea.nombre}</span>
+              <PencilLine
+                className="ml-1.5 inline size-3.5 -translate-y-px text-tostado/55 group-hover/editar:text-oceano"
+                aria-hidden="true"
+              />
+              {linea.detalle && (
+                <span className="block text-[0.85rem] leading-snug text-tostado/70 underline decoration-tostado/25 decoration-dashed underline-offset-[3px] group-hover/editar:decoration-oceano/60">
+                  {linea.detalle}
+                </span>
+              )}
+            </button>
+          ) : (
+            <p
+              className={cn(
+                "font-heading text-[1.1rem] leading-snug font-semibold",
+                agotada && "line-through decoration-aji-texto/70",
+              )}
+            >
+              {linea.nombre}
+            </p>
+          )}
           {agotada && (
             <p className="mt-0.5 text-[0.85rem] font-semibold text-aji-texto">Se agotó: quítalo para enviar</p>
           )}
-          {linea.detalle && <p className="text-[0.85rem] leading-snug text-tostado/70">{linea.detalle}</p>}
+          {linea.detalle && (!editable || agotada) && (
+            <p className="text-[0.85rem] leading-snug text-tostado/70">{linea.detalle}</p>
+          )}
         </motion.div>
         <motion.span
           key={linea.cantidad}
@@ -378,6 +414,9 @@ function Linea({
           className="self-start pt-0.5 text-right font-semibold tabular-nums"
         >
           {precio(linea.precioUnitario * linea.cantidad)}
+          {linea.cantidad > 1 && (
+            <span className="block text-[0.75rem] font-normal text-tostado/70">{precio(linea.precioUnitario)} c/u</span>
+          )}
         </motion.span>
         <Contador
           valor={linea.cantidad}
