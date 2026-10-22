@@ -353,10 +353,11 @@ export function CocinaCliente() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 8, opacity: 0 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md items-center gap-3 rounded-lg border border-dashed border-tostado/30 bg-crema py-2 pr-2 pl-4 text-tostado shadow-[0_10px_24px_-8px_rgb(0_0_0/0.5)]"
+              className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-dashed border-tostado/30 bg-crema py-2 pr-2 pl-4 text-tostado shadow-[0_10px_24px_-8px_rgb(0_0_0/0.5)]"
             >
-              <p className="min-w-0 flex-1 text-cuerpo leading-snug">
-                <span className="font-semibold text-oceano">{cambio.pedido.numero}</span>
+              {/* En celular el texto ocupa su propia línea y los botones van debajo. */}
+              <p className="min-w-0 flex-1 text-cuerpo leading-snug max-sm:basis-full max-sm:pt-1">
+                <span className="font-semibold whitespace-nowrap text-oceano">{cambio.pedido.numero}</span>
                 {textoCambio[cambio.a]}
               </p>
               {COLUMNAS.some((c) => c.id === cambio.a && c.id !== vista) && (
@@ -457,8 +458,9 @@ function Ticket({
         {demorado && <div aria-hidden="true" className="-mx-4 -mt-5 mb-4 h-3 bg-aji-texto" />}
         {/* En cocina se trabaja por mesa: el destino es el título; el número, la referencia. */}
         <header className="border-b-2 border-tostado pb-3">
-          <div className="flex items-baseline justify-between gap-3">
-            <p className="min-w-0 font-heading text-titular leading-none font-bold text-oceano">{nombreDestino(pedido)}</p>
+          {/* El destino nunca se parte; si no cabe junto al número, el número baja de línea. */}
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1.5">
+            <p className="font-heading text-titular leading-none font-bold whitespace-nowrap text-oceano">{nombreDestino(pedido)}</p>
             <span className="shrink-0 rounded-[5px] border-[1.5px] border-tostado/40 px-1.5 text-sm font-semibold whitespace-nowrap tabular-nums text-tostado/80">
               {pedido.numero}
             </span>
