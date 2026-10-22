@@ -15,8 +15,10 @@ import { brand } from "@/config/brand";
 import { EncabezadoMenu } from "@/components/menu/encabezado-menu";
 import { FichaPlato, type Edicion } from "@/components/menu/ficha-plato";
 import { FilaPlato } from "@/components/menu/fila-plato";
+import { PedidosEnviados } from "@/components/menu/pedidos-enviados";
 import { idSeccion, PestanasCategorias } from "@/components/menu/pestanas-categorias";
 import { detalleSeleccion, precioUnitario, seleccionInicial } from "@/lib/pedido";
+import { revisarEnvio } from "@/lib/envio";
 import { totalCarrito, useCarrito } from "@/store/carrito";
 import { useMontado, useRehidratar } from "@/store/hidratar";
 import { mesaValida, useMesa, useMesaActual } from "@/store/mesa";
@@ -165,21 +167,33 @@ export function MenuCliente() {
     const pendientes = useCarrito.getState().lineas;
     // Mientras está sellada, un segundo toque no crea otro pedido; y nada
     // agotado sale a cocina.
-    if (pendientes.length === 0 || sello || pendientes.some((l) => !platoDisponible(l.platoId))) return;
+    if (pendientes.length === 0 || sello || envio.current !== undefined || pendientes.some((l) => !platoDisponible(l.platoId))) return;
+    const lineas = structuredClone(pendientes);
     const hora = new Intl.DateTimeFormat(brand.locale, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date());
     setSello({ hora });
     envio.current = setTimeout(() => {
-      const lineas = useCarrito.getState().lineas;
+      envio.current = undefined;
+      const problema = revisarEnvio(lineas, useCarrito.getState().lineas, useMenu.getState().platos);
+      const cambioMesa = useMesa.getState().mesa !== undefined && useMesa.getState().mesa !== mesa;
+      if (problema || cambioMesa) {
+        setSello(null);
+        avisar({ id: nuevoIdAviso(), tipo: "revision", texto: problema ?? "Cambiaste de mesa. No se envió el pedido; revísalo antes de volver a enviar." }, 6500);
+        return;
+      }
       const pedido = usePedidos
         .getState()
         .crear({ lineas, total: totalCarrito(lineas), modalidad: "mesa", mesa });
       useCarrito.getState().vaciar();
+      setSello(null);
+      setComandaAbierta(false);
+      setAviso(null);
       router.push(`/pedido/${pedido.id}`);
     }, ESPERA_ENVIO_MS);
   };
 
   const cancelarEnvio = () => {
     clearTimeout(envio.current);
+    envio.current = undefined;
     setSello(null);
   };
 
@@ -200,6 +214,7 @@ export function MenuCliente() {
           paraEnviar={mesaParaEnviar}
           onElegirMesa={elegirMesa}
         />
+        <PedidosEnviados mesa={mesa} montado={montado} />
         <PestanasCategorias categorias={categorias} />
 
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-14 lg:pt-4">
@@ -246,9 +261,9 @@ export function MenuCliente() {
       <FichaPlato plato={platoAbierto} edicion={edicion} onCerrar={cerrarFicha} onAnotar={anotar} />
       <p aria-live="polite" className="sr-only">
         {sello
-          ? `Comanda sellada para cocina. Se envía en ${ESPERA_ENVIO_MS / 1000} segundos; puedes deshacerlo.`
+          ? `Pedido sellado para cocina. Se envía en ${ESPERA_ENVIO_MS / 1000} segundos; puedes deshacerlo.`
           : aviso
-            ? `${{ anotado: "Anotado en", quitado: "Quitado de", cambiado: "Cambiado en" }[aviso.tipo]} la comanda: ${aviso.texto}`
+            ? aviso.tipo === "revision" ? aviso.texto : `${{ anotado: "Anotado en", quitado: "Quitado de", cambiado: "Cambiado en" }[aviso.tipo]} tu pedido: ${aviso.texto}`
             : ""}
       </p>
     </MotionConfig>

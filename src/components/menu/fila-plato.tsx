@@ -28,7 +28,7 @@ export function FilaPlato({ plato, onElegir }: { plato: Plato; onElegir: (plato:
         <IlustracionPlato
           platoId={plato.id}
           className={cn(
-            "size-[76px] transition-transform duration-500 ease-out group-enabled:group-hover:rotate-[8deg] sm:size-[92px]",
+            "size-[76px] transition-transform duration-500 ease-out motion-safe:group-enabled:group-hover:rotate-[8deg] sm:size-[92px]",
             agotado && "opacity-40 grayscale-[.6]",
           )}
         />
@@ -62,7 +62,7 @@ export function FilaPlato({ plato, onElegir }: { plato: Plato; onElegir: (plato:
             </span>
             <span
               aria-hidden="true"
-              className="grid size-10 place-items-center rounded-full bg-aji-texto text-white shadow-[0_3px_10px_-2px_rgb(0_0_0/.35)] transition-transform duration-200 group-active:scale-90"
+              className="grid size-10 place-items-center rounded-full bg-aji-texto text-white shadow-[0_3px_10px_-2px_rgb(0_0_0/.35)] transition-transform duration-200 motion-safe:group-active:scale-90"
             >
               <Plus className="size-5" strokeWidth={2.5} />
             </span>

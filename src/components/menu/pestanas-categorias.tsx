@@ -46,7 +46,7 @@ export function PestanasCategorias({ categorias }: { categorias: Categoria[] }) 
               <span
                 aria-hidden="true"
                 className={cn(
-                  "absolute inset-x-3 bottom-0 h-[3px] origin-left rounded-full bg-dorado transition-transform duration-300 ease-out",
+                  "absolute inset-x-3 bottom-0 h-[3px] origin-left rounded-full bg-dorado transition-transform duration-300 ease-out motion-reduce:transition-none",
                   activa === c.id ? "scale-x-100" : "scale-x-0",
                 )}
               />

@@ -11,6 +11,7 @@ export const brand = {
   telefono: "+593 99 000 0000",
   moneda: "USD",
   locale: "es-EC",
+  zonaHoraria: "America/Guayaquil",
   // Prefijo visible del número de pedido (p. ej. "ALB-042").
   prefijoPedido: "ALB",
   // Mesas del local: el QR de cada una lleva ?mesa=1 … ?mesa=N.

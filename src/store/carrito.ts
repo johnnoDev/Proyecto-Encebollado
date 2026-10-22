@@ -16,8 +16,11 @@ type CarritoState = {
   vaciar: () => void;
 };
 
+const seleccionNormalizada = (seleccion: LineaCarrito["seleccion"]) =>
+  JSON.stringify(Object.entries(seleccion).map(([grupo, opciones]) => [grupo, [...opciones].sort()]).sort());
+
 const mismaSeleccion = (a: LineaCarrito["seleccion"], b: LineaCarrito["seleccion"]) =>
-  JSON.stringify(Object.entries(a).sort()) === JSON.stringify(Object.entries(b).sort());
+  seleccionNormalizada(a) === seleccionNormalizada(b);
 
 export const useCarrito = create<CarritoState>()(
   persist(

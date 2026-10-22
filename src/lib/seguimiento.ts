@@ -1,0 +1,43 @@
+import { brand } from "@/config/brand";
+import type { EstadoPedido, Pedido } from "@/types/menu";
+
+export const nombresEstadoPedido: Record<EstadoPedido, string> = {
+  nuevo: "Recibido",
+  preparando: "Preparando",
+  listo: "Listo",
+};
+
+/** Mantiene pendientes y los tres últimos listos accesibles en cada mesa. */
+export function pedidosParaMesa(pedidos: Pedido[], mesa: string | null): Pedido[] {
+  const deEstaMesa = pedidos.filter((p) => mesa ? p.modalidad === "mesa" && p.mesa === mesa : p.modalidad !== "mesa");
+  const recientes = [...deEstaMesa].sort((a, b) => b.creadoEn - a.creadoEn);
+  const listos = new Set(recientes.filter((p) => p.estado === "listo").slice(0, 3).map((p) => p.id));
+  return recientes.filter((p) => p.estado !== "listo" || listos.has(p.id));
+}
+
+const dia = new Intl.DateTimeFormat(brand.locale, {
+  timeZone: brand.zonaHoraria, year: "numeric", month: "2-digit", day: "2-digit",
+});
+const hora = new Intl.DateTimeFormat(brand.locale, {
+  timeZone: brand.zonaHoraria, hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+});
+const fecha = new Intl.DateTimeFormat(brand.locale, {
+  timeZone: brand.zonaHoraria, day: "numeric", month: "short", year: "numeric",
+});
+
+/** Los comprobantes antiguos incluyen fecha; «hoy» se calcula en la zona del local. */
+export function fechaPedido(creadoEn: number, ahora = Date.now()): string {
+  const textoHora = hora.format(creadoEn);
+  return dia.format(creadoEn) === dia.format(ahora)
+    ? textoHora
+    : `${fecha.format(creadoEn)} · ${textoHora}`;
+}
+
+export function indicacionPedidoListo(pedido: Pick<Pedido, "modalidad" | "mesa">): string {
+  if (pedido.modalidad === "mesa") {
+    return pedido.mesa ? `Te lo llevamos a la mesa ${pedido.mesa}.` : "Te lo llevamos a tu mesa.";
+  }
+  return pedido.modalidad === "llevar"
+    ? "Acércate al personal para recoger tu pedido para llevar."
+    : "Acércate al personal para retirar tu pedido.";
+}

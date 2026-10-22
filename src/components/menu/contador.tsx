@@ -35,7 +35,7 @@ export function Contador({ valor, onCambiar, minimo = 1, etiqueta, tamano = "md"
         className={boton}
         onClick={() => onCambiar(valor - 1)}
         disabled={bloqueado || valor <= minimo}
-        aria-label={quita ? "Quitar de la comanda" : "Uno menos"}
+        aria-label={quita ? "Quitar de tu pedido" : "Uno menos"}
       >
         {quita ? <Trash2 className="size-[18px]" /> : <Minus className="size-[18px]" />}
       </button>

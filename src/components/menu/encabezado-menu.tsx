@@ -32,7 +32,7 @@ export function EncabezadoMenu({ mesa, selectorAbierto, onSelector, onElegirMesa
         onClick={() => onSelector(true)}
         aria-label={mesa ? `Mesa ${mesa}. Cambiar de mesa` : "Elegir mesa"}
         className={cn(
-          "flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-dorado pr-3 pl-4 text-tostado shadow-[0_4px_14px_-4px_rgb(0_0_0/0.45)] transition-transform active:scale-95",
+          "flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-dorado pr-3 pl-4 text-tostado shadow-[0_4px_14px_-4px_rgb(0_0_0/0.45)] transition-transform motion-safe:active:scale-95",
           mesa === undefined && "w-28 border-2 border-dorado/45 bg-transparent shadow-none",
         )}
       >
@@ -54,7 +54,7 @@ export function EncabezadoMenu({ mesa, selectorAbierto, onSelector, onElegirMesa
           </SheetTitle>
           <SheetDescription className="mt-1.5 text-cuerpo text-tostado/75">
             {paraEnviar
-              ? "Elígela y te mostramos la comanda para enviarla a cocina."
+              ? "Elígela y te mostramos tu pedido para enviarlo a cocina."
               : "El QR de cada mesa ya trae su número. Cámbialo si te moviste de mesa."}
           </SheetDescription>
           <div className="mt-5 grid grid-cols-4 gap-2.5">

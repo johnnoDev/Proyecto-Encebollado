@@ -98,8 +98,8 @@ function Contenido({ plato, edicion, onAnotar }: { plato: Plato; edicion: Edicio
           type="button"
           onClick={anotar}
           disabled={incompleto}
-          aria-label={`${edicion ? "Guardar cambios" : "Anotar en la comanda"}, ${precio(unitario * cantidad)}`}
-          className="flex h-14 flex-1 items-center justify-between gap-3 rounded-2xl bg-aji-texto px-5 text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] active:scale-[0.98] disabled:opacity-50"
+          aria-label={`${edicion ? "Guardar cambios" : "Anotar en tu pedido"}, ${precio(unitario * cantidad)}`}
+          className="flex h-14 flex-1 items-center justify-between gap-3 rounded-2xl bg-aji-texto px-5 text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] motion-safe:active:scale-[0.98] disabled:opacity-50"
         >
           <span className="text-base font-semibold">{edicion ? "Guardar cambios" : "Anotar"}</span>
           <span className="font-heading text-linea font-bold tabular-nums">{precio(unitario * cantidad)}</span>

@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ChevronUp, PencilLine, Trash2, Undo2 } from "lucide-react";
 import { Contador } from "@/components/menu/contador";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
@@ -20,7 +20,7 @@ const nPlatos = (n: number) => `${n} ${n === 1 ? "plato" : "platos"}`;
 
 export type AvisoComanda = {
   id: number;
-  tipo: "anotado" | "quitado" | "cambiado";
+  tipo: "anotado" | "quitado" | "cambiado" | "revision";
   texto: string;
   onDeshacer?: () => void;
 } | null;
@@ -44,16 +44,17 @@ type Comun = {
 
 /** Papelito que confirma lo anotado o lo quitado (con «Deshacer»). */
 function PapelAviso({ aviso, className }: { aviso: AvisoComanda; className?: string }) {
+  const reducirMovimiento = useReducedMotion();
   return (
     <AnimatePresence>
       {aviso && (
         <motion.div
           key={aviso.id}
           data-superficie="clara"
-          initial={{ y: 14, opacity: 0 }}
+          initial={{ y: reducirMovimiento ? 0 : 14, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 8, opacity: 0 }}
-          transition={{ duration: 0.35, ease: TINTA }}
+          exit={{ y: reducirMovimiento ? 0 : 8, opacity: 0 }}
+          transition={{ duration: reducirMovimiento ? 0.15 : 0.35, ease: TINTA }}
           className={cn(
             "flex items-center gap-3 rounded-lg border border-dashed border-tostado/30 bg-crema py-2 pr-2 pl-4 text-tostado shadow-[0_10px_24px_-8px_rgb(0_0_0/0.5)]",
             className,
@@ -61,13 +62,13 @@ function PapelAviso({ aviso, className }: { aviso: AvisoComanda; className?: str
         >
           <motion.p
             aria-hidden="true"
-            initial={{ clipPath: "inset(0 100% 0 0)" }}
+            initial={reducirMovimiento ? false : { clipPath: "inset(0 100% 0 0)" }}
             animate={{ clipPath: "inset(0 0% 0 0)" }}
-            transition={{ duration: 0.7, delay: 0.1, ease: TINTA }}
+            transition={{ duration: reducirMovimiento ? 0 : 0.7, delay: reducirMovimiento ? 0 : 0.1, ease: TINTA }}
             className="min-w-0 flex-1 py-0.5 text-cuerpo leading-snug"
           >
             <span className={cn("font-semibold", aviso.tipo === "quitado" ? "text-oceano" : "text-aji-texto")}>
-              {{ anotado: "Anotado · ", quitado: "Quitado · ", cambiado: "Cambiado · " }[aviso.tipo]}
+              {{ anotado: "Anotado · ", quitado: "Quitado · ", cambiado: "Cambiado · ", revision: "Revisar · " }[aviso.tipo]}
             </span>
             {aviso.texto}
           </motion.p>
@@ -120,12 +121,12 @@ export function TiraComanda({
                 onClick={onAbrir}
                 disabled={!montado}
                 aria-expanded={abierta}
-                aria-label={`Ver comanda: ${nPlatos(n)}, ${precio(totalCarrito(lineas))}`}
+                aria-label={`Ver tu pedido: ${nPlatos(n)}, ${precio(totalCarrito(lineas))}`}
                 className="flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-xl text-left"
               >
                 <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2">
-                    <span className="font-heading text-plato leading-tight font-bold text-oceano">Comanda</span>
+                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="font-heading text-plato leading-tight font-bold whitespace-nowrap text-oceano">Tu pedido</span>
                     {mesa && (
                       <span className="-rotate-3 rounded-[5px] border-[1.5px] border-oceano px-1.5 font-heading text-nota leading-[1.35] font-bold whitespace-nowrap text-oceano">
                         Mesa {mesa}
@@ -134,7 +135,7 @@ export function TiraComanda({
                   </span>
                   {montado ? (
                     <span className="block truncate text-sm text-tostado/75 tabular-nums">
-                      {n === 0 ? "Vacía" : `${nPlatos(n)} · ${precio(totalCarrito(lineas))}`}
+                      {n === 0 ? "Vacío" : `${nPlatos(n)} · ${precio(totalCarrito(lineas))}`}
                     </span>
                   ) : (
                     <span className="mt-1.5 block h-3 w-28 rounded-full bg-tostado/10" />
@@ -146,7 +147,7 @@ export function TiraComanda({
                 <button
                   type="button"
                   onClick={onAbrir}
-                  className="flex h-12 shrink-0 items-center justify-center rounded-2xl bg-aji-texto px-5 text-cuerpo font-semibold text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] active:scale-[0.98]"
+                  className="flex h-12 shrink-0 items-center justify-center rounded-2xl bg-aji-texto px-5 text-cuerpo font-semibold text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] motion-safe:active:scale-[0.98]"
                 >
                   Revisar y enviar
                 </button>
@@ -181,7 +182,7 @@ export function TiraComanda({
 export function ComandaLateral(comun: Comun) {
   return (
     <aside
-      aria-label="Comanda"
+      aria-label="Tu pedido"
       className="sticky top-[88px] hidden max-h-[calc(100dvh-112px)] drop-shadow-[0_18px_30px_rgb(0_0_0/0.35)] lg:block"
     >
       <div data-superficie="clara" className={cn(papel, "flex max-h-[calc(100dvh-112px)] flex-col rounded-b-[14px] pt-6")}>
@@ -202,6 +203,7 @@ function ContenidoComanda({
   enHoja,
   aviso,
 }: Comun & { enHoja?: boolean; aviso?: AvisoComanda }) {
+  const reducirMovimiento = useReducedMotion();
   const lineas = useCarrito((s) => s.lineas);
   const cambiarCantidad = useCarrito((s) => s.cambiarCantidad);
   const platos = useMenu((s) => s.platos);
@@ -218,7 +220,7 @@ function ContenidoComanda({
     <>
       <header className="flex items-start justify-between gap-4 border-b-2 border-tostado px-5 pb-3 sm:px-6">
         <div>
-          <Titulo className="font-heading text-titular leading-none font-bold text-oceano">Comanda</Titulo>
+          <Titulo className="font-heading text-titular leading-none font-bold text-oceano">Tu pedido</Titulo>
           <Sub className="mt-1.5 text-sm text-tostado/75">
             {montado ? (n === 0 ? "Aún no has anotado nada" : nPlatos(n)) : " "}
           </Sub>
@@ -242,10 +244,10 @@ function ContenidoComanda({
             <motion.div
               key="sello"
               className="pointer-events-none absolute inset-0 z-10 grid place-items-center"
-              initial={{ opacity: 0, scale: 1.9, rotate: -16 }}
+              initial={{ opacity: 0, scale: reducirMovimiento ? 1 : 1.9, rotate: reducirMovimiento ? -9 : -16 }}
               animate={{ opacity: 1, scale: 1, rotate: -9 }}
               exit={{ opacity: 0, scale: 0.92 }}
-              transition={{ type: "spring", stiffness: 700, damping: 26, mass: 0.8 }}
+              transition={reducirMovimiento ? { duration: 0.15 } : { type: "spring", stiffness: 700, damping: 26, mass: 0.8 }}
             >
               <div className="rounded-md border-[3.5px] border-aji-texto bg-crema/85 px-5 pt-2 pb-2.5 text-center text-aji-texto shadow-[0_0_0_4px_var(--crema),0_0_0_5.5px_var(--aji-texto)]">
                 <p className="font-heading text-display leading-none font-black tracking-[0.06em]">A COCINA</p>
@@ -289,7 +291,7 @@ function ContenidoComanda({
           {/* Con la hoja abierta, lo de afuera queda inerte: el aviso vive aquí. */}
           <PapelAviso aviso={aviso ?? null} className="mx-4 mt-3 shadow-none sm:mx-5" />
           <p aria-live="polite" className="sr-only">
-            {aviso?.tipo === "quitado" ? `Quitado de la comanda: ${aviso.texto}` : ""}
+            {aviso?.tipo === "quitado" ? `Quitado de tu pedido: ${aviso.texto}` : ""}
           </p>
         </>
       )}
@@ -311,7 +313,7 @@ function ContenidoComanda({
               <button
                 type="button"
                 onClick={onCancelarEnvio}
-                className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl border-2 border-oceano text-base font-semibold text-oceano transition-colors hover:bg-oceano/8 active:scale-[0.98]"
+                className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl border-2 border-oceano text-base font-semibold text-oceano transition-colors hover:bg-oceano/8 motion-safe:active:scale-[0.98]"
               >
                 <Undo2 className="size-5" aria-hidden="true" />
                 Deshacer, aún no
@@ -328,7 +330,7 @@ function ContenidoComanda({
                 )}
               >
                 {agotadas.size > 0
-                  ? "Algo de tu comanda se agotó. Quítalo para poder enviarla."
+                  ? "Algo de tu pedido se agotó. Quítalo para poder enviarlo."
                   : mesa
                     ? `Cocina lo recibe al instante y te lo llevamos a la mesa ${mesa}.`
                     : "Antes de enviar, dinos en qué mesa estás."}
@@ -356,20 +358,21 @@ function Linea({
   onCantidad: (c: number) => void;
   onQuitar: () => void;
 }) {
+  const reducirMovimiento = useReducedMotion();
   return (
     <motion.li
-      layout="position"
-      initial={{ height: 0, opacity: 1 }}
+      layout={reducirMovimiento ? false : "position"}
+      initial={reducirMovimiento ? false : { height: 0, opacity: 1 }}
       animate={{ height: "auto" }}
-      exit={{ height: 0, opacity: 0 }}
-      transition={{ duration: 0.35, ease: TINTA }}
+      exit={reducirMovimiento ? { opacity: 0 } : { height: 0, opacity: 0 }}
+      transition={{ duration: reducirMovimiento ? 0.15 : 0.35, ease: TINTA }}
       className="overflow-hidden"
     >
       <div className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 border-b border-dashed border-tostado/25 py-3.5">
         <motion.div
-          initial={{ clipPath: "inset(0 100% 0 0)" }}
+          initial={reducirMovimiento ? false : { clipPath: "inset(0 100% 0 0)" }}
           animate={{ clipPath: "inset(0 0% 0 0)" }}
-          transition={{ duration: 0.7, delay: 0.12, ease: TINTA }}
+          transition={{ duration: reducirMovimiento ? 0 : 0.7, delay: reducirMovimiento ? 0 : 0.12, ease: TINTA }}
           className="min-w-0"
         >
           {editable && !agotada ? (
@@ -430,7 +433,7 @@ function Linea({
         <button
           type="button"
           onClick={onQuitar}
-          aria-label={`Quitar ${linea.nombre} de la comanda`}
+          aria-label={`Quitar ${linea.nombre} de tu pedido`}
           className="flex h-11 items-center gap-1.5 justify-self-end rounded-lg px-2 text-sm font-semibold text-tostado/75 transition-colors hover:bg-tostado/6 hover:text-aji-texto"
         >
           <Trash2 className="size-4" aria-hidden="true" />
@@ -447,7 +450,7 @@ function BotonEnviar({ onEnviar, bloqueado }: { onEnviar: () => void; bloqueado?
       type="button"
       onClick={onEnviar}
       disabled={bloqueado}
-      className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-aji-texto text-base font-semibold text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] active:scale-[0.98] disabled:bg-tostado/30 disabled:shadow-none"
+      className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-aji-texto text-base font-semibold text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] motion-safe:active:scale-[0.98] disabled:bg-tostado/30 disabled:shadow-none"
     >
       Enviar a cocina
     </button>

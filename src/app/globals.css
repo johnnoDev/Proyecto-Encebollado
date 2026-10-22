@@ -147,8 +147,21 @@
   }
 }
 
-/* Cuenta regresiva del envío a cocina (es información, no adorno: se mantiene
-   aun con movimiento reducido). */
+/* Las hojas mantienen un fundido breve sin desplazarse con movimiento reducido. */
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="sheet-content"] {
+    translate: none;
+    transform: none;
+    transition-property: opacity;
+    transition-duration: 150ms;
+  }
+
+  [data-slot="sheet-overlay"] {
+    transition-duration: 150ms;
+  }
+}
+
+/* Cuenta regresiva informativa: se mantiene aun con movimiento reducido. */
 @keyframes vaciar-barra {
   from {
     transform: scaleX(1);
