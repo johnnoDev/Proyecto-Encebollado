@@ -47,6 +47,8 @@ export function MenuCliente() {
   const [sello, setSello] = useState<SelloEnvio>(null);
   const temporizador = useRef<ReturnType<typeof setTimeout>>(undefined);
   const envio = useRef<ReturnType<typeof setTimeout>>(undefined);
+  // true cuando el selector de mesa se abrió porque se quiso enviar sin mesa.
+  const [mesaParaEnviar, setMesaParaEnviar] = useState(false);
 
   useEffect(
     () => () => {
@@ -102,15 +104,32 @@ export function MenuCliente() {
 
   const elegirMesa = (m: string) => {
     setSelectorMesa(false);
+    useMesa.getState().fijar(m);
     router.replace(`/menu?mesa=${m}`, { scroll: false });
+    // Si se eligió para poder enviar, se retoma justo donde quedó: la comanda.
+    if (mesaParaEnviar) {
+      setMesaParaEnviar(false);
+      setComandaAbierta(true);
+    }
+  };
+
+  const abrirSelector = (abierto: boolean) => {
+    setSelectorMesa(abierto);
+    if (!abierto) setMesaParaEnviar(false);
   };
 
   // Enviar sella la comanda «A COCINA» y deja un margen real para deshacer:
   // el pedido solo se crea cuando ese margen termina.
   const enviar = () => {
-    if (!mesa) return setSelectorMesa(true);
-    // Mientras está sellada, un segundo toque no crea otro pedido.
-    if (useCarrito.getState().lineas.length === 0 || sello) return;
+    if (!mesa) {
+      setMesaParaEnviar(true);
+      setComandaAbierta(false);
+      return setSelectorMesa(true);
+    }
+    const pendientes = useCarrito.getState().lineas;
+    // Mientras está sellada, un segundo toque no crea otro pedido; y nada
+    // agotado sale a cocina.
+    if (pendientes.length === 0 || sello || pendientes.some((l) => !platoDisponible(l.platoId))) return;
     const hora = new Intl.DateTimeFormat(brand.locale, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date());
     setSello({ hora });
     envio.current = setTimeout(() => {
@@ -128,6 +147,8 @@ export function MenuCliente() {
     setSello(null);
   };
 
+  const platoDisponible = (id: string) => platos.find((p) => p.id === id)?.disponible ?? false;
+
   const comun = { mesa, montado, sello, onEnviar: enviar, onCancelarEnvio: cancelarEnvio, onQuitar: quitar };
 
   return (
@@ -139,7 +160,8 @@ export function MenuCliente() {
         <EncabezadoMenu
           mesa={mesa}
           selectorAbierto={selectorMesa}
-          onSelector={setSelectorMesa}
+          onSelector={abrirSelector}
+          paraEnviar={mesaParaEnviar}
           onElegirMesa={elegirMesa}
         />
         <PestanasCategorias categorias={categorias} />

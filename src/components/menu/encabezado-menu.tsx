@@ -12,9 +12,11 @@ type Props = {
   selectorAbierto: boolean;
   onSelector: (abierto: boolean) => void;
   onElegirMesa: (mesa: string) => void;
+  /** El selector se abrió al intentar enviar sin mesa. */
+  paraEnviar?: boolean;
 };
 
-export function EncabezadoMenu({ mesa, selectorAbierto, onSelector, onElegirMesa }: Props) {
+export function EncabezadoMenu({ mesa, selectorAbierto, onSelector, onElegirMesa, paraEnviar }: Props) {
   return (
     <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 pt-5 pb-4 sm:px-6">
       <div className="flex min-w-0 items-center gap-3">
@@ -36,7 +38,7 @@ export function EncabezadoMenu({ mesa, selectorAbierto, onSelector, onElegirMesa
       >
         {mesa !== undefined && (
           <>
-            <span className="font-heading text-lg leading-none font-bold">{mesa ? `Mesa ${mesa}` : "Elegir mesa"}</span>
+            <span className="font-heading text-lg leading-none font-bold">{mesa ? `Mesa ${mesa}` : "¿Mesa?"}</span>
             <ChevronDown className="size-4" strokeWidth={2.5} aria-hidden="true" />
           </>
         )}
@@ -51,7 +53,9 @@ export function EncabezadoMenu({ mesa, selectorAbierto, onSelector, onElegirMesa
             ¿En qué mesa estás?
           </SheetTitle>
           <SheetDescription className="mt-1.5 text-[0.95rem] text-tostado/75">
-            El QR de cada mesa ya trae su número. Cámbialo si te moviste de mesa.
+            {paraEnviar
+              ? "Elígela y te mostramos la comanda para enviarla a cocina."
+              : "El QR de cada mesa ya trae su número. Cámbialo si te moviste de mesa."}
           </SheetDescription>
           <div className="mt-5 grid grid-cols-4 gap-2.5">
             {MESAS.map((m) => (

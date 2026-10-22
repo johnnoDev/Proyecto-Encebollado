@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/
 import { precio } from "@/lib/formato";
 import { cn } from "@/lib/utils";
 import { platosEnCarrito, totalCarrito, useCarrito } from "@/store/carrito";
+import { useMenu } from "@/store/menu";
 import type { LineaCarrito } from "@/types/menu";
 
 // Curva del trazo: salida exponencial, como tinta que corre y se asienta.
@@ -199,6 +200,11 @@ function ContenidoComanda({
 }: Comun & { enHoja?: boolean; aviso?: AvisoComanda }) {
   const lineas = useCarrito((s) => s.lineas);
   const cambiarCantidad = useCarrito((s) => s.cambiarCantidad);
+  const platos = useMenu((s) => s.platos);
+  // Un plato puede agotarse (desde /admin) después de anotarlo.
+  const agotadas = new Set(
+    lineas.filter((l) => !platos.find((p) => p.id === l.platoId)?.disponible).map((l) => l.lineaId),
+  );
   const total = totalCarrito(lineas);
   const n = platosEnCarrito(lineas);
   const Titulo = enHoja ? SheetTitle : "h2";
@@ -263,6 +269,7 @@ function ContenidoComanda({
               <Linea
                 key={linea.lineaId}
                 linea={linea}
+                agotada={agotadas.has(linea.lineaId)}
                 onCantidad={(c) => cambiarCantidad(linea.lineaId, c)}
                 onQuitar={() => onQuitar(linea.lineaId)}
               />
@@ -307,11 +314,18 @@ function ContenidoComanda({
             </>
           ) : (
             <>
-              <BotonEnviar onEnviar={onEnviar} />
-              <p className="mt-2.5 text-center text-[0.8rem] text-tostado/70">
-                {mesa
-                  ? `Cocina lo recibe al instante y te lo llevamos a la mesa ${mesa}.`
-                  : "Antes de enviar, dinos en qué mesa estás."}
+              <BotonEnviar onEnviar={onEnviar} bloqueado={agotadas.size > 0} />
+              <p
+                className={cn(
+                  "mt-2.5 text-center text-[0.8rem]",
+                  agotadas.size > 0 ? "font-semibold text-aji-texto" : "text-tostado/70",
+                )}
+              >
+                {agotadas.size > 0
+                  ? "Algo de tu comanda se agotó. Quítalo para poder enviarla."
+                  : mesa
+                    ? `Cocina lo recibe al instante y te lo llevamos a la mesa ${mesa}.`
+                    : "Antes de enviar, dinos en qué mesa estás."}
               </p>
             </>
           )}
@@ -323,10 +337,12 @@ function ContenidoComanda({
 
 function Linea({
   linea,
+  agotada,
   onCantidad,
   onQuitar,
 }: {
   linea: LineaCarrito;
+  agotada: boolean;
   onCantidad: (c: number) => void;
   onQuitar: () => void;
 }) {
@@ -346,7 +362,12 @@ function Linea({
           transition={{ duration: 0.7, delay: 0.12, ease: TINTA }}
           className="min-w-0"
         >
-          <p className="font-heading text-[1.1rem] leading-snug font-semibold">{linea.nombre}</p>
+          <p className={cn("font-heading text-[1.1rem] leading-snug font-semibold", agotada && "line-through decoration-aji-texto/70")}>
+            {linea.nombre}
+          </p>
+          {agotada && (
+            <p className="mt-0.5 text-[0.85rem] font-semibold text-aji-texto">Se agotó: quítalo para enviar</p>
+          )}
           {linea.detalle && <p className="text-[0.85rem] leading-snug text-tostado/70">{linea.detalle}</p>}
         </motion.div>
         <motion.span
@@ -361,6 +382,7 @@ function Linea({
         <Contador
           valor={linea.cantidad}
           onCambiar={onCantidad}
+          bloqueado={agotada}
           tamano="sm"
           etiqueta={`Cantidad de ${linea.nombre}`}
           className="justify-self-start"
@@ -379,12 +401,13 @@ function Linea({
   );
 }
 
-function BotonEnviar({ onEnviar }: { onEnviar: () => void }) {
+function BotonEnviar({ onEnviar, bloqueado }: { onEnviar: () => void; bloqueado?: boolean }) {
   return (
     <button
       type="button"
       onClick={onEnviar}
-      className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-aji-texto text-base font-semibold text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] active:scale-[0.98] "
+      disabled={bloqueado}
+      className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-aji-texto text-base font-semibold text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] active:scale-[0.98] disabled:bg-tostado/30 disabled:shadow-none"
     >
       Enviar a cocina
     </button>

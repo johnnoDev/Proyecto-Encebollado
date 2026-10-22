@@ -10,10 +10,11 @@ type Props = {
   minimo?: number;
   etiqueta: string;
   tamano?: "md" | "sm";
+  bloqueado?: boolean;
   className?: string;
 };
 
-export function Contador({ valor, onCambiar, minimo = 1, etiqueta, tamano = "md", className }: Props) {
+export function Contador({ valor, onCambiar, minimo = 1, etiqueta, tamano = "md", bloqueado, className }: Props) {
   const quita = minimo === 0 && valor === 1;
   const boton = cn(
     "grid place-items-center rounded-full text-oceano transition-colors hover:bg-oceano/8 active:bg-oceano/15 disabled:opacity-35",
@@ -32,7 +33,7 @@ export function Contador({ valor, onCambiar, minimo = 1, etiqueta, tamano = "md"
         type="button"
         className={boton}
         onClick={() => onCambiar(valor - 1)}
-        disabled={valor <= minimo}
+        disabled={bloqueado || valor <= minimo}
         aria-label={quita ? "Quitar de la comanda" : "Uno menos"}
       >
         {quita ? <Trash2 className="size-[18px]" /> : <Minus className="size-[18px]" />}
@@ -46,7 +47,13 @@ export function Contador({ valor, onCambiar, minimo = 1, etiqueta, tamano = "md"
       >
         {valor}
       </output>
-      <button type="button" className={boton} onClick={() => onCambiar(valor + 1)} aria-label="Uno más">
+      <button
+        type="button"
+        className={boton}
+        onClick={() => onCambiar(valor + 1)}
+        disabled={bloqueado}
+        aria-label="Uno más"
+      >
         <Plus className="size-[18px]" />
       </button>
     </div>

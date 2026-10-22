@@ -13,6 +13,8 @@ export const brand = {
   locale: "es-EC",
   // Prefijo visible del número de pedido (p. ej. "ALB-042").
   prefijoPedido: "ALB",
+  // Mesas del local: el QR de cada una lleva ?mesa=1 … ?mesa=N.
+  mesas: 12,
 
   colores: {
     oceano: "#0E3B5C", // primario, fondos oscuros, encabezados

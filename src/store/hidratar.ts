@@ -10,9 +10,11 @@ export function useRehidratar() {
   useEffect(() => {
     void useMenu.persist.rehydrate();
     void useCarrito.persist.rehydrate();
-    // Un cambio hecho en /admin desde otra pestaña se refleja aquí al instante.
+    // Cambios hechos en otra pestaña (ajustes de /admin u otra copia de la
+    // carta) se reflejan aquí al instante, sin pisarse.
     const alCambiar = (e: StorageEvent) => {
       if (e.key === useMenu.persist.getOptions().name) void useMenu.persist.rehydrate();
+      if (e.key === useCarrito.persist.getOptions().name) void useCarrito.persist.rehydrate();
     };
     window.addEventListener("storage", alCambiar);
     return () => window.removeEventListener("storage", alCambiar);
