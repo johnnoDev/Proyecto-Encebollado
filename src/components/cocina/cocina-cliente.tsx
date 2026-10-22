@@ -1,0 +1,301 @@
+"use client";
+
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { AnimatePresence, motion, MotionConfig, useReducedMotion } from "motion/react";
+import { ArrowRight, Check, Flame, Undo2 } from "lucide-react";
+import { brand } from "@/config/brand";
+import {
+  columnasCocina,
+  MINUTOS_DEMORA,
+  minutosEspera,
+  nombreDestino,
+  siguienteEstado,
+  textoEspera,
+} from "@/lib/cocina";
+import { cn } from "@/lib/utils";
+import { useMontado } from "@/store/hidratar";
+import { usePedidos } from "@/store/pedidos";
+import type { EstadoPedido, Pedido } from "@/types/menu";
+
+const papel =
+  "bg-crema text-tostado [mask:radial-gradient(circle_at_9px_0,transparent_6px,#000_6.5px)_0_0/18px_100%_repeat-x]";
+
+const COLUMNAS: { id: EstadoPedido; nombre: string; vacio: string; accion?: string }[] = [
+  { id: "nuevo", nombre: "Nuevos", vacio: "Sin pedidos nuevos. Llegarán aquí al instante.", accion: "Empezar" },
+  { id: "preparando", nombre: "Preparando", vacio: "Nada en preparación.", accion: "Marcar listo" },
+  { id: "listo", nombre: "Listos", vacio: "Aún no hay pedidos listos." },
+];
+
+type Cambio = { id: number; pedido: Pedido; de: EstadoPedido; a: EstadoPedido } | null;
+
+// Reloj compartido: avanza cada 30 s para mantener al día el tiempo de espera.
+// En el servidor vale 0 (las comandas solo se pintan tras montar).
+let ahoraCompartido = 0;
+function suscribirReloj(avisar: () => void) {
+  ahoraCompartido = Date.now();
+  const t = setInterval(() => {
+    ahoraCompartido = Date.now();
+    avisar();
+  }, 30000);
+  return () => clearInterval(t);
+}
+function useAhora() {
+  return useSyncExternalStore(
+    suscribirReloj,
+    () => ahoraCompartido,
+    () => 0,
+  );
+}
+
+let ultimoIdCambio = 0;
+
+export function CocinaCliente() {
+  const montado = useMontado();
+  const pedidos = usePedidos((s) => s.pedidos);
+  const cambiarEstado = usePedidos((s) => s.cambiarEstado);
+  const ahora = useAhora();
+  const [vista, setVista] = useState<EstadoPedido>("nuevo");
+  const [cambio, setCambio] = useState<Cambio>(null);
+  const temporizador = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => () => clearTimeout(temporizador.current), []);
+
+  const columnas = columnasCocina(montado ? pedidos : []);
+
+  const avanzar = (pedido: Pedido) => {
+    const a = siguienteEstado[pedido.estado];
+    if (!a) return;
+    cambiarEstado(pedido.id, a);
+    setCambio({ id: ++ultimoIdCambio, pedido, de: pedido.estado, a });
+    clearTimeout(temporizador.current);
+    temporizador.current = setTimeout(() => setCambio(null), 5000);
+  };
+
+  const deshacer = () => {
+    if (!cambio) return;
+    cambiarEstado(cambio.pedido.id, cambio.de);
+    clearTimeout(temporizador.current);
+    setCambio(null);
+  };
+
+  return (
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-dvh bg-oceano pb-28 text-crema">
+        <header className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 pt-5 pb-4 sm:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <Image src="/brand/logo-mark.svg" alt="" width={44} height={44} priority className="size-11 shrink-0" />
+            <div className="min-w-0">
+              <h1 className="truncate font-heading text-titulo leading-none font-bold">Cocina</h1>
+              <p className="mt-1 truncate text-nota text-crema/75">{brand.nombre}</p>
+            </div>
+          </div>
+          <Link
+            href="/menu?mesa=1"
+            target="_blank"
+            className="flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-crema/30 px-4 text-sm font-semibold text-crema/90 transition-colors hover:border-crema/60 hover:text-crema"
+          >
+            Abrir la carta <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </header>
+
+        {/* Celular: una columna a la vez, elegida con pestañas que cuentan pedidos. */}
+        <nav
+          aria-label="Estados de pedido"
+          className="sticky top-0 z-30 border-b border-crema/15 bg-oceano md:hidden"
+        >
+          <div role="tablist" className="mx-auto flex max-w-7xl px-2">
+            {COLUMNAS.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                role="tab"
+                aria-selected={vista === c.id}
+                onClick={() => setVista(c.id)}
+                className={cn(
+                  "relative flex h-14 flex-1 items-center justify-center gap-2 text-cuerpo font-semibold transition-colors",
+                  vista === c.id ? "text-crema" : "text-crema/65",
+                )}
+              >
+                {c.nombre}
+                <Conteo n={columnas[c.id].length} activo={vista === c.id} destacado={c.id === "nuevo"} />
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "absolute inset-x-4 bottom-0 h-[3px] rounded-full bg-dorado transition-opacity",
+                    vista === c.id ? "opacity-100" : "opacity-0",
+                  )}
+                />
+              </button>
+            ))}
+          </div>
+        </nav>
+
+        <main className="mx-auto grid max-w-7xl gap-6 px-4 pt-5 sm:px-6 md:grid-cols-3 md:pt-2">
+          {COLUMNAS.map((c) => (
+            <section
+              key={c.id}
+              aria-labelledby={`col-${c.id}`}
+              className={cn("min-w-0", vista !== c.id && "max-md:hidden")}
+            >
+              <h2 id={`col-${c.id}`} className="mb-3 flex items-center gap-2 max-md:sr-only">
+                <span className="font-heading text-plato font-bold">{c.nombre}</span>
+                <Conteo n={columnas[c.id].length} activo destacado={c.id === "nuevo"} />
+              </h2>
+              {!montado ? (
+                <div className="h-40 rounded-xl border border-dashed border-crema/20" />
+              ) : columnas[c.id].length === 0 ? (
+                <p className="rounded-xl border border-dashed border-crema/25 px-4 py-8 text-center text-cuerpo text-crema/70">
+                  {c.vacio}
+                </p>
+              ) : (
+                <ul className="flex flex-col gap-5">
+                  <AnimatePresence initial={false}>
+                    {columnas[c.id].map((p) => (
+                      <Ticket key={p.id} pedido={p} ahora={ahora} accion={c.accion} onAvanzar={() => avanzar(p)} />
+                    ))}
+                  </AnimatePresence>
+                </ul>
+              )}
+            </section>
+          ))}
+        </main>
+
+        <AnimatePresence>
+          {cambio && (
+            <motion.div
+              key={cambio.id}
+              data-superficie="clara"
+              initial={{ y: 16, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 8, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md items-center gap-3 rounded-lg border border-dashed border-tostado/30 bg-crema py-2 pr-2 pl-4 text-tostado shadow-[0_10px_24px_-8px_rgb(0_0_0/0.5)]"
+            >
+              <p className="min-w-0 flex-1 text-cuerpo leading-snug">
+                <span className="font-semibold text-oceano">{cambio.pedido.numero}</span>
+                {cambio.a === "listo" ? " listo para entregar" : " en preparación"}
+              </p>
+              <button
+                type="button"
+                onClick={deshacer}
+                className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg px-3 text-cuerpo font-semibold text-oceano underline decoration-oceano/40 underline-offset-4 hover:bg-oceano/8"
+              >
+                <Undo2 className="size-4" aria-hidden="true" />
+                Deshacer
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <p aria-live="polite" className="sr-only">
+          {cambio
+            ? `${cambio.pedido.numero} ${cambio.a === "listo" ? "marcado como listo" : "en preparación"}.`
+            : ""}
+        </p>
+      </div>
+    </MotionConfig>
+  );
+}
+
+function Conteo({ n, activo, destacado }: { n: number; activo: boolean; destacado?: boolean }) {
+  return (
+    <span
+      className={cn(
+        "grid h-6 min-w-6 place-items-center rounded-full px-1.5 text-xs font-bold tabular-nums",
+        destacado && n > 0 ? "bg-dorado text-tostado" : activo ? "bg-crema/20 text-crema" : "bg-crema/10 text-crema/75",
+      )}
+    >
+      {n}
+    </span>
+  );
+}
+
+function Ticket({
+  pedido,
+  ahora,
+  accion,
+  onAvanzar,
+}: {
+  pedido: Pedido;
+  ahora: number;
+  accion?: string;
+  onAvanzar: () => void;
+}) {
+  const reducir = useReducedMotion();
+  const minutos = minutosEspera(pedido.creadoEn, ahora);
+  const demorado = pedido.estado !== "listo" && minutos >= MINUTOS_DEMORA;
+  const platos = pedido.lineas.reduce((s, l) => s + l.cantidad, 0);
+
+  return (
+    <motion.li
+      layout={reducir ? false : "position"}
+      initial={reducir ? { opacity: 0 } : { opacity: 0, y: -12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.97 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="drop-shadow-[0_14px_24px_rgb(0_0_0/0.35)]"
+    >
+      <article
+        data-superficie="clara"
+        aria-label={`Pedido ${pedido.numero}, ${nombreDestino(pedido)}, ${platos} ${platos === 1 ? "plato" : "platos"}`}
+        className={cn(papel, "rounded-b-[12px] px-4 pt-5 pb-4")}
+      >
+        <header className="flex items-start justify-between gap-3 border-b-2 border-tostado pb-3">
+          <div className="min-w-0">
+            <p className="font-heading text-titulo leading-none font-bold tabular-nums text-oceano">{pedido.numero}</p>
+            <p
+              className={cn(
+                "mt-1.5 flex items-center gap-1 text-sm tabular-nums",
+                demorado ? "font-semibold text-aji-texto" : "text-tostado/75",
+              )}
+            >
+              {demorado && <Flame className="size-4" aria-hidden="true" />}
+              {textoEspera(minutos)}
+              {demorado && <span className="sr-only"> (demorado)</span>}
+            </p>
+          </div>
+          <span className="mt-0.5 shrink-0 -rotate-3 rounded-[5px] border-2 border-oceano px-2 py-0.5 font-heading text-linea font-bold text-oceano">
+            {nombreDestino(pedido)}
+          </span>
+        </header>
+
+        <ul className="divide-y divide-dashed divide-tostado/25">
+          {pedido.lineas.map((l) => (
+            <li key={l.lineaId} className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2.5 py-2.5">
+              <span className="font-heading text-linea font-bold tabular-nums text-oceano">
+                {l.cantidad}
+                <span aria-hidden="true"> ×</span>
+              </span>
+              <div className="min-w-0">
+                <p className="font-heading text-linea leading-snug font-semibold break-words">{l.nombre}</p>
+                {l.detalle && <p className="mt-0.5 text-sm leading-snug break-words text-tostado/80">{l.detalle}</p>}
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        {accion ? (
+          <button
+            type="button"
+            onClick={onAvanzar}
+            className={cn(
+              "mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold transition-[transform,background-color] duration-150 motion-safe:active:scale-[0.98]",
+              pedido.estado === "nuevo"
+                ? "bg-aji-texto text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)]"
+                : "bg-cilantro-texto text-white hover:bg-[color-mix(in_oklab,var(--cilantro-texto)_88%,black)]",
+            )}
+          >
+            {pedido.estado === "preparando" && <Check className="size-5" aria-hidden="true" />}
+            {accion}
+            <span className="sr-only"> {pedido.numero}</span>
+          </button>
+        ) : (
+          <p className="mt-3 flex items-center justify-center gap-1.5 text-sm font-semibold text-cilantro-texto">
+            <Check className="size-4" aria-hidden="true" /> Listo para entregar
+          </p>
+        )}
+      </article>
+    </motion.li>
+  );
+}

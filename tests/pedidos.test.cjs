@@ -81,3 +81,30 @@ test("el historial limita listos pero conserva todos los pendientes", () => {
   assert.ok(visibles.some((p) => p.id === "pendiente-antiguo"));
   assert.deepEqual(datos.map((p) => p.id), ["listo-0", "listo-1", "listo-2", "listo-3", "listo-4", "pendiente-antiguo"]);
 });
+
+test("cocina: pendientes por orden de llegada y listos recientes limitados", () => {
+  const { columnasCocina, LISTOS_VISIBLES } = cargar("src/lib/cocina.ts");
+  const datos = [
+    { id: "n2", estado: "nuevo", creadoEn: 20 },
+    { id: "n1", estado: "nuevo", creadoEn: 10 },
+    { id: "p1", estado: "preparando", creadoEn: 5 },
+    ...Array.from({ length: LISTOS_VISIBLES + 2 }, (_, i) => ({ id: `l${i}`, estado: "listo", creadoEn: i })),
+  ];
+  const c = columnasCocina(datos);
+  assert.deepEqual(Array.from(c.nuevo, (p) => p.id), ["n1", "n2"]);
+  assert.deepEqual(Array.from(c.preparando, (p) => p.id), ["p1"]);
+  assert.equal(c.listo.length, LISTOS_VISIBLES);
+  assert.equal(c.listo[0].id, `l${LISTOS_VISIBLES + 1}`);
+  assert.equal(datos[0].id, "n2");
+});
+
+test("cocina: el pedido avanza nuevo → preparando → listo y se detiene", () => {
+  const { siguienteEstado, minutosEspera, textoEspera } = cargar("src/lib/cocina.ts");
+  assert.equal(siguienteEstado.nuevo, "preparando");
+  assert.equal(siguienteEstado.preparando, "listo");
+  assert.equal(siguienteEstado.listo, null);
+  assert.equal(minutosEspera(0, 9 * 60000 + 59000), 9);
+  assert.equal(minutosEspera(1000, 0), 0);
+  assert.equal(textoEspera(0), "Recién llegado");
+  assert.equal(textoEspera(75), "1 h 15 min");
+});
