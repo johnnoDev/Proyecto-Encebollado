@@ -7,7 +7,7 @@ import { AnimatePresence, motion, MotionConfig } from "motion/react";
 import { ArrowRight, RotateCcw, Undo2 } from "lucide-react";
 import { IlustracionPlato } from "@/components/menu/ilustracion-plato";
 import { brand } from "@/config/brand";
-import { leerPrecio, precioEditable } from "@/lib/admin";
+import { avisoCambioGrande, leerPrecio, precioEditable } from "@/lib/admin";
 import { precio } from "@/lib/formato";
 import { cn } from "@/lib/utils";
 import { useMontado, useRehidratar } from "@/store/hidratar";
@@ -324,6 +324,8 @@ function CampoPrecio({
   const id = useId();
   const [texto, setTexto] = useState(() => precioEditable(plato.precio));
   const [error, setError] = useState<string | null>(null);
+  // Precio grande pendiente de confirmar: no se guarda hasta un segundo «sí».
+  const [porConfirmar, setPorConfirmar] = useState<{ valor: number; aviso: string } | null>(null);
   const [visto, setVisto] = useState(plato.precio);
 
   // Si el precio cambia desde fuera (deshacer, otra pestaña), el campo lo sigue.
@@ -331,16 +333,33 @@ function CampoPrecio({
     setVisto(plato.precio);
     setTexto(precioEditable(plato.precio));
     setError(null);
+    setPorConfirmar(null);
   }
+
+  const aplicar = (valor: number) => {
+    setPorConfirmar(null);
+    setTexto(precioEditable(valor));
+    onCambiar(plato, { precio: valor }, `${plato.nombre}: ahora ${precio(valor)}`);
+  };
+
+  const cancelar = () => {
+    setTexto(precioEditable(plato.precio));
+    setError(null);
+    setPorConfirmar(null);
+  };
 
   const guardar = () => {
     const leido = leerPrecio(texto);
     if (!leido.ok) return setError(leido.error);
     setError(null);
-    setTexto(precioEditable(leido.valor));
-    if (leido.valor !== plato.precio) {
-      onCambiar(plato, { precio: leido.valor }, `${plato.nombre}: ahora ${precio(leido.valor)}`);
+    if (leido.valor === plato.precio) {
+      setTexto(precioEditable(leido.valor));
+      return setPorConfirmar(null);
     }
+    if (porConfirmar?.valor === leido.valor) return aplicar(leido.valor);
+    const aviso = avisoCambioGrande(plato.precio, leido.valor);
+    if (aviso) return setPorConfirmar({ valor: leido.valor, aviso });
+    aplicar(leido.valor);
   };
 
   return (
@@ -363,20 +382,50 @@ function CampoPrecio({
           autoComplete="off"
           disabled={!montado}
           value={texto}
-          onChange={(e) => setTexto(e.target.value)}
+          onChange={(e) => {
+            setTexto(e.target.value);
+            setPorConfirmar(null);
+          }}
           onBlur={guardar}
           onKeyDown={(e) => {
-            if (e.key === "Enter") e.currentTarget.blur();
-            if (e.key === "Escape") {
-              setTexto(precioEditable(plato.precio));
-              setError(null);
+            if (e.key === "Enter") {
+              // Con un precio pendiente, Enter es el segundo «sí».
+              if (porConfirmar) aplicar(porConfirmar.valor);
+              else e.currentTarget.blur();
             }
+            if (e.key === "Escape") cancelar();
           }}
           aria-invalid={error !== null}
-          aria-describedby={error ? `${id}-error` : undefined}
+          aria-describedby={error ? `${id}-error` : porConfirmar ? `${id}-confirmar` : undefined}
           className="h-full w-full min-w-0 bg-transparent pr-3 pl-1 font-heading text-linea font-semibold tabular-nums outline-none"
         />
       </div>
+      {porConfirmar && (
+        <div id={`${id}-confirmar`} role="alert" className="mt-2 max-w-60">
+          <p className="text-sm font-semibold text-pretty text-oceano">
+            ¿{precio(porConfirmar.valor)}? {porConfirmar.aviso} Antes: {precio(plato.precio)}.
+          </p>
+          <div className="mt-1.5 flex gap-2">
+            <button
+              type="button"
+              // mousedown: confirmar antes de que el campo pierda el foco y vuelva a validar.
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => aplicar(porConfirmar.valor)}
+              className="flex h-10 items-center rounded-lg bg-oceano px-3 text-sm font-semibold text-crema"
+            >
+              Confirmar
+            </button>
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={cancelar}
+              className="flex h-10 items-center rounded-lg border border-tostado/25 px-3 text-sm font-semibold text-tostado"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
       {error && (
         <p id={`${id}-error`} className="mt-1 max-w-48 text-sm font-semibold text-pretty text-aji-texto">
           {error}

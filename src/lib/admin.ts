@@ -18,5 +18,17 @@ export function leerPrecio(texto: string): ResultadoPrecio {
   return { ok: true, valor };
 }
 
+/**
+ * Un cambio de este tamaño suele ser un error de dedo (47,50 por 4,75):
+ * se pide confirmación. Devuelve el aviso a mostrar, o null si es normal.
+ */
+export function avisoCambioGrande(anterior: number, nuevo: number): string | null {
+  if (anterior <= 0 || nuevo === anterior) return null;
+  const veces = nuevo / anterior;
+  if (veces >= 3) return `Es ${Math.round(veces)} veces el precio anterior.`;
+  if (veces <= 1 / 3) return "Es menos de un tercio del precio anterior.";
+  return null;
+}
+
 /** 3.5 → «3,50» para mostrar en el campo de edición. */
 export const precioEditable = (valor: number) => valor.toFixed(2).replace(".", ",");

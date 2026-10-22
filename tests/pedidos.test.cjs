@@ -166,3 +166,12 @@ test("admin: los ajustes iguales al menú original no se guardan", () => {
   useMenu.getState().quitarAjuste("chifles");
   assert.equal(useMenu.getState().platos.find((p) => p.id === "chifles").disponible, original.disponible);
 });
+
+test("admin: un cambio de precio de 3× o de un tercio pide confirmación", () => {
+  const { avisoCambioGrande } = cargar("src/lib/admin.ts");
+  assert.equal(avisoCambioGrande(4.75, 47.5), "Es 10 veces el precio anterior.");
+  assert.ok(avisoCambioGrande(4.5, 1.5));
+  assert.equal(avisoCambioGrande(4.5, 5.5), null);
+  assert.equal(avisoCambioGrande(4.5, 4.5), null);
+  assert.equal(avisoCambioGrande(3, 8.99), null);
+});
