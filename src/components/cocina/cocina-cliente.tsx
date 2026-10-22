@@ -220,36 +220,37 @@ export function CocinaCliente() {
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={alternarSonido}
-            aria-pressed={sonido}
-            aria-label="Timbre de pedidos nuevos"
-            className={cn(
-              "flex h-11 items-center gap-2 rounded-full border px-3 text-sm font-semibold transition-colors",
-              sonido
-                ? "w-11 justify-center border-dorado bg-dorado px-0 text-tostado"
-                : turno
-                  ? "border-aji bg-aji-texto text-white"
-                  : "w-11 justify-center border-crema/30 px-0 text-crema/80 hover:border-crema/60",
-            )}
-          >
-            {sonido ? <Bell className="size-5" aria-hidden="true" /> : <BellOff className="size-5" aria-hidden="true" />}
-            {/* Con el turno empezado, un timbre apagado se dice con palabras, no solo con un icono. */}
-            {!sonido && turno && (
-              <span aria-hidden="true">
-                <span className="max-sm:hidden">Sonido apagado · </span>Activar
-              </span>
-            )}
-          </button>
-          <Link
-            href={`/menu?mesa=${mesaDemo}`}
-            target="_blank"
-            className="flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-crema/30 px-4 max-sm:w-11 max-sm:justify-center max-sm:px-0 text-sm font-semibold text-crema/90 transition-colors hover:border-crema/60 hover:text-crema"
-          >
-            <span className="max-sm:sr-only">Abrir la carta</span>
-            <ArrowRight className="size-4" aria-hidden="true" />
-          </Link>
+            <button
+              type="button"
+              onClick={alternarSonido}
+              aria-pressed={sonido}
+              aria-label="Timbre de pedidos nuevos"
+              className={cn(
+                "flex h-11 items-center gap-2 rounded-full border px-3 text-sm font-semibold transition-colors",
+                sonido
+                  ? "w-11 justify-center border-dorado bg-dorado px-0 text-tostado"
+                  : turno
+                    ? "border-aji bg-aji-texto text-white"
+                    : "w-11 justify-center border-crema/30 px-0 text-crema/80 hover:border-crema/60",
+              )}
+            >
+              {sonido ? <Bell className="size-5" aria-hidden="true" /> : <BellOff className="size-5" aria-hidden="true" />}
+              {/* Con el turno empezado, un timbre apagado se dice con palabras, no solo con un icono. */}
+              {!sonido && turno && (
+                <span aria-hidden="true">
+                  <span className="max-sm:hidden">Sonido apagado · </span>Activar
+                </span>
+              )}
+            </button>
+            <Link
+              href={`/menu?mesa=${mesaDemo}`}
+              target="_blank"
+              className="flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-crema/30 px-4 max-sm:w-11 max-sm:justify-center max-sm:px-0 text-sm font-semibold text-crema/90 transition-colors hover:border-crema/60 hover:text-crema"
+            >
+              <span className="max-sm:sr-only">Abrir la carta</span>
+              <span className="sr-only"> (se abre en otra pestaña)</span>
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
           </div>
         </header>
 
@@ -498,7 +499,7 @@ function Ticket({
 
         <ul className="divide-y divide-dashed divide-tostado/25">
           {pedido.lineas.map((l) => (
-            <li key={l.lineaId} className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2.5 py-2.5 md:py-2 lg:py-2.5">
+            <li key={l.lineaId} className="grid grid-cols-[2.25rem_minmax(0,1fr)] gap-x-1.5 py-2.5 md:py-2 lg:py-2.5">
               <span className="font-heading text-linea font-bold tabular-nums text-oceano">
                 {l.cantidad}
                 <span aria-hidden="true"> ×</span>
@@ -540,7 +541,7 @@ function Ticket({
 function Detalle({ texto, sobreTinte }: { texto: string; sobreTinte?: boolean }) {
   const partes = texto.split(" · ");
   return (
-    <p className="mt-0.5 text-sm leading-snug break-words text-tostado/80">
+    <p className="mt-0.5 text-cuerpo leading-snug break-words text-tostado/85">
       {partes.map((parte, i) => {
         const especial = /^sin |aparte$/i.test(parte);
         return (
