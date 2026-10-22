@@ -9,6 +9,7 @@ import { brand } from "@/config/brand";
 import {
   columnasCocina,
   MINUTOS_DEMORA,
+  MINUTOS_URGENTE,
   minutosEspera,
   nombreDestino,
   siguienteEstado,
@@ -225,6 +226,7 @@ function Ticket({
   const reducir = useReducedMotion();
   const minutos = minutosEspera(pedido.creadoEn, ahora);
   const demorado = pedido.estado !== "listo" && minutos >= MINUTOS_DEMORA;
+  const urgente = demorado && minutos >= MINUTOS_URGENTE;
   const platos = pedido.lineas.reduce((s, l) => s + l.cantidad, 0);
 
   return (
@@ -239,8 +241,14 @@ function Ticket({
       <article
         data-superficie="clara"
         aria-label={`Pedido ${pedido.numero}, ${nombreDestino(pedido)}, ${platos} ${platos === 1 ? "plato" : "platos"}`}
-        className={cn(papel, "rounded-b-[12px] px-4 pt-5 pb-4")}
+        className={cn(
+          papel,
+          "rounded-b-[12px] px-4 pt-5 pb-4",
+          urgente && "bg-[color-mix(in_oklab,var(--aji)_16%,var(--crema))]",
+        )}
       >
+        {/* Franja de demora: se lee a metros de distancia, antes que cualquier texto. */}
+        {demorado && <div aria-hidden="true" className="-mx-4 -mt-5 mb-4 h-3 bg-aji-texto" />}
         {/* En cocina se trabaja por mesa: el destino es el título; el número, la referencia. */}
         <header className="border-b-2 border-tostado pb-3">
           <div className="flex items-baseline justify-between gap-3">
@@ -251,13 +259,13 @@ function Ticket({
           </div>
           <p
             className={cn(
-              "mt-1.5 flex items-center gap-1 text-sm tabular-nums",
-              demorado ? "font-semibold text-aji-texto" : "text-tostado/75",
+              "mt-2 inline-flex items-center gap-1.5 font-heading text-linea font-bold tabular-nums",
+              demorado ? "rounded-md bg-aji-texto px-2 py-0.5 text-white" : "text-tostado/75",
             )}
           >
-            {demorado && <Flame className="size-4" aria-hidden="true" />}
+            {demorado && <Flame className="size-[18px]" aria-hidden="true" />}
             {textoEspera(minutos)}
-            {demorado && <span className="sr-only"> (demorado)</span>}
+            {demorado && <span className="sr-only">{urgente ? " (muy demorado)" : " (demorado)"}</span>}
           </p>
         </header>
 

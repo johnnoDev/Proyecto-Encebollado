@@ -6,6 +6,9 @@ export const LISTOS_VISIBLES = 8;
 /** A partir de estos minutos de espera, la comanda se marca como demorada. */
 export const MINUTOS_DEMORA = 10;
 
+/** Segundo umbral: la comanda entera se tiñe para que no se pierda de vista. */
+export const MINUTOS_URGENTE = 15;
+
 export const siguienteEstado: Record<EstadoPedido, EstadoPedido | null> = {
   nuevo: "preparando",
   preparando: "listo",
