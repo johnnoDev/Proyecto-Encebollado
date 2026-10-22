@@ -18,11 +18,13 @@ export type Plato = {
   categoriaId: string;
   nombre: string;
   descripcion: string;
+  /** Precio base (opción más barata); los grupos suman sobre este valor. */
   precio: number;
-  /** Ruta dentro de /public, p. ej. "/platos/encebollado-clasico.jpg". */
-  imagen: string;
+  /** Ruta dentro de /public. Mientras sea null se muestra una ilustración de marcador. */
+  imagen: string | null;
   disponible: boolean;
-  destacado?: boolean;
+  /** Etiqueta corta opcional ("El favorito"); se pinta en rosa. */
+  etiqueta?: string;
   grupos: GrupoOpciones[];
 };
 
@@ -32,9 +34,16 @@ export type Categoria = {
   descripcion?: string;
 };
 
+export type Modalidad = {
+  id: "mesa" | "llevar" | "retiro";
+  nombre: string;
+  descripcion: string;
+};
+
 export type Menu = {
   categorias: Categoria[];
   platos: Plato[];
+  modalidades: Modalidad[];
 };
 
 export type EstadoPedido = "nuevo" | "preparando" | "listo";
@@ -57,6 +66,9 @@ export type Pedido = {
   lineas: LineaCarrito[];
   total: number;
   estado: EstadoPedido;
+  modalidad: Modalidad["id"];
+  /** Número de mesa cuando la modalidad es "mesa". */
+  mesa?: string;
   nombreCliente?: string;
   creadoEn: number;
 };

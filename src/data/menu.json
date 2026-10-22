@@ -1,20 +1,24 @@
 {
+  "modalidades": [
+    { "id": "mesa", "nombre": "En mesa", "descripcion": "Te lo llevamos a tu mesa" },
+    { "id": "llevar", "nombre": "Para llevar", "descripcion": "Empacado y listo para irte" },
+    { "id": "retiro", "nombre": "Retiro", "descripcion": "Pide ahora y recoge en el local" }
+  ],
   "categorias": [
-    { "id": "encebollados", "nombre": "Encebollados", "descripcion": "El plato estrella de la costa" },
-    { "id": "mariscos", "nombre": "Del mar", "descripcion": "Ceviches y más" },
-    { "id": "acompanantes", "nombre": "Acompañantes" },
-    { "id": "bebidas", "nombre": "Bebidas" }
+    { "id": "encebollados", "nombre": "Encebollados", "descripcion": "Caldo de la costa, como en casa" },
+    { "id": "extras", "nombre": "Extras", "descripcion": "Para acompañar o repetir" },
+    { "id": "bebidas", "nombre": "Bebidas", "descripcion": "Bien frías" }
   ],
   "platos": [
     {
-      "id": "encebollado-clasico",
+      "id": "encebollado-albacora",
       "categoriaId": "encebollados",
-      "nombre": "Encebollado clásico",
-      "descripcion": "Caldo de albacora con yuca, cebolla encurtida, tomate y culantro.",
-      "precio": 4.5,
-      "imagen": "/platos/encebollado-clasico.jpg",
+      "nombre": "Encebollado de albacora",
+      "descripcion": "Caldo de albacora con yuca, cebolla curtida, tomate y culantro.",
+      "precio": 3.5,
+      "imagen": null,
       "disponible": true,
-      "destacado": true,
+      "etiqueta": "El clásico",
       "grupos": [
         {
           "id": "tamano",
@@ -22,31 +26,29 @@
           "tipo": "unica",
           "obligatorio": true,
           "opciones": [
-            { "id": "normal", "nombre": "Normal", "precio": 0 },
-            { "id": "grande", "nombre": "Grande", "precio": 1.5 }
+            { "id": "pequeno", "nombre": "Pequeño", "precio": 0 },
+            { "id": "mediano", "nombre": "Mediano", "precio": 1 },
+            { "id": "grande", "nombre": "Grande", "precio": 2 }
           ]
         },
         {
-          "id": "acompanante",
-          "nombre": "Acompañante",
+          "id": "cebolla",
+          "nombre": "Cebolla",
           "tipo": "unica",
           "obligatorio": true,
           "opciones": [
-            { "id": "chifles", "nombre": "Chifles", "precio": 0 },
-            { "id": "pan", "nombre": "Pan", "precio": 0 },
-            { "id": "arroz", "nombre": "Arroz", "precio": 0.5 }
+            { "id": "con-cebolla", "nombre": "Con cebolla", "precio": 0 },
+            { "id": "sin-cebolla", "nombre": "Sin cebolla", "precio": 0 }
           ]
         },
         {
-          "id": "extras",
-          "nombre": "Extras",
+          "id": "aparte",
+          "nombre": "Servir aparte",
           "tipo": "multiple",
           "obligatorio": false,
           "opciones": [
-            { "id": "extra-pescado", "nombre": "Porción extra de albacora", "precio": 1.75 },
-            { "id": "aji", "nombre": "Ají de la casa", "precio": 0 },
-            { "id": "limon", "nombre": "Limón", "precio": 0 },
-            { "id": "sin-cebolla", "nombre": "Sin cebolla", "precio": 0 }
+            { "id": "limon", "nombre": "Limón aparte", "precio": 0 },
+            { "id": "aji", "nombre": "Ají aparte", "precio": 0 }
           ]
         }
       ]
@@ -55,11 +57,11 @@
       "id": "encebollado-mixto",
       "categoriaId": "encebollados",
       "nombre": "Encebollado mixto",
-      "descripcion": "El clásico con camarón y concha. Para los que vienen con hambre.",
-      "precio": 7,
-      "imagen": "/platos/encebollado-mixto.jpg",
+      "descripcion": "Albacora y camarón en el mismo caldo. Para los que vienen con hambre.",
+      "precio": 4.5,
+      "imagen": null,
       "disponible": true,
-      "destacado": true,
+      "etiqueta": "El favorito",
       "grupos": [
         {
           "id": "tamano",
@@ -67,105 +69,189 @@
           "tipo": "unica",
           "obligatorio": true,
           "opciones": [
-            { "id": "normal", "nombre": "Normal", "precio": 0 },
+            { "id": "pequeno", "nombre": "Pequeño", "precio": 0 },
+            { "id": "mediano", "nombre": "Mediano", "precio": 1 },
             { "id": "grande", "nombre": "Grande", "precio": 2 }
           ]
         },
         {
-          "id": "acompanante",
-          "nombre": "Acompañante",
+          "id": "cebolla",
+          "nombre": "Cebolla",
           "tipo": "unica",
           "obligatorio": true,
           "opciones": [
-            { "id": "chifles", "nombre": "Chifles", "precio": 0 },
-            { "id": "pan", "nombre": "Pan", "precio": 0 },
-            { "id": "arroz", "nombre": "Arroz", "precio": 0.5 }
+            { "id": "con-cebolla", "nombre": "Con cebolla", "precio": 0 },
+            { "id": "sin-cebolla", "nombre": "Sin cebolla", "precio": 0 }
           ]
-        }
-      ]
-    },
-    {
-      "id": "encebollado-chancho",
-      "categoriaId": "encebollados",
-      "nombre": "Encebollado con chicharrón",
-      "descripcion": "Versión contundente con chicharrón crocante.",
-      "precio": 6,
-      "imagen": "/platos/encebollado-chancho.jpg",
-      "disponible": false,
-      "grupos": []
-    },
-    {
-      "id": "ceviche-camaron",
-      "categoriaId": "mariscos",
-      "nombre": "Ceviche de camarón",
-      "descripcion": "Camarón en jugo de limón y naranja, con cebolla, tomate y culantro.",
-      "precio": 8,
-      "imagen": "/platos/ceviche-camaron.jpg",
-      "disponible": true,
-      "grupos": [
+        },
         {
-          "id": "acompanante",
-          "nombre": "Acompañante",
+          "id": "aparte",
+          "nombre": "Servir aparte",
           "tipo": "multiple",
           "obligatorio": false,
           "opciones": [
-            { "id": "chifles", "nombre": "Chifles", "precio": 0 },
-            { "id": "canguil", "nombre": "Canguil", "precio": 0 }
+            { "id": "limon", "nombre": "Limón aparte", "precio": 0 },
+            { "id": "aji", "nombre": "Ají aparte", "precio": 0 }
           ]
         }
       ]
     },
     {
-      "id": "bolon",
-      "categoriaId": "acompanantes",
-      "nombre": "Bolón de verde",
-      "descripcion": "Verde majado con queso o chicharrón.",
-      "precio": 2.5,
-      "imagen": "/platos/bolon.jpg",
+      "id": "encebollado-camaron",
+      "categoriaId": "encebollados",
+      "nombre": "Encebollado de camarón",
+      "descripcion": "Camarón de la costa en caldo de yuca, con cebolla curtida y culantro.",
+      "precio": 4,
+      "imagen": null,
       "disponible": true,
       "grupos": [
         {
-          "id": "relleno",
-          "nombre": "Relleno",
+          "id": "tamano",
+          "nombre": "Tamaño",
           "tipo": "unica",
           "obligatorio": true,
           "opciones": [
-            { "id": "queso", "nombre": "Queso", "precio": 0 },
-            { "id": "chicharron", "nombre": "Chicharrón", "precio": 0 },
-            { "id": "mixto", "nombre": "Mixto", "precio": 0.5 }
+            { "id": "pequeno", "nombre": "Pequeño", "precio": 0 },
+            { "id": "mediano", "nombre": "Mediano", "precio": 1 },
+            { "id": "grande", "nombre": "Grande", "precio": 2 }
+          ]
+        },
+        {
+          "id": "cebolla",
+          "nombre": "Cebolla",
+          "tipo": "unica",
+          "obligatorio": true,
+          "opciones": [
+            { "id": "con-cebolla", "nombre": "Con cebolla", "precio": 0 },
+            { "id": "sin-cebolla", "nombre": "Sin cebolla", "precio": 0 }
+          ]
+        },
+        {
+          "id": "aparte",
+          "nombre": "Servir aparte",
+          "tipo": "multiple",
+          "obligatorio": false,
+          "opciones": [
+            { "id": "limon", "nombre": "Limón aparte", "precio": 0 },
+            { "id": "aji", "nombre": "Ají aparte", "precio": 0 }
           ]
         }
       ]
     },
     {
       "id": "chifles",
-      "categoriaId": "acompanantes",
-      "nombre": "Porción de chifles",
+      "categoriaId": "extras",
+      "nombre": "Chifles",
       "descripcion": "Láminas de verde fritas, crujientes.",
       "precio": 1,
-      "imagen": "/platos/chifles.jpg",
+      "imagen": null,
       "disponible": true,
       "grupos": []
     },
     {
-      "id": "jugo-naranjilla",
-      "categoriaId": "bebidas",
-      "nombre": "Jugo de naranjilla",
-      "descripcion": "Natural, recién hecho.",
-      "precio": 1.75,
-      "imagen": "/platos/jugo-naranjilla.jpg",
+      "id": "pan",
+      "categoriaId": "extras",
+      "nombre": "Pan",
+      "descripcion": "Pan suave para mojar en el caldo.",
+      "precio": 0.5,
+      "imagen": null,
       "disponible": true,
       "grupos": []
     },
     {
-      "id": "cola",
-      "categoriaId": "bebidas",
-      "nombre": "Cola personal",
-      "descripcion": "Bien fría.",
+      "id": "yuca",
+      "categoriaId": "extras",
+      "nombre": "Porción de yuca",
+      "descripcion": "Yuca cocida, tierna.",
       "precio": 1,
-      "imagen": "/platos/cola.jpg",
+      "imagen": null,
       "disponible": true,
       "grupos": []
+    },
+    {
+      "id": "aguacate",
+      "categoriaId": "extras",
+      "nombre": "Aguacate",
+      "descripcion": "Medio aguacate en láminas.",
+      "precio": 1.25,
+      "imagen": null,
+      "disponible": true,
+      "grupos": []
+    },
+    {
+      "id": "camarones-adicionales",
+      "categoriaId": "extras",
+      "nombre": "Camarones adicionales",
+      "descripcion": "Porción extra de camarón para tu encebollado.",
+      "precio": 2,
+      "imagen": null,
+      "disponible": false,
+      "grupos": []
+    },
+    {
+      "id": "jugo-natural",
+      "categoriaId": "bebidas",
+      "nombre": "Jugo natural",
+      "descripcion": "Fruta de temporada, recién licuada.",
+      "precio": 1.5,
+      "imagen": null,
+      "disponible": true,
+      "grupos": [
+        {
+          "id": "sabor",
+          "nombre": "Sabor",
+          "tipo": "unica",
+          "obligatorio": true,
+          "opciones": [
+            { "id": "naranjilla", "nombre": "Naranjilla", "precio": 0 },
+            { "id": "maracuya", "nombre": "Maracuyá", "precio": 0 },
+            { "id": "mora", "nombre": "Mora", "precio": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gaseosa",
+      "categoriaId": "bebidas",
+      "nombre": "Gaseosa",
+      "descripcion": "Personal, bien fría.",
+      "precio": 1,
+      "imagen": null,
+      "disponible": true,
+      "grupos": [
+        {
+          "id": "sabor",
+          "nombre": "Sabor",
+          "tipo": "unica",
+          "obligatorio": true,
+          "opciones": [
+            { "id": "cola", "nombre": "Cola", "precio": 0 },
+            { "id": "naranja", "nombre": "Naranja", "precio": 0 },
+            { "id": "limon", "nombre": "Limón", "precio": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "agua",
+      "categoriaId": "bebidas",
+      "nombre": "Agua",
+      "descripcion": "Botella personal.",
+      "precio": 0.75,
+      "imagen": null,
+      "disponible": true,
+      "grupos": [
+        {
+          "id": "tipo",
+          "nombre": "Tipo",
+          "tipo": "unica",
+          "obligatorio": true,
+          "opciones": [
+            { "id": "sin-gas", "nombre": "Sin gas", "precio": 0 },
+            { "id": "con-gas", "nombre": "Con gas", "precio": 0 }
+          ]
+        }
+      ]
     }
   ]
 }
