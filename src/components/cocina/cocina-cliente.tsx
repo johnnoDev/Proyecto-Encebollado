@@ -163,9 +163,10 @@ export function CocinaCliente() {
           <Link
             href="/menu?mesa=1"
             target="_blank"
-            className="flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-crema/30 px-4 text-sm font-semibold text-crema/90 transition-colors hover:border-crema/60 hover:text-crema"
+            className="flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-crema/30 px-4 max-sm:w-11 max-sm:justify-center max-sm:px-0 text-sm font-semibold text-crema/90 transition-colors hover:border-crema/60 hover:text-crema"
           >
-            Abrir la carta <ArrowRight className="size-4" aria-hidden="true" />
+            <span className="max-sm:sr-only">Abrir la carta</span>
+            <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
           </div>
         </header>
@@ -247,6 +248,15 @@ export function CocinaCliente() {
                 <span className="font-semibold text-oceano">{cambio.pedido.numero}</span>
                 {textoCambio[cambio.a]}
               </p>
+              {COLUMNAS.some((c) => c.id === cambio.a && c.id !== vista) && (
+                <button
+                  type="button"
+                  onClick={() => setVista(cambio.a as ColumnaCocina)}
+                  className="flex h-11 shrink-0 items-center rounded-lg px-2 text-cuerpo font-semibold text-oceano hover:bg-oceano/8 md:hidden"
+                >
+                  Ver en {COLUMNAS.find((c) => c.id === cambio.a)?.nombre}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={deshacer}
@@ -355,14 +365,14 @@ function Ticket({
 
         <ul className="divide-y divide-dashed divide-tostado/25">
           {pedido.lineas.map((l) => (
-            <li key={l.lineaId} className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2.5 py-2.5">
+            <li key={l.lineaId} className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2.5 py-2.5 md:py-2 lg:py-2.5">
               <span className="font-heading text-linea font-bold tabular-nums text-oceano">
                 {l.cantidad}
                 <span aria-hidden="true"> ×</span>
               </span>
               <div className="min-w-0">
-                <p className="font-heading text-linea leading-snug font-semibold break-words">{l.nombre}</p>
-                {l.detalle && <p className="mt-0.5 text-sm leading-snug break-words text-tostado/80">{l.detalle}</p>}
+                <p className="font-heading text-linea leading-snug font-semibold break-words md:text-base lg:text-linea">{l.nombre}</p>
+                {l.detalle && <Detalle texto={l.detalle} />}
               </div>
             </li>
           ))}
@@ -386,5 +396,26 @@ function Ticket({
         </button>
       </article>
     </motion.li>
+  );
+}
+
+/**
+ * Detalle de la línea: lo que cambia la preparación («sin cebolla», «ají aparte»)
+ * va destacado; el resto (tamaño, sabor) queda en tono normal.
+ */
+function Detalle({ texto }: { texto: string }) {
+  const partes = texto.split(" · ");
+  return (
+    <p className="mt-0.5 text-sm leading-snug break-words text-tostado/80">
+      {partes.map((parte, i) => {
+        const especial = /^sin |aparte$/i.test(parte);
+        return (
+          <span key={i}>
+            {i > 0 && " · "}
+            <span className={cn(especial && "font-semibold text-aji-texto")}>{parte}</span>
+          </span>
+        );
+      })}
+    </p>
   );
 }
