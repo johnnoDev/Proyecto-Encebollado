@@ -82,6 +82,8 @@ export function CocinaCliente() {
   const montado = useMontado();
   const pedidos = usePedidos((s) => s.pedidos);
   const cambiarEstado = usePedidos((s) => s.cambiarEstado);
+  // Para probar el circuito: la carta se abre en la mesa siguiente a la del último pedido.
+  const mesaDemo = (usePedidos((s) => s.contador) % brand.mesas) + 1;
   const ahora = useAhora();
   const [vista, setVista] = useState<ColumnaCocina>("nuevo");
   const [cambio, setCambio] = useState<Cambio>(null);
@@ -196,7 +198,7 @@ export function CocinaCliente() {
             {sonido ? <Bell className="size-5" aria-hidden="true" /> : <BellOff className="size-5" aria-hidden="true" />}
           </button>
           <Link
-            href="/menu?mesa=1"
+            href={`/menu?mesa=${mesaDemo}`}
             target="_blank"
             className="flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-crema/30 px-4 max-sm:w-11 max-sm:justify-center max-sm:px-0 text-sm font-semibold text-crema/90 transition-colors hover:border-crema/60 hover:text-crema"
           >
@@ -262,7 +264,7 @@ export function CocinaCliente() {
               {!montado ? (
                 <div className="h-40 rounded-xl border border-dashed border-crema/20" />
               ) : columnas[c.id].length === 0 ? (
-                <p className="rounded-xl border border-dashed border-crema/25 px-4 py-8 text-center text-cuerpo text-crema/70">
+                <p className="rounded-xl border border-dashed border-crema/25 px-4 py-8 text-center text-cuerpo text-pretty text-crema/70">
                   {c.vacio}
                 </p>
               ) : (
@@ -376,7 +378,7 @@ function Ticket({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      className="drop-shadow-[0_14px_24px_rgb(0_0_0/0.35)]"
+      className="drop-shadow-[0_10px_16px_rgb(0_0_0/0.3)]"
     >
       <article
         data-superficie="clara"

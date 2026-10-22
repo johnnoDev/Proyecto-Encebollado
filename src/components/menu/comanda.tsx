@@ -264,7 +264,7 @@ function ContenidoComanda({
         </AnimatePresence>
         {montado && n === 0 && (
           <div>
-            <p className="pt-4 pb-1 text-cuerpo leading-relaxed text-tostado/70">
+            <p className="pt-4 pb-1 text-cuerpo leading-relaxed text-pretty text-tostado/70">
               Toca un plato de la carta y aparecerá escrito aquí.
             </p>
             {Array.from({ length: 4 }, (_, i) => (
