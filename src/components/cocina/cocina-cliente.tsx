@@ -484,7 +484,7 @@ function Ticket({
               </span>
               <div className="min-w-0">
                 <p className="font-heading text-linea leading-snug font-semibold break-words md:text-base lg:text-linea">{l.nombre}</p>
-                {l.detalle && <Detalle texto={l.detalle} />}
+                {l.detalle && <Detalle texto={l.detalle} sobreTinte={urgente} />}
               </div>
             </li>
           ))}
@@ -516,7 +516,7 @@ function Ticket({
  * Detalle de la línea: lo que cambia la preparación («sin cebolla», «ají aparte»)
  * va destacado; el resto (tamaño, sabor) queda en tono normal.
  */
-function Detalle({ texto }: { texto: string }) {
+function Detalle({ texto, sobreTinte }: { texto: string; sobreTinte?: boolean }) {
   const partes = texto.split(" · ");
   return (
     <p className="mt-0.5 text-sm leading-snug break-words text-tostado/80">
@@ -525,7 +525,15 @@ function Detalle({ texto }: { texto: string }) {
         return (
           <span key={i}>
             {i > 0 && " · "}
-            <span className={cn(especial && "font-semibold text-aji-texto")}>{parte}</span>
+            <span
+              className={cn(
+                especial && "font-semibold text-aji-texto",
+                // Sobre el tinte de urgencia el ají no llega a 4,5:1: se oscurece hacia tostado (~5:1).
+                especial && sobreTinte && "text-[color-mix(in_oklab,var(--aji-texto)_80%,var(--tostado))]",
+              )}
+            >
+              {parte}
+            </span>
           </span>
         );
       })}
