@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, MotionConfig, useReducedMotion } from "motion/react";
-import { ArrowRight, Check, Flame, Undo2 } from "lucide-react";
+import { ArrowRight, Bell, BellOff, Check, Flame, Undo2 } from "lucide-react";
 import { brand } from "@/config/brand";
 import {
   columnasCocina,
@@ -60,6 +60,23 @@ function useAhora() {
 
 let ultimoIdCambio = 0;
 
+/** Timbre corto de dos notas, sintetizado: no depende de archivos de audio. */
+function tocarTimbre(ctx: AudioContext) {
+  const t = ctx.currentTime;
+  [880, 1320].forEach((frecuencia, i) => {
+    const osc = ctx.createOscillator();
+    const vol = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = frecuencia;
+    vol.gain.setValueAtTime(0.0001, t + i * 0.16);
+    vol.gain.exponentialRampToValueAtTime(0.25, t + i * 0.16 + 0.02);
+    vol.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.16 + 0.35);
+    osc.connect(vol).connect(ctx.destination);
+    osc.start(t + i * 0.16);
+    osc.stop(t + i * 0.16 + 0.4);
+  });
+}
+
 export function CocinaCliente() {
   const montado = useMontado();
   const pedidos = usePedidos((s) => s.pedidos);
@@ -72,6 +89,36 @@ export function CocinaCliente() {
   useEffect(() => () => clearTimeout(temporizador.current), []);
 
   const columnas = columnasCocina(montado ? pedidos : []);
+  const nNuevos = columnas.nuevo.length;
+  // El pedido nuevo más reciente: cambia solo cuando llega uno nuevo.
+  const ultimoNuevo = columnas.nuevo.at(-1)?.id ?? null;
+
+  const [sonido, setSonido] = useState(false);
+  const audio = useRef<AudioContext | null>(null);
+  const vistos = useRef<Set<string> | null>(null);
+
+  // Conteo en el título de la pestaña: se ve aunque la pantalla esté en otra app.
+  useEffect(() => {
+    document.title = nNuevos > 0 ? `(${nNuevos}) Cocina · ${brand.nombre}` : `Cocina · ${brand.nombre}`;
+  }, [nNuevos]);
+
+  // Timbre solo si aparece en «Nuevos» un pedido nunca visto: no al cargar
+  // la página ni al deshacer un cambio.
+  useEffect(() => {
+    if (!montado) return;
+    const llegoUno =
+      vistos.current !== null && pedidos.some((p) => p.estado === "nuevo" && !vistos.current!.has(p.id));
+    if (llegoUno && sonido && audio.current) tocarTimbre(audio.current);
+    vistos.current = new Set(pedidos.map((p) => p.id));
+  }, [pedidos, montado, sonido]);
+
+  const alternarSonido = () => {
+    // El navegador solo permite audio tras un toque: el contexto nace aquí.
+    if (!audio.current) audio.current = new AudioContext();
+    void audio.current.resume();
+    if (!sonido) tocarTimbre(audio.current);
+    setSonido((v) => !v);
+  };
 
   const avanzar = (pedido: Pedido) => {
     const a = siguienteEstado[pedido.estado];
@@ -100,6 +147,19 @@ export function CocinaCliente() {
               <p className="mt-1 truncate text-nota text-crema/75">{brand.nombre}</p>
             </div>
           </div>
+          <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={alternarSonido}
+            aria-pressed={sonido}
+            aria-label={sonido ? "Timbre de pedidos nuevos activado. Apagar" : "Activar timbre de pedidos nuevos"}
+            className={cn(
+              "grid size-11 place-items-center rounded-full border transition-colors",
+              sonido ? "border-dorado bg-dorado text-tostado" : "border-crema/30 text-crema/80 hover:border-crema/60",
+            )}
+          >
+            {sonido ? <Bell className="size-5" aria-hidden="true" /> : <BellOff className="size-5" aria-hidden="true" />}
+          </button>
           <Link
             href="/menu?mesa=1"
             target="_blank"
@@ -107,6 +167,7 @@ export function CocinaCliente() {
           >
             Abrir la carta <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
+          </div>
         </header>
 
         {/* Celular: una columna a la vez, elegida con pestañas que cuentan pedidos. */}
@@ -128,7 +189,7 @@ export function CocinaCliente() {
                 )}
               >
                 {c.nombre}
-                <Conteo n={columnas[c.id].length} activo={vista === c.id} destacado={c.id === "nuevo"} />
+                <Conteo n={columnas[c.id].length} activo={vista === c.id} destacado={c.id === "nuevo"} pulso={c.id === "nuevo" ? ultimoNuevo : null} />
                 <span
                   aria-hidden="true"
                   className={cn(
@@ -150,7 +211,7 @@ export function CocinaCliente() {
             >
               <h2 id={`col-${c.id}`} className="mb-3 flex items-center gap-2 max-md:sr-only">
                 <span className="font-heading text-plato font-bold">{c.nombre}</span>
-                <Conteo n={columnas[c.id].length} activo destacado={c.id === "nuevo"} />
+                <Conteo n={columnas[c.id].length} activo destacado={c.id === "nuevo"} pulso={c.id === "nuevo" ? ultimoNuevo : null} />
               </h2>
               {!montado ? (
                 <div className="h-40 rounded-xl border border-dashed border-crema/20" />
@@ -207,16 +268,31 @@ export function CocinaCliente() {
   );
 }
 
-function Conteo({ n, activo, destacado }: { n: number; activo: boolean; destacado?: boolean }) {
+/** Contador de columna; con `pulso`, late cada vez que cambia el pedido más reciente. */
+function Conteo({
+  n,
+  activo,
+  destacado,
+  pulso,
+}: {
+  n: number;
+  activo: boolean;
+  destacado?: boolean;
+  pulso?: string | null;
+}) {
   return (
-    <span
+    <motion.span
+      key={pulso ?? "fijo"}
+      initial={pulso ? { scale: 1.6 } : false}
+      animate={{ scale: 1 }}
+      transition={{ type: "spring", stiffness: 500, damping: 14 }}
       className={cn(
         "grid h-6 min-w-6 place-items-center rounded-full px-1.5 text-xs font-bold tabular-nums",
         destacado && n > 0 ? "bg-dorado text-tostado" : activo ? "bg-crema/20 text-crema" : "bg-crema/10 text-crema/75",
       )}
     >
       {n}
-    </span>
+    </motion.span>
   );
 }
 
