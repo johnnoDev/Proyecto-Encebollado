@@ -67,16 +67,20 @@ function Contenido({ plato, edicion, onAnotar }: { plato: Plato; edicion: Edicio
   return (
     <div className="flex max-h-[inherit] min-h-0 flex-1 flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        <div className="grid place-items-center bg-oceano pt-7 pb-6">
-          <IlustracionPlato platoId={plato.id} className="size-44 sm:size-52" />
+        {/* Celular: fila compacta para que las opciones entren sin scroll.
+            Desde sm: la ilustración grande encabeza y el nombre va debajo. */}
+        <div className="flex items-center gap-4 bg-oceano py-5 pr-16 pl-5 sm:flex-col sm:gap-0 sm:px-6 sm:pt-8 sm:pb-6 sm:text-center">
+          <IlustracionPlato platoId={plato.id} className="size-24 shrink-0 sm:size-52" />
+          <div className="min-w-0 sm:mt-5">
+            <SheetTitle className="font-heading text-[1.5rem] leading-[1.1] font-bold text-balance text-crema sm:text-[1.9rem]">
+              {plato.nombre}
+            </SheetTitle>
+            <SheetDescription className="mt-1.5 text-[0.9rem] leading-snug text-crema/80 sm:text-[0.95rem]">
+              {plato.descripcion}
+            </SheetDescription>
+          </div>
         </div>
         <div className="px-5 pt-5 pb-6 sm:px-6">
-          <SheetTitle className="font-heading text-[1.9rem] leading-[1.05] font-bold text-balance text-oceano">
-            {plato.nombre}
-          </SheetTitle>
-          <SheetDescription className="mt-2 text-[0.95rem] leading-relaxed text-tostado/80">
-            {plato.descripcion}
-          </SheetDescription>
           {plato.grupos.map((grupo) => (
             <Grupo
               key={grupo.id}
@@ -120,7 +124,7 @@ function Grupo({
   const conPrecio = grupo.opciones.some((o) => o.precio > 0);
 
   return (
-    <fieldset className="mt-7">
+    <fieldset className="mt-6 first:mt-0">
       <legend className="flex w-full items-baseline justify-between gap-3">
         <span className="text-base font-semibold text-tostado">{grupo.nombre}</span>
         <span className="text-[0.8rem] text-tostado/70">

@@ -18,7 +18,8 @@ export function Contador({ valor, onCambiar, minimo = 1, etiqueta, tamano = "md"
   const quita = minimo === 0 && valor === 1;
   const boton = cn(
     "grid place-items-center rounded-full text-oceano transition-colors hover:bg-oceano/8 active:bg-oceano/15 disabled:opacity-35",
-    tamano === "md" ? "size-11" : "size-10",
+    // Siempre ≥44 px de área táctil; «sm» solo afina el número.
+    "size-11",
   );
   return (
     <div
