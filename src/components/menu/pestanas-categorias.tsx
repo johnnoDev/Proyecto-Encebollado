@@ -38,7 +38,7 @@ export function PestanasCategorias({ categorias }: { categorias: Categoria[] }) 
               aria-current={activa === c.id ? "true" : undefined}
               onClick={() => setActiva(c.id)}
               className={cn(
-                "relative flex h-14 items-center px-3 text-[0.95rem] font-semibold whitespace-nowrap transition-colors",
+                "relative flex h-14 items-center px-3 text-cuerpo font-semibold whitespace-nowrap transition-colors",
                 activa === c.id ? "text-crema" : "text-crema/65 hover:text-crema",
               )}
             >

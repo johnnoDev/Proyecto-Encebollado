@@ -64,7 +64,7 @@ function PapelAviso({ aviso, className }: { aviso: AvisoComanda; className?: str
             initial={{ clipPath: "inset(0 100% 0 0)" }}
             animate={{ clipPath: "inset(0 0% 0 0)" }}
             transition={{ duration: 0.7, delay: 0.1, ease: TINTA }}
-            className="min-w-0 flex-1 py-0.5 text-[0.9rem] leading-snug"
+            className="min-w-0 flex-1 py-0.5 text-cuerpo leading-snug"
           >
             <span className={cn("font-semibold", aviso.tipo === "quitado" ? "text-oceano" : "text-aji-texto")}>
               {{ anotado: "Anotado · ", quitado: "Quitado · ", cambiado: "Cambiado · " }[aviso.tipo]}
@@ -75,7 +75,7 @@ function PapelAviso({ aviso, className }: { aviso: AvisoComanda; className?: str
             <button
               type="button"
               onClick={aviso.onDeshacer}
-              className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg px-3 text-[0.9rem] font-semibold text-oceano underline decoration-oceano/40 underline-offset-4 hover:bg-oceano/8"
+              className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg px-3 text-cuerpo font-semibold text-oceano underline decoration-oceano/40 underline-offset-4 hover:bg-oceano/8"
             >
               <Undo2 className="size-4" aria-hidden="true" />
               Deshacer
@@ -125,9 +125,9 @@ export function TiraComanda({
               >
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2">
-                    <span className="font-heading text-[1.2rem] leading-tight font-bold text-oceano">Comanda</span>
+                    <span className="font-heading text-plato leading-tight font-bold text-oceano">Comanda</span>
                     {mesa && (
-                      <span className="-rotate-3 rounded-[5px] border-[1.5px] border-oceano px-1.5 font-heading text-[0.8rem] leading-[1.35] font-bold whitespace-nowrap text-oceano">
+                      <span className="-rotate-3 rounded-[5px] border-[1.5px] border-oceano px-1.5 font-heading text-nota leading-[1.35] font-bold whitespace-nowrap text-oceano">
                         Mesa {mesa}
                       </span>
                     )}
@@ -146,13 +146,13 @@ export function TiraComanda({
                 <button
                   type="button"
                   onClick={onAbrir}
-                  className="flex h-12 shrink-0 items-center justify-center rounded-2xl bg-aji-texto px-5 text-[0.95rem] font-semibold text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] active:scale-[0.98]"
+                  className="flex h-12 shrink-0 items-center justify-center rounded-2xl bg-aji-texto px-5 text-cuerpo font-semibold text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] active:scale-[0.98]"
                 >
                   Revisar y enviar
                 </button>
               )}
               {montado && n === 0 && (
-                <span className="max-w-[9.5rem] text-right text-[0.8rem] leading-snug text-tostado/70">
+                <span className="max-w-[9.5rem] text-right text-nota leading-snug text-tostado/70">
                   Toca un plato para anotarlo
                 </span>
               )}
@@ -217,14 +217,14 @@ function ContenidoComanda({
     <>
       <header className="flex items-start justify-between gap-4 border-b-2 border-tostado px-5 pb-3 sm:px-6">
         <div>
-          <Titulo className="font-heading text-[1.9rem] leading-none font-bold text-oceano">Comanda</Titulo>
+          <Titulo className="font-heading text-titular leading-none font-bold text-oceano">Comanda</Titulo>
           <Sub className="mt-1.5 text-sm text-tostado/75">
             {montado ? (n === 0 ? "Aún no has anotado nada" : nPlatos(n)) : " "}
           </Sub>
         </div>
         <span
           className={cn(
-            "mt-0.5 shrink-0 -rotate-3 rounded-md border-2 border-oceano px-2.5 py-0.5 font-heading text-lg font-bold text-oceano",
+            "mt-0.5 shrink-0 -rotate-3 rounded-md border-2 border-oceano px-2.5 py-0.5 font-heading text-linea font-bold text-oceano",
             enHoja && "mr-12",
           )}
         >
@@ -247,8 +247,8 @@ function ContenidoComanda({
               transition={{ type: "spring", stiffness: 700, damping: 26, mass: 0.8 }}
             >
               <div className="rounded-md border-[3.5px] border-aji-texto bg-crema/85 px-5 pt-2 pb-2.5 text-center text-aji-texto shadow-[0_0_0_4px_var(--crema),0_0_0_5.5px_var(--aji-texto)]">
-                <p className="font-heading text-[2.4rem] leading-none font-black tracking-[0.06em]">A COCINA</p>
-                <p className="mt-1.5 text-[0.8rem] font-bold tracking-[0.14em] tabular-nums">
+                <p className="font-heading text-display leading-none font-black tracking-[0.06em]">A COCINA</p>
+                <p className="mt-1.5 text-nota font-bold tracking-[0.14em] tabular-nums">
                   MESA {mesa} · {sello.hora}
                 </p>
               </div>
@@ -257,7 +257,7 @@ function ContenidoComanda({
         </AnimatePresence>
         {montado && n === 0 && (
           <div>
-            <p className="pt-4 pb-1 text-[0.95rem] leading-relaxed text-tostado/70">
+            <p className="pt-4 pb-1 text-cuerpo leading-relaxed text-tostado/70">
               Toca un plato de la carta y aparecerá escrito aquí.
             </p>
             {Array.from({ length: 4 }, (_, i) => (
@@ -297,7 +297,7 @@ function ContenidoComanda({
         <footer className="border-t-2 border-tostado px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
           <div className="mb-3 flex items-baseline justify-between">
             <span className="text-base font-semibold">Total</span>
-            <span className="font-heading text-[1.75rem] font-bold text-oceano tabular-nums">{precio(total)}</span>
+            <span className="font-heading text-titular font-bold text-oceano tabular-nums">{precio(total)}</span>
           </div>
           {sello ? (
             <>
@@ -315,14 +315,14 @@ function ContenidoComanda({
                 <Undo2 className="size-5" aria-hidden="true" />
                 Deshacer, aún no
               </button>
-              <p className="mt-2.5 text-center text-[0.8rem] text-tostado/70">Saliendo a cocina…</p>
+              <p className="mt-2.5 text-center text-nota text-tostado/70">Saliendo a cocina…</p>
             </>
           ) : (
             <>
               <BotonEnviar onEnviar={onEnviar} bloqueado={agotadas.size > 0} />
               <p
                 className={cn(
-                  "mt-2.5 text-center text-[0.8rem]",
+                  "mt-2.5 text-center text-nota",
                   agotadas.size > 0 ? "font-semibold text-aji-texto" : "text-tostado/70",
                 )}
               >
@@ -378,13 +378,13 @@ function Linea({
               aria-label={`Cambiar ${linea.nombre}${linea.detalle ? `: ${linea.detalle}` : ""}`}
               className="group/editar -mx-1 rounded-md px-1 text-left"
             >
-              <span className="font-heading text-[1.1rem] leading-snug font-semibold">{linea.nombre}</span>
+              <span className="font-heading text-linea leading-snug font-semibold">{linea.nombre}</span>
               <PencilLine
                 className="ml-1.5 inline size-3.5 -translate-y-px text-tostado/55 group-hover/editar:text-oceano"
                 aria-hidden="true"
               />
               {linea.detalle && (
-                <span className="block text-[0.85rem] leading-snug text-tostado/70 underline decoration-tostado/25 decoration-dashed underline-offset-[3px] group-hover/editar:decoration-oceano/60">
+                <span className="block text-sm leading-snug text-tostado/70 underline decoration-tostado/25 decoration-dashed underline-offset-[3px] group-hover/editar:decoration-oceano/60">
                   {linea.detalle}
                 </span>
               )}
@@ -392,7 +392,7 @@ function Linea({
           ) : (
             <p
               className={cn(
-                "font-heading text-[1.1rem] leading-snug font-semibold",
+                "font-heading text-linea leading-snug font-semibold",
                 agotada && "line-through decoration-aji-texto/70",
               )}
             >
@@ -400,10 +400,10 @@ function Linea({
             </p>
           )}
           {agotada && (
-            <p className="mt-0.5 text-[0.85rem] font-semibold text-aji-texto">Se agotó: quítalo para enviar</p>
+            <p className="mt-0.5 text-sm font-semibold text-aji-texto">Se agotó: quítalo para enviar</p>
           )}
           {linea.detalle && (!editable || agotada) && (
-            <p className="text-[0.85rem] leading-snug text-tostado/70">{linea.detalle}</p>
+            <p className="text-sm leading-snug text-tostado/70">{linea.detalle}</p>
           )}
         </motion.div>
         <motion.span
@@ -415,7 +415,7 @@ function Linea({
         >
           {precio(linea.precioUnitario * linea.cantidad)}
           {linea.cantidad > 1 && (
-            <span className="block text-[0.75rem] font-normal text-tostado/70">{precio(linea.precioUnitario)} c/u</span>
+            <span className="block text-xs font-normal text-tostado/70">{precio(linea.precioUnitario)} c/u</span>
           )}
         </motion.span>
         <Contador
@@ -430,7 +430,7 @@ function Linea({
           type="button"
           onClick={onQuitar}
           aria-label={`Quitar ${linea.nombre} de la comanda`}
-          className="flex h-11 items-center gap-1.5 justify-self-end rounded-lg px-2 text-[0.85rem] font-semibold text-tostado/75 transition-colors hover:bg-tostado/6 hover:text-aji-texto"
+          className="flex h-11 items-center gap-1.5 justify-self-end rounded-lg px-2 text-sm font-semibold text-tostado/75 transition-colors hover:bg-tostado/6 hover:text-aji-texto"
         >
           <Trash2 className="size-4" aria-hidden="true" />
           Quitar

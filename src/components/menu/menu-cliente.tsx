@@ -214,12 +214,12 @@ export function MenuCliente() {
               >
                 <h2
                   id={`${idSeccion(categoria.id)}-titulo`}
-                  className="font-heading text-[2.1rem] leading-none font-bold tracking-[-0.02em] text-crema"
+                  className="font-heading text-display leading-none font-bold tracking-[-0.02em] text-crema"
                 >
                   {categoria.nombre}
                 </h2>
                 {categoria.descripcion && (
-                  <p className="mt-2 text-[0.95rem] text-crema/75">{categoria.descripcion}</p>
+                  <p className="mt-2 text-cuerpo text-crema/75">{categoria.descripcion}</p>
                 )}
                 <ul className="mt-3">
                   {platos

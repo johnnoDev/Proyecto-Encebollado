@@ -72,10 +72,10 @@ function Contenido({ plato, edicion, onAnotar }: { plato: Plato; edicion: Edicio
         <div className="flex items-center gap-4 bg-oceano py-5 pr-16 pl-5 sm:flex-col sm:gap-0 sm:px-6 sm:pt-8 sm:pb-6 sm:text-center">
           <IlustracionPlato platoId={plato.id} className="size-24 shrink-0 sm:size-52" />
           <div className="min-w-0 sm:mt-5">
-            <SheetTitle className="font-heading text-[1.5rem] leading-[1.1] font-bold text-balance text-crema sm:text-[1.9rem]">
+            <SheetTitle className="font-heading text-titulo leading-[1.1] font-bold text-balance text-crema sm:text-titular">
               {plato.nombre}
             </SheetTitle>
-            <SheetDescription className="mt-1.5 text-[0.9rem] leading-snug text-crema/80 sm:text-[0.95rem]">
+            <SheetDescription className="mt-1.5 text-cuerpo leading-snug text-crema/80">
               {plato.descripcion}
             </SheetDescription>
           </div>
@@ -102,7 +102,7 @@ function Contenido({ plato, edicion, onAnotar }: { plato: Plato; edicion: Edicio
           className="flex h-14 flex-1 items-center justify-between gap-3 rounded-2xl bg-aji-texto px-5 text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] transition-[transform,background-color] duration-150 hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)] active:scale-[0.98] disabled:opacity-50"
         >
           <span className="text-base font-semibold">{edicion ? "Guardar cambios" : "Anotar"}</span>
-          <span className="font-heading text-lg font-bold tabular-nums">{precio(unitario * cantidad)}</span>
+          <span className="font-heading text-linea font-bold tabular-nums">{precio(unitario * cantidad)}</span>
         </button>
       </div>
     </div>
@@ -127,7 +127,7 @@ function Grupo({
     <fieldset className="mt-6 first:mt-0">
       <legend className="flex w-full items-baseline justify-between gap-3">
         <span className="text-base font-semibold text-tostado">{grupo.nombre}</span>
-        <span className="text-[0.8rem] text-tostado/70">
+        <span className="text-nota text-tostado/70">
           {unica ? "Elige uno" : "Opcional, puedes marcar varios"}
         </span>
       </legend>
@@ -165,9 +165,9 @@ function Grupo({
                 }
               />
               {!unica && marcada && <Check className="size-4" strokeWidth={2.75} aria-hidden="true" />}
-              <span className="text-[0.95rem] leading-tight font-semibold">{opcion.nombre}</span>
+              <span className="text-cuerpo leading-tight font-semibold">{opcion.nombre}</span>
               {unica && conPrecio && (
-                <span className={cn("text-[0.8rem] tabular-nums", marcada ? "text-crema/85" : "text-tostado/70")}>
+                <span className={cn("text-nota tabular-nums", marcada ? "text-crema/85" : "text-tostado/70")}>
                   {precio(base + opcion.precio)}
                 </span>
               )}

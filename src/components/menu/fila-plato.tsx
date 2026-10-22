@@ -33,10 +33,10 @@ export function FilaPlato({ plato, onElegir }: { plato: Plato; onElegir: (plato:
           )}
         />
         <span className={cn("min-w-0", agotado && "opacity-55")}>
-          <span className="block font-heading text-[1.3rem] leading-[1.15] font-semibold text-balance text-crema">
+          <span className="block font-heading text-plato leading-[1.15] font-semibold text-balance text-crema">
             {plato.nombre}
           </span>
-          <span className="mt-1 line-clamp-2 block text-[0.875rem] leading-snug text-crema/75">
+          <span className="mt-1 line-clamp-2 block text-sm leading-snug text-crema/75">
             {plato.descripcion}
           </span>
           {plato.etiqueta && !agotado && (
@@ -56,7 +56,7 @@ export function FilaPlato({ plato, onElegir }: { plato: Plato; onElegir: (plato:
           <span className="flex flex-col items-end justify-center gap-2 self-stretch">
             <span className="text-right">
               {desde && <span className="block text-xs text-crema/70">desde</span>}
-              <span className="font-heading text-xl font-semibold text-dorado tabular-nums">
+              <span className="font-heading text-plato font-semibold text-dorado tabular-nums">
                 {precio(plato.precio)}
               </span>
             </span>

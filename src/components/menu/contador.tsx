@@ -43,7 +43,7 @@ export function Contador({ valor, onCambiar, minimo = 1, etiqueta, tamano = "md"
         aria-live="polite"
         className={cn(
           "min-w-7 text-center font-semibold tabular-nums",
-          tamano === "md" ? "text-lg" : "text-base",
+          tamano === "md" ? "text-linea" : "text-base",
         )}
       >
         {valor}

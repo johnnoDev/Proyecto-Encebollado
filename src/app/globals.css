@@ -5,6 +5,25 @@
 /* Sin modo oscuro: `dark:` solo aplica con la clase .dark, que la app no usa. */
 @custom-variant dark (&:is(.dark *));
 
+/* Escala tipográfica: un tamaño por rol. Fraunces (display → linea) es la voz
+   del local; DM Sans (base, cuerpo, sm, nota, xs) es el texto que se lee. */
+@theme {
+  --text-display: 2.25rem;
+  --text-display--line-height: 1;
+  --text-titular: 1.875rem;
+  --text-titular--line-height: 1.05;
+  --text-titulo: 1.5rem;
+  --text-titulo--line-height: 1.1;
+  --text-plato: 1.25rem;
+  --text-plato--line-height: 1.2;
+  --text-linea: 1.125rem;
+  --text-linea--line-height: 1.35;
+  --text-cuerpo: 0.9375rem;
+  --text-cuerpo--line-height: 1.5;
+  --text-nota: 0.8125rem;
+  --text-nota--line-height: 1.45;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
