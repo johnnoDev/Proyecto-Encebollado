@@ -73,4 +73,6 @@ export type Pedido = {
   mesa?: string;
   nombreCliente?: string;
   creadoEn: number;
+  /** Cuándo quedó listo: en cocina se mide desde aquí cuánto lleva esperando para salir. */
+  listoEn?: number;
 };

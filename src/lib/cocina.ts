@@ -9,6 +9,18 @@ export const MINUTOS_DEMORA = 10;
 /** Segundo umbral: la comanda entera se tiñe para que no se pierda de vista. */
 export const MINUTOS_URGENTE = 15;
 
+/** Un listo que espera más que esto se está enfriando: hay que llevarlo ya. */
+export const MINUTOS_ENFRIA = 5;
+
+/** Minutos que lleva un pedido listo esperando salir (desde que quedó listo). */
+export function minutosListo(pedido: Pick<Pedido, "listoEn" | "creadoEn">, ahora: number): number {
+  return minutosEspera(pedido.listoEn ?? pedido.creadoEn, ahora);
+}
+
+export function textoListo(minutos: number): string {
+  return minutos < 1 ? "Recién listo" : `Listo hace ${textoEspera(minutos)}`;
+}
+
 /** Las columnas del panel; los entregados ya no se muestran en cocina. */
 export type ColumnaCocina = Exclude<EstadoPedido, "entregado">;
 

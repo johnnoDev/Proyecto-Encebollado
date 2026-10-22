@@ -4,13 +4,16 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, MotionConfig, useReducedMotion } from "motion/react";
-import { ArrowRight, Bell, BellOff, Check, Flame, Play, Undo2 } from "lucide-react";
+import { ArrowRight, Bell, BellOff, Check, Flame, Play, Thermometer, Undo2 } from "lucide-react";
 import { brand } from "@/config/brand";
 import {
   columnasCocina,
   type ColumnaCocina,
   MINUTOS_DEMORA,
   MINUTOS_URGENTE,
+  MINUTOS_ENFRIA,
+  minutosListo,
+  textoListo,
   minutosEspera,
   nombreDestino,
   siguienteEstado,
@@ -434,6 +437,10 @@ function Ticket({
   const minutos = minutosEspera(pedido.creadoEn, ahora);
   const demorado = pedido.estado !== "listo" && minutos >= MINUTOS_DEMORA;
   const urgente = demorado && minutos >= MINUTOS_URGENTE;
+  // En «Listos» lo que importa es cuánto lleva esperando salir: se enfría.
+  const esListo = pedido.estado === "listo";
+  const minutosSalida = esListo ? minutosListo(pedido, ahora) : 0;
+  const enfriando = esListo && minutosSalida >= MINUTOS_ENFRIA;
   const platos = pedido.lineas.reduce((s, l) => s + l.cantidad, 0);
 
   return (
@@ -465,16 +472,28 @@ function Ticket({
               {pedido.numero}
             </span>
           </div>
-          <p
-            className={cn(
-              "mt-2 inline-flex items-center gap-1.5 font-heading text-linea font-bold tabular-nums",
-              demorado ? "rounded-md bg-aji-texto px-2 py-0.5 text-white" : "text-tostado/75",
-            )}
-          >
-            {demorado && <Flame className="size-[18px]" aria-hidden="true" />}
-            {textoEspera(minutos)}
-            {demorado && <span className="sr-only">{urgente ? " (muy demorado)" : " (demorado)"}</span>}
-          </p>
+          {esListo ? (
+            <p
+              className={cn(
+                "mt-2 inline-flex items-center gap-1.5 font-heading text-linea font-bold tabular-nums",
+                enfriando ? "rounded-md bg-oceano px-2 py-0.5 whitespace-nowrap text-crema" : "text-cilantro-texto",
+              )}
+            >
+              {enfriando && <Thermometer className="size-[18px]" aria-hidden="true" />}
+              {enfriando ? `Se enfría · ${textoEspera(minutosSalida)}` : textoListo(minutosSalida)}
+            </p>
+          ) : (
+            <p
+              className={cn(
+                "mt-2 inline-flex items-center gap-1.5 font-heading text-linea font-bold tabular-nums",
+                demorado ? "rounded-md bg-aji-texto px-2 py-0.5 text-white" : "text-tostado/75",
+              )}
+            >
+              {demorado && <Flame className="size-[18px]" aria-hidden="true" />}
+              {textoEspera(minutos)}
+              {demorado && <span className="sr-only">{urgente ? " (muy demorado)" : " (demorado)"}</span>}
+            </p>
+          )}
         </header>
 
         <ul className="divide-y divide-dashed divide-tostado/25">

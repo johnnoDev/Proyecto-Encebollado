@@ -7,6 +7,15 @@ import type { EstadoPedido, Pedido } from "@/types/menu";
 // /cocina los lee en el mismo navegador (abrir ambas vistas en pestañas).
 type NuevoPedido = Pick<Pedido, "lineas" | "total" | "modalidad" | "mesa" | "nombreCliente">;
 
+/** Aplica un estado: al quedar listo guarda el momento; al volver atrás lo borra. */
+export function conEstado(pedido: Pedido, estado: EstadoPedido, ahora: number): Pedido {
+  if (estado === "listo") return { ...pedido, estado, listoEn: pedido.estado === "listo" ? pedido.listoEn : ahora };
+  if (estado === "entregado") return { ...pedido, estado };
+  const resto = { ...pedido, estado };
+  delete resto.listoEn;
+  return resto;
+}
+
 type PedidosState = {
   pedidos: Pedido[];
   contador: number;
@@ -33,7 +42,7 @@ export const usePedidos = create<PedidosState>()(
       },
       cambiarEstado: (id, estado) =>
         set((s) => ({
-          pedidos: s.pedidos.map((p) => (p.id === id ? { ...p, estado } : p)),
+          pedidos: s.pedidos.map((p) => (p.id === id ? conEstado(p, estado, Date.now()) : p)),
         })),
     }),
     { name: "pedidos" },

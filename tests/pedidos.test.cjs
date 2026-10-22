@@ -125,3 +125,18 @@ test("entregados salen de cocina y cuentan como terminados en el seguimiento", (
   const visibles = pedidosParaMesa([...datos, ...viejos], "7");
   assert.deepEqual(Array.from(visibles, (p) => p.id), ["e", "l", "n", "v0"]);
 });
+
+test("listos: se guarda cuándo quedó listo y se borra al volver atrás", () => {
+  const { conEstado } = cargar("src/store/pedidos.ts");
+  const { minutosListo, textoListo, MINUTOS_ENFRIA } = cargar("src/lib/cocina.ts");
+  const base = { id: "p", estado: "preparando", creadoEn: 0 };
+  const listo = conEstado(base, "listo", 10 * 60000);
+  assert.equal(listo.listoEn, 10 * 60000);
+  assert.equal(conEstado(listo, "listo", 99).listoEn, 10 * 60000);
+  assert.equal(minutosListo(listo, 13 * 60000), 3);
+  assert.equal(textoListo(0), "Recién listo");
+  assert.equal(textoListo(7), "Listo hace 7 min");
+  assert.ok(MINUTOS_ENFRIA > 0);
+  assert.equal("listoEn" in conEstado(listo, "preparando", 0), false);
+  assert.equal(conEstado(listo, "entregado", 0).listoEn, 10 * 60000);
+});
