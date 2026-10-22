@@ -33,6 +33,7 @@ export const useMenu = create<MenuState>()(
     }),
     {
       name: "menu-ajustes",
+      skipHydration: true,
       partialize: (s) => ({ ajustes: s.ajustes }),
       merge: (guardado, actual) => {
         const ajustes = (guardado as Pick<MenuState, "ajustes"> | undefined)?.ajustes ?? {};

@@ -61,7 +61,7 @@
       "precio": 4.5,
       "imagen": null,
       "disponible": true,
-      "etiqueta": "El favorito",
+      "etiqueta": "El más cargado",
       "grupos": [
         {
           "id": "tamano",
@@ -172,7 +172,7 @@
       "id": "aguacate",
       "categoriaId": "extras",
       "nombre": "Aguacate",
-      "descripcion": "Medio aguacate en láminas.",
+      "descripcion": "Medio aguacate maduro, para el caldo.",
       "precio": 1.25,
       "imagen": null,
       "disponible": true,

@@ -104,5 +104,26 @@
   }
   html {
     @apply font-sans;
+    scrollbar-color: color-mix(in oklab, var(--dorado) 70%, transparent) transparent;
+    caret-color: var(--aji-texto);
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+  ::selection {
+    background: var(--dorado);
+    color: var(--tostado);
+  }
+  :focus-visible {
+    outline: 2.5px solid var(--dorado);
+    outline-offset: 2px;
+  }
+  /* Sobre papel crema el dorado no contrasta: el foco pasa a océano. */
+  [data-superficie="clara"] :focus-visible,
+  [data-slot="sheet-content"] :focus-visible {
+    outline-color: var(--oceano);
   }
 }

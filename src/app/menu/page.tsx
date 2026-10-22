@@ -1,4 +1,8 @@
-// Pendiente: pantalla aún no implementada.
-export default function Page() {
-  return <main className="p-6 font-heading text-2xl">Menú</main>;
+import type { Metadata } from "next";
+import { MenuCliente } from "@/components/menu/menu-cliente";
+
+export const metadata: Metadata = { title: "Carta" };
+
+export default function MenuPage() {
+  return <MenuCliente />;
 }

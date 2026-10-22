@@ -57,7 +57,8 @@ export type LineaCarrito = {
   cantidad: number;
   /** Opciones elegidas por grupo: { [grupoId]: opcionId[] } */
   seleccion: Record<string, string[]>;
-  nota?: string;
+  /** Opciones en texto («Mediano · sin cebolla»), guardado para que cocina lo lea tal cual. */
+  detalle: string;
 };
 
 export type Pedido = {
