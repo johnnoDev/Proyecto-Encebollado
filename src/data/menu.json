@@ -1,0 +1,171 @@
+{
+  "categorias": [
+    { "id": "encebollados", "nombre": "Encebollados", "descripcion": "El plato estrella de la costa" },
+    { "id": "mariscos", "nombre": "Del mar", "descripcion": "Ceviches y más" },
+    { "id": "acompanantes", "nombre": "Acompañantes" },
+    { "id": "bebidas", "nombre": "Bebidas" }
+  ],
+  "platos": [
+    {
+      "id": "encebollado-clasico",
+      "categoriaId": "encebollados",
+      "nombre": "Encebollado clásico",
+      "descripcion": "Caldo de albacora con yuca, cebolla encurtida, tomate y culantro.",
+      "precio": 4.5,
+      "imagen": "/platos/encebollado-clasico.jpg",
+      "disponible": true,
+      "destacado": true,
+      "grupos": [
+        {
+          "id": "tamano",
+          "nombre": "Tamaño",
+          "tipo": "unica",
+          "obligatorio": true,
+          "opciones": [
+            { "id": "normal", "nombre": "Normal", "precio": 0 },
+            { "id": "grande", "nombre": "Grande", "precio": 1.5 }
+          ]
+        },
+        {
+          "id": "acompanante",
+          "nombre": "Acompañante",
+          "tipo": "unica",
+          "obligatorio": true,
+          "opciones": [
+            { "id": "chifles", "nombre": "Chifles", "precio": 0 },
+            { "id": "pan", "nombre": "Pan", "precio": 0 },
+            { "id": "arroz", "nombre": "Arroz", "precio": 0.5 }
+          ]
+        },
+        {
+          "id": "extras",
+          "nombre": "Extras",
+          "tipo": "multiple",
+          "obligatorio": false,
+          "opciones": [
+            { "id": "extra-pescado", "nombre": "Porción extra de albacora", "precio": 1.75 },
+            { "id": "aji", "nombre": "Ají de la casa", "precio": 0 },
+            { "id": "limon", "nombre": "Limón", "precio": 0 },
+            { "id": "sin-cebolla", "nombre": "Sin cebolla", "precio": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "encebollado-mixto",
+      "categoriaId": "encebollados",
+      "nombre": "Encebollado mixto",
+      "descripcion": "El clásico con camarón y concha. Para los que vienen con hambre.",
+      "precio": 7,
+      "imagen": "/platos/encebollado-mixto.jpg",
+      "disponible": true,
+      "destacado": true,
+      "grupos": [
+        {
+          "id": "tamano",
+          "nombre": "Tamaño",
+          "tipo": "unica",
+          "obligatorio": true,
+          "opciones": [
+            { "id": "normal", "nombre": "Normal", "precio": 0 },
+            { "id": "grande", "nombre": "Grande", "precio": 2 }
+          ]
+        },
+        {
+          "id": "acompanante",
+          "nombre": "Acompañante",
+          "tipo": "unica",
+          "obligatorio": true,
+          "opciones": [
+            { "id": "chifles", "nombre": "Chifles", "precio": 0 },
+            { "id": "pan", "nombre": "Pan", "precio": 0 },
+            { "id": "arroz", "nombre": "Arroz", "precio": 0.5 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "encebollado-chancho",
+      "categoriaId": "encebollados",
+      "nombre": "Encebollado con chicharrón",
+      "descripcion": "Versión contundente con chicharrón crocante.",
+      "precio": 6,
+      "imagen": "/platos/encebollado-chancho.jpg",
+      "disponible": false,
+      "grupos": []
+    },
+    {
+      "id": "ceviche-camaron",
+      "categoriaId": "mariscos",
+      "nombre": "Ceviche de camarón",
+      "descripcion": "Camarón en jugo de limón y naranja, con cebolla, tomate y culantro.",
+      "precio": 8,
+      "imagen": "/platos/ceviche-camaron.jpg",
+      "disponible": true,
+      "grupos": [
+        {
+          "id": "acompanante",
+          "nombre": "Acompañante",
+          "tipo": "multiple",
+          "obligatorio": false,
+          "opciones": [
+            { "id": "chifles", "nombre": "Chifles", "precio": 0 },
+            { "id": "canguil", "nombre": "Canguil", "precio": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bolon",
+      "categoriaId": "acompanantes",
+      "nombre": "Bolón de verde",
+      "descripcion": "Verde majado con queso o chicharrón.",
+      "precio": 2.5,
+      "imagen": "/platos/bolon.jpg",
+      "disponible": true,
+      "grupos": [
+        {
+          "id": "relleno",
+          "nombre": "Relleno",
+          "tipo": "unica",
+          "obligatorio": true,
+          "opciones": [
+            { "id": "queso", "nombre": "Queso", "precio": 0 },
+            { "id": "chicharron", "nombre": "Chicharrón", "precio": 0 },
+            { "id": "mixto", "nombre": "Mixto", "precio": 0.5 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chifles",
+      "categoriaId": "acompanantes",
+      "nombre": "Porción de chifles",
+      "descripcion": "Láminas de verde fritas, crujientes.",
+      "precio": 1,
+      "imagen": "/platos/chifles.jpg",
+      "disponible": true,
+      "grupos": []
+    },
+    {
+      "id": "jugo-naranjilla",
+      "categoriaId": "bebidas",
+      "nombre": "Jugo de naranjilla",
+      "descripcion": "Natural, recién hecho.",
+      "precio": 1.75,
+      "imagen": "/platos/jugo-naranjilla.jpg",
+      "disponible": true,
+      "grupos": []
+    },
+    {
+      "id": "cola",
+      "categoriaId": "bebidas",
+      "nombre": "Cola personal",
+      "descripcion": "Bien fría.",
+      "precio": 1,
+      "imagen": "/platos/cola.jpg",
+      "disponible": true,
+      "grupos": []
+    }
+  ]
+}
