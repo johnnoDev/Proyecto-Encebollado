@@ -30,6 +30,8 @@ export function AdminCliente() {
   const quitarAjuste = useMenu((s) => s.quitarAjuste);
   const [aviso, setAviso] = useState<Aviso>(null);
   const [confirmar, setConfirmar] = useState(false);
+  // «Agotados» deja ver solo lo que hay que reactivar o revisar en medio del servicio.
+  const [soloAgotados, setSoloAgotados] = useState(false);
   const temporizador = useRef<ReturnType<typeof setTimeout>>(undefined);
   const temporizadorConfirmar = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -103,6 +105,44 @@ export function AdminCliente() {
           </Link>
         </header>
 
+        <nav
+          aria-label="Ir a"
+          className="sticky top-0 z-30 border-b border-crema/15 bg-oceano shadow-[0_10px_20px_-14px_rgb(0_0_0/0.6)]"
+        >
+          <ul className="mx-auto flex max-w-4xl gap-2 overflow-x-auto px-4 py-2.5 [scrollbar-width:none] sm:px-6">
+            <li>
+              <button
+                type="button"
+                aria-pressed={soloAgotados}
+                onClick={() => setSoloAgotados((v) => !v)}
+                disabled={!montado}
+                className={cn(
+                  "flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-semibold whitespace-nowrap transition-colors",
+                  soloAgotados
+                    ? "border-dorado bg-dorado text-tostado"
+                    : "border-crema/30 text-crema/90 hover:border-crema/60",
+                )}
+              >
+                Agotados
+                <span className="grid h-5 min-w-5 place-items-center rounded-full bg-tostado/15 px-1 text-xs tabular-nums">
+                  {montado ? agotados : "·"}
+                </span>
+              </button>
+            </li>
+            {!soloAgotados &&
+              categorias.map((c) => (
+                <li key={c.id}>
+                  <a
+                    href={`#cat-${c.id}`}
+                    className="flex h-10 items-center rounded-full px-4 text-sm font-semibold whitespace-nowrap text-crema/80 transition-colors hover:bg-crema/10 hover:text-crema"
+                  >
+                    {c.nombre}
+                  </a>
+                </li>
+              ))}
+          </ul>
+        </nav>
+
         <main className="mx-auto max-w-4xl px-4 sm:px-6">
           <section
             aria-label="Resumen de la carta"
@@ -146,16 +186,37 @@ export function AdminCliente() {
             Los cambios se ven al instante en la carta del comensal. Lo ya anotado en un pedido mantiene su precio.
           </p>
 
-          {categorias.map((categoria) => (
-            <section key={categoria.id} aria-labelledby={`cat-${categoria.id}`} className="mt-8">
-              <h2 id={`cat-${categoria.id}`} className="mb-3 font-heading text-plato font-bold">
-                {categoria.nombre}
-              </h2>
-              <div className="drop-shadow-[0_10px_16px_rgb(0_0_0/0.3)]">
-                <ul data-superficie="clara" className={cn(papel, "rounded-b-[14px] px-4 pt-3 pb-1 sm:px-5")}>
-                  {platos
-                    .filter((p) => p.categoriaId === categoria.id)
-                    .map((plato) => (
+          {soloAgotados && montado && agotados === 0 && (
+            <p className="mt-8 rounded-xl border border-dashed border-crema/25 px-4 py-8 text-center text-cuerpo text-pretty text-crema/75">
+              No hay platos agotados. Todo lo de la carta se puede pedir.
+            </p>
+          )}
+
+          {categorias.map((categoria) => {
+            const visibles = platos.filter(
+              (p) => p.categoriaId === categoria.id && (!soloAgotados || !p.disponible),
+            );
+            if (visibles.length === 0) return null;
+            const conOpciones = visibles.some((p) => p.grupos.length > 0);
+            return (
+              <section
+                key={categoria.id}
+                id={`cat-${categoria.id}`}
+                aria-labelledby={`titulo-${categoria.id}`}
+                className="mt-8 scroll-mt-20"
+              >
+                <h2 id={`titulo-${categoria.id}`} className="font-heading text-plato font-bold">
+                  {categoria.nombre}
+                </h2>
+                {/* Una sola vez por categoría, no repetido en cada plato. */}
+                {conOpciones && (
+                  <p className="mt-1 text-sm text-pretty text-crema/75">
+                    Los precios son la base; las opciones (tamaño, sabor) suman encima.
+                  </p>
+                )}
+                <div className="mt-3 drop-shadow-[0_10px_16px_rgb(0_0_0/0.3)]">
+                  <ul data-superficie="clara" className={cn(papel, "rounded-b-[14px] px-4 pt-3 pb-1 sm:px-5")}>
+                    {visibles.map((plato) => (
                       <FilaAdmin
                         key={plato.id}
                         plato={plato}
@@ -165,10 +226,11 @@ export function AdminCliente() {
                         onOriginal={() => volverAlOriginal(plato)}
                       />
                     ))}
-                </ul>
-              </div>
-            </section>
-          ))}
+                  </ul>
+                </div>
+              </section>
+            );
+          })}
         </main>
 
         <AnimatePresence>
@@ -230,10 +292,7 @@ function FilaAdmin({
       />
       <div className="min-w-0">
         <p className="font-heading text-linea leading-snug font-semibold">{plato.nombre}</p>
-        <p className="mt-0.5 text-sm text-tostado/75">
-          {plato.grupos.length > 0 ? "Precio base; las opciones suman encima" : "Precio fijo"}
-          {precioCambiado && <> · antes {precio(original.precio)}</>}
-        </p>
+        {precioCambiado && <p className="mt-0.5 text-sm text-tostado/75">Antes {precio(original.precio)}</p>}
         {montado && cambiado && (
           <button
             type="button"
