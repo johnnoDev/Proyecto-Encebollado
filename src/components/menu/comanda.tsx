@@ -8,6 +8,8 @@ import { precio } from "@/lib/formato";
 import { cn } from "@/lib/utils";
 import { platosEnCarrito, totalCarrito, useCarrito } from "@/store/carrito";
 import { useMenu } from "@/store/menu";
+import { pedidosParaMesa } from "@/lib/seguimiento";
+import { usePedidos } from "@/store/pedidos";
 import type { LineaCarrito } from "@/types/menu";
 
 // Curva del trazo: salida exponencial, como tinta que corre y se asienta.
@@ -108,6 +110,8 @@ export function TiraComanda({
   const lineas = useCarrito((s) => s.lineas);
   const n = platosEnCarrito(lineas);
   const { mesa, montado } = comun;
+  // Con un pedido ya enviado, lo que se anota ahora es uno nuevo: se nombra distinto.
+  const hayEnviados = usePedidos((s) => (mesa === undefined ? false : pedidosParaMesa(s.pedidos, mesa).length > 0));
 
   return (
     <>
@@ -126,7 +130,7 @@ export function TiraComanda({
               >
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="font-heading text-plato leading-tight font-bold whitespace-nowrap text-oceano">Tu pedido</span>
+                    <span className="font-heading text-plato leading-tight font-bold whitespace-nowrap text-oceano">{montado && hayEnviados ? "Nuevo pedido" : "Tu pedido"}</span>
                     {mesa && (
                       <span className="-rotate-3 rounded-[5px] border-[1.5px] border-oceano px-1.5 font-heading text-nota leading-[1.35] font-bold whitespace-nowrap text-oceano">
                         Mesa {mesa}
@@ -135,7 +139,7 @@ export function TiraComanda({
                   </span>
                   {montado ? (
                     <span className="block truncate text-sm text-tostado/75 tabular-nums">
-                      {n === 0 ? "Vacío" : `${nPlatos(n)} · ${precio(totalCarrito(lineas))}`}
+                      {n === 0 ? "Nada anotado aún" : `${nPlatos(n)} · ${precio(totalCarrito(lineas))}`}
                     </span>
                   ) : (
                     <span className="mt-1.5 block h-3 w-28 rounded-full bg-tostado/10" />
