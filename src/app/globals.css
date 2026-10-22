@@ -39,6 +39,10 @@
   --color-cilantro-texto: var(--cilantro-texto);
   --color-crema: var(--crema);
   --color-tostado: var(--tostado);
+  /* Ají aclarado: el rojo de «agotado» que se lee sobre océano. */
+  --color-aji-claro: color-mix(in oklab, var(--aji) 70%, white);
+  /* Ají oscurecido: el de «agotado» sobre papel teñido de ají (≥4,5:1). */
+  --color-aji-oscuro: color-mix(in oklab, var(--aji-texto) 80%, var(--tostado));
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);

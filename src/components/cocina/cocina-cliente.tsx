@@ -551,7 +551,7 @@ function Detalle({ texto, sobreTinte }: { texto: string; sobreTinte?: boolean })
               className={cn(
                 especial && "font-semibold text-aji-texto",
                 // Sobre el tinte de urgencia el ají no llega a 4,5:1: se oscurece hacia tostado (~5:1).
-                especial && sobreTinte && "text-[color-mix(in_oklab,var(--aji-texto)_80%,var(--tostado))]",
+                especial && sobreTinte && "text-aji-oscuro",
               )}
             >
               {parte}

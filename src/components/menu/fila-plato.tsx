@@ -48,7 +48,7 @@ export function FilaPlato({ plato, onElegir }: { plato: Plato; onElegir: (plato:
         {agotado ? (
           <span
             aria-hidden="true"
-            className="-rotate-[8deg] rounded-[4px] border-[2.5px] border-[color-mix(in_oklab,var(--aji)_70%,white)] px-2 py-0.5 font-heading text-base font-black tracking-[0.1em] text-[color-mix(in_oklab,var(--aji)_70%,white)]"
+            className="-rotate-[8deg] rounded-[4px] border-[2.5px] border-aji-claro px-2 py-0.5 font-heading text-base font-black tracking-[0.1em] text-aji-claro"
           >
             AGOTADO
           </span>

@@ -153,7 +153,7 @@ export function AdminCliente() {
                 <>
                   <strong className="font-semibold text-crema">{disponibles} disponibles</strong>
                   {" · "}
-                  <span className={cn(agotados > 0 && "font-semibold text-[color-mix(in_oklab,var(--aji)_70%,white)]")}>
+                  <span className={cn(agotados > 0 && "font-semibold text-aji-claro")}>
                     {agotados} {agotados === 1 ? "agotado" : "agotados"}
                   </span>
                   {" · "}
@@ -285,13 +285,21 @@ function FilaAdmin({
   const precioCambiado = original !== undefined && original.precio !== plato.precio;
 
   return (
-    <li className="grid grid-cols-[56px_minmax(0,1fr)] items-center gap-x-3 gap-y-3 border-b border-dashed border-tostado/25 py-4 last:border-b-0 sm:grid-cols-[56px_minmax(0,1fr)_auto_auto] sm:gap-x-5">
+    <li
+      className={cn(
+        "-mx-4 grid grid-cols-[56px_minmax(0,1fr)] items-center gap-x-3 gap-y-3 border-b border-dashed border-tostado/25 px-4 py-4 transition-colors last:border-b-0 sm:-mx-5 sm:grid-cols-[56px_minmax(0,1fr)_auto_auto] sm:gap-x-5 sm:px-5",
+        // Agotado: la fila entera se tiñe para encontrarla al recorrer la lista.
+        !plato.disponible && "bg-[color-mix(in_oklab,var(--aji)_9%,var(--crema))]",
+      )}
+    >
       <IlustracionPlato
         platoId={plato.id}
         className={cn("size-14 transition-opacity", !plato.disponible && "opacity-45 grayscale-[.6]")}
       />
       <div className="min-w-0">
-        <p className="font-heading text-linea leading-snug font-semibold">{plato.nombre}</p>
+        <p className={cn("font-heading text-linea leading-snug font-semibold", !plato.disponible && "text-tostado/65")}>
+          {plato.nombre}
+        </p>
         {precioCambiado && <p className="mt-0.5 text-sm text-tostado/75">Antes {precio(original.precio)}</p>}
         {montado && cambiado && (
           <button
@@ -464,7 +472,7 @@ function Interruptor({
       <span
         className={cn(
           "w-20 text-right text-sm font-semibold",
-          disponible ? "text-cilantro-texto" : "text-aji-texto",
+          disponible ? "text-cilantro-texto" : "text-aji-oscuro",
         )}
       >
         {disponible ? "Disponible" : "Agotado"}
