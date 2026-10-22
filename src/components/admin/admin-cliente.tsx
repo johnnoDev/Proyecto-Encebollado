@@ -425,7 +425,7 @@ function CampoPrecio({
       </label>
       <div
         className={cn(
-          "flex h-11 w-32 items-center rounded-xl border bg-white/70 pl-3 transition-colors focus-within:border-oceano",
+          "flex h-11 w-32 items-center rounded-xl border bg-white/70 pl-3 transition-colors focus-within:border-oceano focus-within:ring-2 focus-within:ring-oceano focus-within:ring-offset-1 focus-within:ring-offset-crema",
           error ? "border-aji-texto" : "border-tostado/20",
         )}
       >
