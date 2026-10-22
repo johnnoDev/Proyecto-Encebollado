@@ -8,6 +8,7 @@ import { ArrowRight, Check, Flame, Undo2 } from "lucide-react";
 import { brand } from "@/config/brand";
 import {
   columnasCocina,
+  type ColumnaCocina,
   MINUTOS_DEMORA,
   MINUTOS_URGENTE,
   minutosEspera,
@@ -23,11 +24,18 @@ import type { EstadoPedido, Pedido } from "@/types/menu";
 const papel =
   "bg-crema text-tostado [mask:radial-gradient(circle_at_9px_0,transparent_6px,#000_6.5px)_0_0/18px_100%_repeat-x]";
 
-const COLUMNAS: { id: EstadoPedido; nombre: string; vacio: string; accion?: string }[] = [
+const COLUMNAS: { id: ColumnaCocina; nombre: string; vacio: string; accion: string }[] = [
   { id: "nuevo", nombre: "Nuevos", vacio: "Sin pedidos nuevos. Llegarán aquí al instante.", accion: "Empezar" },
   { id: "preparando", nombre: "Preparando", vacio: "Nada en preparación.", accion: "Marcar listo" },
-  { id: "listo", nombre: "Listos", vacio: "Aún no hay pedidos listos." },
+  { id: "listo", nombre: "Listos", vacio: "Aún no hay pedidos listos.", accion: "Entregado" },
 ];
+
+const textoCambio: Record<EstadoPedido, string> = {
+  nuevo: " de vuelta en nuevos",
+  preparando: " en preparación",
+  listo: " listo para entregar",
+  entregado: " entregado en la mesa",
+};
 
 type Cambio = { id: number; pedido: Pedido; de: EstadoPedido; a: EstadoPedido } | null;
 
@@ -57,7 +65,7 @@ export function CocinaCliente() {
   const pedidos = usePedidos((s) => s.pedidos);
   const cambiarEstado = usePedidos((s) => s.cambiarEstado);
   const ahora = useAhora();
-  const [vista, setVista] = useState<EstadoPedido>("nuevo");
+  const [vista, setVista] = useState<ColumnaCocina>("nuevo");
   const [cambio, setCambio] = useState<Cambio>(null);
   const temporizador = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -176,7 +184,7 @@ export function CocinaCliente() {
             >
               <p className="min-w-0 flex-1 text-cuerpo leading-snug">
                 <span className="font-semibold text-oceano">{cambio.pedido.numero}</span>
-                {cambio.a === "listo" ? " listo para entregar" : " en preparación"}
+                {textoCambio[cambio.a]}
               </p>
               <button
                 type="button"
@@ -191,7 +199,7 @@ export function CocinaCliente() {
         </AnimatePresence>
         <p aria-live="polite" className="sr-only">
           {cambio
-            ? `${cambio.pedido.numero} ${cambio.a === "listo" ? "marcado como listo" : "en preparación"}.`
+            ? `${cambio.pedido.numero}${textoCambio[cambio.a]}.`
             : ""}
         </p>
       </div>
@@ -220,7 +228,7 @@ function Ticket({
 }: {
   pedido: Pedido;
   ahora: number;
-  accion?: string;
+  accion: string;
   onAvanzar: () => void;
 }) {
   const reducir = useReducedMotion();
@@ -284,26 +292,22 @@ function Ticket({
           ))}
         </ul>
 
-        {accion ? (
-          <button
-            type="button"
-            onClick={onAvanzar}
-            className={cn(
-              "mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold transition-[transform,background-color] duration-150 motion-safe:active:scale-[0.98]",
-              pedido.estado === "nuevo"
-                ? "bg-aji-texto text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)]"
-                : "bg-cilantro-texto text-white hover:bg-[color-mix(in_oklab,var(--cilantro-texto)_88%,black)]",
-            )}
-          >
-            {pedido.estado === "preparando" && <Check className="size-5" aria-hidden="true" />}
-            {accion}
-            <span className="sr-only"> {pedido.numero}</span>
-          </button>
-        ) : (
-          <p className="mt-3 flex items-center justify-center gap-1.5 text-sm font-semibold text-cilantro-texto">
-            <Check className="size-4" aria-hidden="true" /> Listo para entregar
-          </p>
-        )}
+        <button
+          type="button"
+          onClick={onAvanzar}
+          className={cn(
+            "mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold transition-[transform,background-color] duration-150 motion-safe:active:scale-[0.98]",
+            pedido.estado === "nuevo" &&
+              "bg-aji-texto text-white shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--aji)_70%,transparent)] hover:bg-[color-mix(in_oklab,var(--aji-texto)_88%,black)]",
+            pedido.estado === "preparando" &&
+              "bg-cilantro-texto text-white hover:bg-[color-mix(in_oklab,var(--cilantro-texto)_88%,black)]",
+            pedido.estado === "listo" && "border-2 border-oceano text-oceano hover:bg-oceano/8",
+          )}
+        >
+          {pedido.estado !== "nuevo" && <Check className="size-5" aria-hidden="true" />}
+          {accion}
+          <span className="sr-only"> {pedido.numero}</span>
+        </button>
       </article>
     </motion.li>
   );

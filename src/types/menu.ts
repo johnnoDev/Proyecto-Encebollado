@@ -46,7 +46,8 @@ export type Menu = {
   modalidades: Modalidad[];
 };
 
-export type EstadoPedido = "nuevo" | "preparando" | "listo";
+/** «entregado» cierra el ciclo: el pedido llegó a la mesa y sale del panel de cocina. */
+export type EstadoPedido = "nuevo" | "preparando" | "listo" | "entregado";
 
 export type LineaCarrito = {
   /** Identificador único de la línea (mismo plato con distintas opciones = líneas distintas). */

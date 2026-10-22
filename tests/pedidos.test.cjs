@@ -98,13 +98,30 @@ test("cocina: pendientes por orden de llegada y listos recientes limitados", () 
   assert.equal(datos[0].id, "n2");
 });
 
-test("cocina: el pedido avanza nuevo → preparando → listo y se detiene", () => {
+test("cocina: el pedido avanza nuevo → preparando → listo → entregado y se detiene", () => {
   const { siguienteEstado, minutosEspera, textoEspera } = cargar("src/lib/cocina.ts");
   assert.equal(siguienteEstado.nuevo, "preparando");
   assert.equal(siguienteEstado.preparando, "listo");
-  assert.equal(siguienteEstado.listo, null);
+  assert.equal(siguienteEstado.listo, "entregado");
+  assert.equal(siguienteEstado.entregado, null);
   assert.equal(minutosEspera(0, 9 * 60000 + 59000), 9);
   assert.equal(minutosEspera(1000, 0), 0);
   assert.equal(textoEspera(0), "Recién llegado");
   assert.equal(textoEspera(75), "1 h 15 min");
+});
+
+test("entregados salen de cocina y cuentan como terminados en el seguimiento", () => {
+  const { columnasCocina } = cargar("src/lib/cocina.ts");
+  const { pedidosParaMesa } = cargar("src/lib/seguimiento.ts");
+  const datos = [
+    { id: "e", modalidad: "mesa", mesa: "7", estado: "entregado", creadoEn: 3 },
+    { id: "l", modalidad: "mesa", mesa: "7", estado: "listo", creadoEn: 2 },
+    { id: "n", modalidad: "mesa", mesa: "7", estado: "nuevo", creadoEn: 1 },
+  ];
+  const c = columnasCocina(datos);
+  assert.equal([...c.nuevo, ...c.preparando, ...c.listo].some((p) => p.id === "e"), false);
+  assert.equal(c.entregado, undefined);
+  const viejos = Array.from({ length: 4 }, (_, i) => ({ id: `v${i}`, modalidad: "mesa", mesa: "7", estado: "entregado", creadoEn: -10 - i }));
+  const visibles = pedidosParaMesa([...datos, ...viejos], "7");
+  assert.deepEqual(Array.from(visibles, (p) => p.id), ["e", "l", "n", "v0"]);
 });

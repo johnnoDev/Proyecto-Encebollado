@@ -9,17 +9,21 @@ export const MINUTOS_DEMORA = 10;
 /** Segundo umbral: la comanda entera se tiñe para que no se pierda de vista. */
 export const MINUTOS_URGENTE = 15;
 
+/** Las columnas del panel; los entregados ya no se muestran en cocina. */
+export type ColumnaCocina = Exclude<EstadoPedido, "entregado">;
+
 export const siguienteEstado: Record<EstadoPedido, EstadoPedido | null> = {
   nuevo: "preparando",
   preparando: "listo",
-  listo: null,
+  listo: "entregado",
+  entregado: null,
 };
 
 /**
  * Reparte los pedidos en columnas. Los pendientes salen del más antiguo al más
  * nuevo (se cocina en orden de llegada); los listos, del más reciente.
  */
-export function columnasCocina(pedidos: Pedido[]): Record<EstadoPedido, Pedido[]> {
+export function columnasCocina(pedidos: Pedido[]): Record<ColumnaCocina, Pedido[]> {
   const porLlegada = [...pedidos].sort((a, b) => a.creadoEn - b.creadoEn);
   return {
     nuevo: porLlegada.filter((p) => p.estado === "nuevo"),

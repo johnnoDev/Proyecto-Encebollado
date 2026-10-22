@@ -16,6 +16,7 @@ const estados: { id: EstadoPedido; nombre: string; titulo: string; detalle: stri
   { id: "nuevo", nombre: "Recibido", titulo: "Tu pedido ya está en cocina", detalle: "Tu pedido quedó anotado. Aquí verás cuando empiecen a prepararlo." },
   { id: "preparando", nombre: "Preparando", titulo: "Ya estamos con tu pedido", detalle: "En cocina están preparando lo que elegiste. El estado se actualizará aquí." },
   { id: "listo", nombre: "Listo", titulo: "¡Tu pedido está listo!", detalle: "Todo lo que anotaste en tu pedido está listo." },
+  { id: "entregado", nombre: "Entregado", titulo: "¡Buen provecho!", detalle: "Tu pedido ya está en la mesa. Gracias por elegirnos." },
 ];
 
 function MarcoPedido({ children }: { children: React.ReactNode }) {
@@ -81,7 +82,7 @@ export function PedidoCliente() {
           </div>
           <ol aria-label="Progreso del pedido" className="mt-7 flex lg:mt-9 lg:flex-col lg:gap-5">
             {estados.map((paso, i) => (
-              <li key={paso.id} aria-current={i === indice ? "step" : undefined} className="flex min-w-0 flex-1 items-center gap-2 lg:flex-none lg:gap-3">
+              <li key={paso.id} aria-current={i === indice ? "step" : undefined} className="flex min-w-0 flex-1 flex-col items-center gap-1.5 text-center lg:flex-none lg:flex-row lg:gap-3 lg:text-left">
                 <span aria-hidden="true" className={cn("flex size-7 shrink-0 items-center justify-center rounded-full border", i <= indice ? "border-dorado bg-dorado text-oceano" : "border-crema/40 text-crema/75")}>
                   {i <= indice ? <Check className="size-4" strokeWidth={2.5} /> : <span className="size-1.5 rounded-full bg-current" />}
                 </span>
