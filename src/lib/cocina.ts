@@ -1,8 +1,5 @@
 import type { EstadoPedido, Pedido } from "@/types/menu";
 
-/** Cuántos listos se muestran: lo reciente para entregar, no el historial del día. */
-export const LISTOS_VISIBLES = 8;
-
 /** A partir de estos minutos de espera, la comanda se marca como demorada. */
 export const MINUTOS_DEMORA = 10;
 
@@ -42,8 +39,7 @@ export function columnasCocina(pedidos: Pedido[]): Record<ColumnaCocina, Pedido[
     preparando: porLlegada.filter((p) => p.estado === "preparando"),
     listo: porLlegada
       .filter((p) => p.estado === "listo")
-      .reverse()
-      .slice(0, LISTOS_VISIBLES),
+      .reverse(),
   };
 }
 

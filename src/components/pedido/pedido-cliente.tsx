@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { ArrowLeft, Check } from "lucide-react";
 import { brand } from "@/config/brand";
 import { precio } from "@/lib/formato";
-import { fechaPedido, indicacionPedidoListo } from "@/lib/seguimiento";
+import { fechaPedido, indicacionPedidoEntregado, indicacionPedidoListo } from "@/lib/seguimiento";
 import { cn } from "@/lib/utils";
 import { useMontado } from "@/store/hidratar";
 import { usePedidos } from "@/store/pedidos";
@@ -16,7 +16,7 @@ const estados: { id: EstadoPedido; nombre: string; titulo: string; detalle: stri
   { id: "nuevo", nombre: "Recibido", titulo: "Tu pedido ya está en cocina", detalle: "Tu pedido quedó anotado. Aquí verás cuando empiecen a prepararlo." },
   { id: "preparando", nombre: "Preparando", titulo: "Ya estamos con tu pedido", detalle: "En cocina están preparando lo que elegiste. El estado se actualizará aquí." },
   { id: "listo", nombre: "Listo", titulo: "¡Tu pedido está listo!", detalle: "Todo lo que anotaste en tu pedido está listo." },
-  { id: "entregado", nombre: "Entregado", titulo: "¡Buen provecho!", detalle: "Tu pedido ya está en la mesa. Gracias por elegirnos." },
+  { id: "entregado", nombre: "Entregado", titulo: "¡Buen provecho!", detalle: "Tu pedido ya fue entregado. Gracias por elegirnos." },
 ];
 
 function MarcoPedido({ children }: { children: React.ReactNode }) {
@@ -78,7 +78,7 @@ export function PedidoCliente() {
         <section aria-label="Estado del pedido" className="lg:pt-5">
           <div role="status" aria-live="polite" aria-atomic="true">
             <h1 className="max-w-md font-heading text-display font-bold leading-[1.1] tracking-[-0.02em] text-balance">{estado.titulo}</h1>
-            <p className="mt-4 max-w-sm text-cuerpo leading-relaxed text-crema/80">{pedido.estado === "listo" ? indicacionPedidoListo(pedido) : estado.detalle}</p>
+            <p className="mt-4 max-w-sm text-cuerpo leading-relaxed text-crema/80">{pedido.estado === "listo" ? indicacionPedidoListo(pedido) : pedido.estado === "entregado" ? indicacionPedidoEntregado(pedido) : estado.detalle}</p>
           </div>
           <ol aria-label="Progreso del pedido" className="mt-7 flex lg:mt-9 lg:flex-col lg:gap-5">
             {estados.map((paso, i) => (

@@ -86,19 +86,20 @@ test("el historial limita listos pero conserva todos los pendientes", () => {
   assert.deepEqual(datos.map((p) => p.id), ["listo-0", "listo-1", "listo-2", "listo-3", "listo-4", "pendiente-antiguo"]);
 });
 
-test("cocina: pendientes por orden de llegada y listos recientes limitados", () => {
-  const { columnasCocina, LISTOS_VISIBLES } = cargar("src/lib/cocina.ts");
+test("cocina: pendientes por orden de llegada y todos los listos visibles", () => {
+  const { columnasCocina } = cargar("src/lib/cocina.ts");
   const datos = [
     { id: "n2", estado: "nuevo", creadoEn: 20 },
     { id: "n1", estado: "nuevo", creadoEn: 10 },
     { id: "p1", estado: "preparando", creadoEn: 5 },
-    ...Array.from({ length: LISTOS_VISIBLES + 2 }, (_, i) => ({ id: `l${i}`, estado: "listo", creadoEn: i })),
+    ...Array.from({ length: 12 }, (_, i) => ({ id: `l${i}`, estado: "listo", creadoEn: i })),
   ];
   const c = columnasCocina(datos);
   assert.deepEqual(Array.from(c.nuevo, (p) => p.id), ["n1", "n2"]);
   assert.deepEqual(Array.from(c.preparando, (p) => p.id), ["p1"]);
-  assert.equal(c.listo.length, LISTOS_VISIBLES);
-  assert.equal(c.listo[0].id, `l${LISTOS_VISIBLES + 1}`);
+  assert.equal(c.listo.length, 12);
+  assert.ok(c.listo.some((p) => p.id === "l0"));
+  assert.equal(c.listo[0].id, "l11");
   assert.equal(datos[0].id, "n2");
 });
 
@@ -174,4 +175,12 @@ test("admin: un cambio de precio de 3× o de un tercio pide confirmación", () =
   assert.equal(avisoCambioGrande(4.5, 5.5), null);
   assert.equal(avisoCambioGrande(4.5, 4.5), null);
   assert.equal(avisoCambioGrande(3, 8.99), null);
+});
+
+test("la confirmación de entrega corresponde a cada modalidad", () => {
+  const { indicacionPedidoEntregado } = cargar("src/lib/seguimiento.ts");
+  assert.match(indicacionPedidoEntregado({ modalidad: "mesa" }), /en la mesa/);
+  assert.match(indicacionPedidoEntregado({ modalidad: "llevar" }), /para llevar/);
+  assert.match(indicacionPedidoEntregado({ modalidad: "retiro" }), /retiraste/);
+  for (const modalidad of ["llevar", "retiro"]) assert.doesNotMatch(indicacionPedidoEntregado({ modalidad }), /mesa/);
 });

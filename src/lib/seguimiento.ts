@@ -44,3 +44,10 @@ export function indicacionPedidoListo(pedido: Pick<Pedido, "modalidad" | "mesa">
     ? "Acércate al personal para recoger tu pedido para llevar."
     : "Acércate al personal para retirar tu pedido.";
 }
+
+/** Confirmación final según cómo recibe el comensal su pedido. */
+export function indicacionPedidoEntregado(pedido: Pick<Pedido, "modalidad">): string {
+  if (pedido.modalidad === "mesa") return "Tu pedido ya está en la mesa. Gracias por elegirnos.";
+  if (pedido.modalidad === "llevar") return "Ya te entregamos tu pedido para llevar. Gracias por elegirnos.";
+  return "Ya retiraste tu pedido. Gracias por elegirnos.";
+}

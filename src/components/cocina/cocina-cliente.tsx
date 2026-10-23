@@ -38,7 +38,7 @@ const textoCambio: Record<EstadoPedido, string> = {
   nuevo: " de vuelta en nuevos",
   preparando: " en preparación",
   listo: " listo para entregar",
-  entregado: " entregado en la mesa",
+  entregado: " entregado",
 };
 
 type Cambio = { id: number; pedido: Pedido; de: EstadoPedido; a: EstadoPedido } | null;
