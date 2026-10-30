@@ -34,7 +34,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="es"
       style={variablesDeColor}
       className={`${titulos.variable} ${texto.variable} h-full antialiased`}
+      // El script de abajo marca <html> antes de hidratar: ese atributo no viene del servidor.
+      suppressHydrationWarning
     >
+      <head>
+        {/* Con JS y sin movimiento reducido, la portada puede ocultar lo que va a revelar. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'if(matchMedia("(prefers-reduced-motion: no-preference)").matches)document.documentElement.dataset.movimiento=""',
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

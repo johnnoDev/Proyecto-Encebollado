@@ -73,6 +73,7 @@ function Contenido({ plato, edicion, onAnotar }: { plato: Plato; edicion: Edicio
           <FotoPlato
             platoId={plato.id}
             imagen={plato.imagen}
+            origen="ficha"
             sizes="(min-width: 640px) 208px, 96px"
             className="size-24 shrink-0 sm:size-52"
           />

@@ -6,6 +6,7 @@ import { Contador } from "@/components/menu/contador";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { precio } from "@/lib/formato";
 import { cn } from "@/lib/utils";
+import { CifraRodante } from "@/components/menu/cifra-rodante";
 import { platosEnCarrito, totalCarrito, useCarrito } from "@/store/carrito";
 import { useMenu } from "@/store/menu";
 import { pedidosParaMesa } from "@/lib/seguimiento";
@@ -130,7 +131,7 @@ export function TiraComanda({
               >
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="font-heading text-plato leading-tight font-bold whitespace-nowrap text-oceano">{montado && hayEnviados ? "Nuevo pedido" : "Tu pedido"}</span>
+                    <span data-destino-comanda className="inline-block font-heading text-plato leading-tight font-bold whitespace-nowrap text-oceano">{montado && hayEnviados ? "Nuevo pedido" : "Tu pedido"}</span>
                     {mesa && (
                       <span className="-rotate-3 rounded-[5px] border-[1.5px] border-oceano px-1.5 font-heading text-nota leading-[1.35] font-bold whitespace-nowrap text-oceano">
                         Mesa {mesa}
@@ -139,7 +140,11 @@ export function TiraComanda({
                   </span>
                   {montado ? (
                     <span className="block truncate text-sm text-tostado/75 tabular-nums">
-                      {n === 0 ? "Nada anotado aún" : `${nPlatos(n)} · ${precio(totalCarrito(lineas))}`}
+                      {n === 0 ? (
+                        "Nada anotado aún"
+                      ) : (
+                        <CifraRodante valor={`${nPlatos(n)} · ${precio(totalCarrito(lineas))}`} numero={totalCarrito(lineas)} />
+                      )}
                     </span>
                   ) : (
                     <span className="mt-1.5 block h-3 w-28 rounded-full bg-tostado/10" />
@@ -224,7 +229,12 @@ function ContenidoComanda({
     <>
       <header className="flex items-start justify-between gap-4 border-b-2 border-tostado px-5 pb-3 sm:px-6">
         <div>
-          <Titulo className="font-heading text-titular leading-none font-bold text-oceano">Tu pedido</Titulo>
+          <Titulo
+            data-destino-comanda={enHoja ? undefined : ""}
+            className="origin-left font-heading text-titular leading-none font-bold text-oceano"
+          >
+            Tu pedido
+          </Titulo>
           <Sub className="mt-1.5 text-sm text-tostado/75">
             {montado ? (n === 0 ? "Aún no has anotado nada" : nPlatos(n)) : " "}
           </Sub>
@@ -304,7 +314,7 @@ function ContenidoComanda({
         <footer className="border-t-2 border-tostado px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
           <div className="mb-3 flex items-baseline justify-between">
             <span className="text-base font-semibold">Total</span>
-            <span className="font-heading text-titular font-bold text-oceano tabular-nums">{precio(total)}</span>
+            <CifraRodante valor={precio(total)} numero={total} className="font-heading text-titular font-bold text-oceano tabular-nums" />
           </div>
           {sello ? (
             <>

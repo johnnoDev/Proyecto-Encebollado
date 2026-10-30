@@ -263,9 +263,18 @@ function Contenido({ platoId }: { platoId: string }) {
   }
 }
 
-export function IlustracionPlato({ platoId, className }: { platoId: string; className?: string }) {
+export function IlustracionPlato({
+  platoId,
+  className,
+  datos,
+}: {
+  platoId: string;
+  className?: string;
+  /** Atributos data-* extra (p. ej. para ubicar la foto de origen del vuelo a la comanda). */
+  datos?: Record<`data-${string}`, string>;
+}) {
   return (
-    <svg viewBox="0 0 120 120" className={className} aria-hidden="true" focusable="false">
+    <svg viewBox="0 0 120 120" className={className} aria-hidden="true" focusable="false" {...datos}>
       <Contenido platoId={platoId} />
     </svg>
   );

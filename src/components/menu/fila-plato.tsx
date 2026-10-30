@@ -28,6 +28,7 @@ export function FilaPlato({ plato, onElegir }: { plato: Plato; onElegir: (plato:
         <FotoPlato
           platoId={plato.id}
           imagen={plato.imagen}
+          origen="fila"
           sizes="(min-width: 640px) 92px, 76px"
           className={cn(
             "size-[76px] transition-transform duration-500 ease-out motion-safe:group-enabled:group-hover:scale-[1.06] motion-safe:group-enabled:group-hover:-rotate-3 sm:size-[92px]",

@@ -76,20 +76,7 @@ export default function Portada() {
             <p className="mx-auto mt-4 max-w-md text-cuerpo text-pretty text-crema/80">
               Sin esperar al mesero: desde tu celular, en tu mesa.
             </p>
-            <div className="mt-10 lg:grid lg:grid-cols-[minmax(0,1fr)_28rem_minmax(0,1fr)] lg:items-end lg:gap-10">
-              {/* La mesera presenta el encebollado; en celular asoma detrás de la comanda. */}
-              <div className="relative mx-auto h-56 w-52 overflow-hidden lg:mx-0 lg:h-[34rem] lg:w-auto lg:justify-self-end lg:overflow-visible">
-                <Image
-                  src="/local/mesera.webp"
-                  alt="Una mesera de La Albacora presenta un encebollado recién servido"
-                  width={404}
-                  height={1100}
-                  sizes="(min-width: 1024px) 200px, 208px"
-                  className="h-auto w-52 lg:h-full lg:w-auto"
-                />
-              </div>
-              <ComandaComoPedir className="z-10 -mt-6 lg:mt-0 lg:mb-6" />
-            </div>
+            <ComandaComoPedir />
             <PideAhora className="mt-16" />
           </div>
         </section>

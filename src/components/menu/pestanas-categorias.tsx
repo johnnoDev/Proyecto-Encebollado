@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import type { Categoria } from "@/types/menu";
 
@@ -30,7 +31,7 @@ export function PestanasCategorias({ categorias }: { categorias: Categoria[] }) 
       aria-label="Categorías"
       className="sticky top-0 z-30 border-b border-crema/15 bg-oceano shadow-[0_10px_20px_-14px_rgb(0_0_0/0.6)]"
     >
-      <ul className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-2 [scrollbar-width:none] sm:px-4">
+      <motion.ul layoutScroll className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-2 [scrollbar-width:none] sm:px-4">
         {categorias.map((c) => (
           <li key={c.id}>
             <a
@@ -43,17 +44,19 @@ export function PestanasCategorias({ categorias }: { categorias: Categoria[] }) 
               )}
             >
               {c.nombre}
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "absolute inset-x-3 bottom-0 h-[3px] origin-left rounded-full bg-dorado transition-transform duration-300 ease-out motion-reduce:transition-none",
-                  activa === c.id ? "scale-x-100" : "scale-x-0",
-                )}
-              />
+              {/* La marca dorada se desliza de una pestaña a otra. */}
+              {activa === c.id && (
+                <motion.span
+                  layoutId="pestana-activa"
+                  aria-hidden="true"
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  className="absolute inset-x-3 bottom-0 h-[3px] rounded-full bg-dorado"
+                />
+              )}
             </a>
           </li>
         ))}
-      </ul>
+      </motion.ul>
     </nav>
   );
 }

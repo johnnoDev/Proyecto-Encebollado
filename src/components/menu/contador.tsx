@@ -1,6 +1,7 @@
 "use client";
 
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { CifraRodante } from "@/components/menu/cifra-rodante";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -46,7 +47,7 @@ export function Contador({ valor, onCambiar, minimo = 1, etiqueta, tamano = "md"
           tamano === "md" ? "text-linea" : "text-base",
         )}
       >
-        {valor}
+        <CifraRodante valor={String(valor)} numero={valor} />
       </output>
       <button
         type="button"

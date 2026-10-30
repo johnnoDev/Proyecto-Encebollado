@@ -11,16 +11,20 @@ export function FotoPlato({
   imagen,
   sizes,
   className,
+  origen,
 }: {
   platoId: string;
   imagen: string | null;
   /** Ancho con que se pinta, para que next/image elija el archivo justo. */
   sizes: string;
   className?: string;
+  /** Marca la foto como punto de partida del vuelo a la comanda (ver lib/vuelo). */
+  origen?: "fila" | "ficha";
 }) {
-  if (!imagen) return <IlustracionPlato platoId={platoId} className={className} />;
+  const datos = origen ? { "data-foto": origen, "data-plato": platoId } : undefined;
+  if (!imagen) return <IlustracionPlato platoId={platoId} className={className} datos={datos} />;
   return (
-    <span aria-hidden="true" className={cn("relative block", className)}>
+    <span aria-hidden="true" className={cn("relative block", className)} {...datos}>
       <Image src={imagen} alt="" fill sizes={sizes} className="object-contain" />
     </span>
   );

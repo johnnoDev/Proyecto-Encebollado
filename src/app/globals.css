@@ -171,6 +171,19 @@
   }
 }
 
+/* Portada: lo que GSAP revela solo se oculta con JS y movimiento permitido
+   (atributo puesto en layout.tsx). Si GSAP no llega, aparece solo a los 2,5 s. */
+[data-movimiento] [data-revela] {
+  visibility: hidden;
+  animation: revela-respaldo 0s linear 2.5s forwards;
+}
+
+@keyframes revela-respaldo {
+  to {
+    visibility: visible;
+  }
+}
+
 /* Cuenta regresiva informativa: se mantiene aun con movimiento reducido. */
 @keyframes vaciar-barra {
   from {

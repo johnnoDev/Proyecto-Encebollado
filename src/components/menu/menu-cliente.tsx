@@ -25,6 +25,7 @@ import { mesaValida, useMesa, useMesaActual } from "@/store/mesa";
 import { useMenu } from "@/store/menu";
 import { usePedidos } from "@/store/pedidos";
 import type { LineaCarrito, Plato } from "@/types/menu";
+import { volarAComanda } from "@/lib/vuelo";
 
 /** Identificadores para que cada aviso reinicie su animación. */
 let ultimoIdAviso = 0;
@@ -73,6 +74,8 @@ export function MenuCliente() {
 
   const anotar = (linea: Omit<LineaCarrito, "lineaId">) => {
     if (edicion) return guardarEdicion(linea);
+    // Se lanza antes de cerrar la ficha, mientras su foto sigue en pantalla.
+    volarAComanda(linea.platoId);
     agregar(linea);
     setPlatoAbierto(null);
     const texto = `${linea.cantidad > 1 ? `${linea.cantidad} × ` : ""}${linea.nombre}${linea.detalle ? ` · ${linea.detalle.toLowerCase()}` : ""}`;
