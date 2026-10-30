@@ -76,7 +76,20 @@ export default function Portada() {
             <p className="mx-auto mt-4 max-w-md text-cuerpo text-pretty text-crema/80">
               Sin esperar al mesero: desde tu celular, en tu mesa.
             </p>
-            <ComandaComoPedir />
+            <div className="mt-10 lg:grid lg:grid-cols-[minmax(0,1fr)_28rem_minmax(0,1fr)] lg:items-end lg:gap-10">
+              {/* La mesera presenta el encebollado; en celular asoma detrás de la comanda. */}
+              <div className="relative mx-auto h-56 w-52 overflow-hidden lg:mx-0 lg:h-[34rem] lg:w-auto lg:justify-self-end lg:overflow-visible">
+                <Image
+                  src="/local/mesera.webp"
+                  alt="Una mesera de La Albacora presenta un encebollado recién servido"
+                  width={404}
+                  height={1100}
+                  sizes="(min-width: 1024px) 200px, 208px"
+                  className="h-auto w-52 lg:h-full lg:w-auto"
+                />
+              </div>
+              <ComandaComoPedir className="z-10 -mt-6 lg:mt-0 lg:mb-6" />
+            </div>
             <PideAhora className="mt-16" />
           </div>
         </section>
@@ -86,26 +99,58 @@ export default function Portada() {
           aria-labelledby="titulo-donde"
           className={cn(dentado, "-mt-px scroll-mt-4 bg-crema pt-16 pb-20 text-tostado sm:pt-20")}
         >
-          <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-            <h2 id="titulo-donde" className="font-heading text-display font-bold text-oceano">
-              Dónde estamos
-            </h2>
-            <Ornamento className="mx-auto mt-4" />
-            <address className="mt-8 flex flex-col items-center gap-4 not-italic">
-              <p className="flex flex-col items-center gap-2 font-heading text-titulo leading-snug font-semibold text-balance text-oceano">
-                <MapPin className="size-7 shrink-0 text-aji-texto" aria-hidden="true" />
-                {brand.direccion}
-              </p>
-              <a
-                href={`tel:${telefono}`}
-                className="flex h-12 items-center gap-2 rounded-full border border-tostado/20 px-5 text-cuerpo font-semibold text-tostado transition-colors hover:border-oceano/50"
-              >
-                <Phone className="size-4 text-aji-texto" aria-hidden="true" />
-                {brand.telefono}
-              </a>
-            </address>
-            <p className="mt-10 text-cuerpo text-pretty text-tostado/80">¿Ya estás en tu mesa? Escanea el QR o:</p>
-            <PideAhora className="mt-4" />
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:grid lg:grid-cols-2 lg:items-center lg:gap-16">
+            {/* Dos fotos del local, apoyadas sobre el papel como recuerdos. */}
+            <div className="relative mx-auto h-[19rem] w-full max-w-md sm:h-[24rem] lg:order-2 lg:h-[30rem] lg:max-w-none">
+              <figure className="absolute top-0 left-0 w-[80%] -rotate-3 bg-white p-2 pb-9 shadow-[0_14px_28px_-10px_rgb(0_0_0/0.35)]">
+                <Image
+                  src="/local/servicio.webp"
+                  alt="Un comensal sonríe al recibir su encebollado en la mesa"
+                  width={848}
+                  height={630}
+                  sizes="(min-width: 1024px) 27rem, 80vw"
+                  className="h-auto w-full"
+                />
+                <figcaption className="absolute bottom-2.5 left-3 font-heading text-sm text-tostado/75">
+                  A la mesa
+                </figcaption>
+              </figure>
+              <figure className="absolute right-0 bottom-0 w-[44%] rotate-3 bg-white p-2 pb-9 shadow-[0_14px_28px_-10px_rgb(0_0_0/0.35)]">
+                <Image
+                  src="/local/cocina.webp"
+                  alt="En la cocina se sirven los encebollados del día"
+                  width={758}
+                  height={936}
+                  sizes="(min-width: 1024px) 15rem, 44vw"
+                  className="h-auto w-full"
+                />
+                <figcaption className="absolute bottom-2.5 left-3 font-heading text-sm text-tostado/75">
+                  En la cocina
+                </figcaption>
+              </figure>
+            </div>
+
+            <div className="mt-14 text-center lg:order-1 lg:mt-0 lg:text-left">
+              <h2 id="titulo-donde" className="font-heading text-display font-bold text-oceano">
+                Dónde estamos
+              </h2>
+              <Ornamento className="mx-auto mt-4 lg:mx-0" />
+              <address className="mt-8 flex flex-col items-center gap-4 not-italic lg:items-start">
+                <p className="flex flex-col items-center gap-2 font-heading text-titulo leading-snug font-semibold text-balance text-oceano lg:flex-row lg:items-start">
+                  <MapPin className="size-7 shrink-0 text-aji-texto lg:mt-0.5" aria-hidden="true" />
+                  {brand.direccion}
+                </p>
+                <a
+                  href={`tel:${telefono}`}
+                  className="flex h-12 items-center gap-2 rounded-full border border-tostado/20 px-5 text-cuerpo font-semibold text-tostado transition-colors hover:border-oceano/50"
+                >
+                  <Phone className="size-4 text-aji-texto" aria-hidden="true" />
+                  {brand.telefono}
+                </a>
+              </address>
+              <p className="mt-10 text-cuerpo text-pretty text-tostado/80">¿Ya estás en tu mesa? Escanea el QR o:</p>
+              <PideAhora className="mt-4" />
+            </div>
           </div>
         </section>
       </main>

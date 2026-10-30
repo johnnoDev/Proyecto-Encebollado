@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
+import { cn } from "@/lib/utils";
 
 const TINTA = [0.16, 1, 0.3, 1] as const;
 
@@ -17,10 +18,10 @@ const papel =
  * «Cómo pedir» contado como lo que es: una comanda. Las líneas se escriben al
  * entrar en pantalla y al final cae el sello «A COCINA».
  */
-export function ComandaComoPedir() {
+export function ComandaComoPedir({ className }: { className?: string }) {
   const reducir = useReducedMotion();
   return (
-    <div className="relative mx-auto mt-10 max-w-md drop-shadow-[0_18px_30px_rgb(0_0_0/0.35)]">
+    <div className={cn("relative mx-auto max-w-md drop-shadow-[0_18px_30px_rgb(0_0_0/0.35)]", className)}>
       <div className={`${papel} rounded-b-[14px] px-6 pt-7 pb-8 text-left`}>
         <div className="flex items-baseline justify-between border-b-2 border-tostado pb-3">
           <p className="font-heading text-titular leading-none font-bold text-oceano">Comanda</p>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { Contador } from "@/components/menu/contador";
-import { IlustracionPlato } from "@/components/menu/ilustracion-plato";
+import { FotoPlato } from "@/components/menu/foto-plato";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { useMedia } from "@/hooks/use-media";
 import { precio } from "@/lib/formato";
@@ -70,7 +70,12 @@ function Contenido({ plato, edicion, onAnotar }: { plato: Plato; edicion: Edicio
         {/* Celular: fila compacta para que las opciones entren sin scroll.
             Desde sm: la ilustración grande encabeza y el nombre va debajo. */}
         <div className="flex items-center gap-4 bg-oceano py-5 pr-16 pl-5 sm:flex-col sm:gap-0 sm:px-6 sm:pt-8 sm:pb-6 sm:text-center">
-          <IlustracionPlato platoId={plato.id} className="size-24 shrink-0 sm:size-52" />
+          <FotoPlato
+            platoId={plato.id}
+            imagen={plato.imagen}
+            sizes="(min-width: 640px) 208px, 96px"
+            className="size-24 shrink-0 sm:size-52"
+          />
           <div className="min-w-0 sm:mt-5">
             <SheetTitle className="font-heading text-titulo leading-[1.1] font-bold text-balance text-crema sm:text-titular">
               {plato.nombre}

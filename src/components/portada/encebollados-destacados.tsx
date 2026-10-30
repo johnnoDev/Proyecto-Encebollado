@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { IlustracionPlato } from "@/components/menu/ilustracion-plato";
+import Image from "next/image";
 import { precio } from "@/lib/formato";
 import { tienePrecioVariable } from "@/lib/pedido";
 import { useRehidratar } from "@/store/hidratar";
@@ -21,10 +21,16 @@ export function EncebolladosDestacados() {
             href="/menu#cat-encebollados"
             className="group flex flex-col items-center rounded-2xl px-2 pb-2 text-center transition-colors hover:bg-tostado/[0.03]"
           >
-            <IlustracionPlato
-              platoId={plato.id}
-              className="size-44 transition-transform duration-700 ease-out motion-safe:group-hover:rotate-[10deg] sm:size-48"
-            />
+            {/* Foto cenital del tazón: gira como si se lo acercaran a la mesa. */}
+            <span className="relative block size-48 transition-transform duration-700 ease-out motion-safe:group-hover:rotate-[10deg] sm:size-52">
+              <Image
+                src={`/platos/${plato.id}-cenital.webp`}
+                alt=""
+                fill
+                sizes="(min-width: 640px) 208px, 192px"
+                className="object-contain drop-shadow-[0_14px_18px_color-mix(in_oklab,var(--tostado)_30%,transparent)]"
+              />
+            </span>
             {plato.etiqueta ? (
               <span className="mt-4 rounded-full bg-rosa px-2.5 py-0.5 text-xs font-semibold text-white">
                 {plato.etiqueta}

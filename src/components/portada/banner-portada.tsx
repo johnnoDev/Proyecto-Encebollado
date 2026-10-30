@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import { IlustracionPlato } from "@/components/menu/ilustracion-plato";
+import Image from "next/image";
 import { Ornamento } from "@/components/portada/ornamento";
 import { PideAhora } from "@/components/portada/pide-ahora";
 import { brand } from "@/config/brand";
@@ -12,35 +12,6 @@ import { useRehidratar } from "@/store/hidratar";
 import { useMenu } from "@/store/menu";
 
 const TINTA = [0.16, 1, 0.3, 1] as const;
-const mezcla = (a: string, pa: number, b: string) => `color-mix(in oklab, var(--${a}) ${pa}%, ${b})`;
-
-/** Medio limón visto desde arriba, con los mismos tokens que las ilustraciones de la carta. */
-function Limon({ className }: { className?: string }) {
-  const pulpa = mezcla("cilantro", 42, mezcla("dorado", 40, "var(--crema)"));
-  const piel = mezcla("crema", 82, "var(--cilantro)");
-  return (
-    <svg viewBox="0 0 60 60" aria-hidden="true" focusable="false" className={className}>
-      <circle cx={31.5} cy={33} r={27} style={{ fill: mezcla("tostado", 50, "transparent") }} />
-      <circle cx={30} cy={30} r={27} style={{ fill: "var(--cilantro)" }} />
-      <circle cx={30} cy={30} r={23.5} style={{ fill: piel }} />
-      <circle cx={30} cy={30} r={21} style={{ fill: pulpa }} />
-      {Array.from({ length: 8 }, (_, i) => {
-        const a = (i * Math.PI) / 4;
-        return (
-          <line
-            key={i}
-            x1={30}
-            y1={30}
-            x2={30 + Math.cos(a) * 21}
-            y2={30 + Math.sin(a) * 21}
-            style={{ stroke: piel, strokeWidth: 1.8, strokeLinecap: "round" }}
-          />
-        );
-      })}
-      <circle cx={30} cy={30} r={2.6} style={{ fill: piel }} />
-    </svg>
-  );
-}
 
 /** Granos de pimienta y ají picado esparcidos sobre la mesa. */
 function Granos({ className }: { className?: string }) {
@@ -132,13 +103,9 @@ export function BannerPortada() {
         aria-hidden="true"
         className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_68%_24%,color-mix(in_oklab,var(--oceano)_84%,var(--crema))_0%,transparent_58%)] lg:bg-[radial-gradient(circle_at_70%_50%,color-mix(in_oklab,var(--oceano)_84%,var(--crema))_0%,transparent_46%)]"
       />
-      {/* Un plato de chifles asoma en la esquina, como en una mesa servida. */}
-      <motion.div
-        aria-hidden="true"
-        className="absolute -bottom-24 -left-24 hidden size-64 lg:block"
-        {...flota(0.5, 20)}
-      >
-        <IlustracionPlato platoId="chifles" className="size-full" />
+      {/* La canasta de pan asoma en la esquina, como en una mesa servida. */}
+      <motion.div aria-hidden="true" className="absolute -bottom-20 -left-16 hidden size-64 lg:block" {...flota(0.5, 14)}>
+        <Image src="/platos/pan.webp" alt="" fill sizes="256px" className="object-contain" />
       </motion.div>
 
       <div className="mx-auto grid max-w-6xl px-4 pb-16 sm:px-6 lg:min-h-[calc(100svh-4.25rem)] lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-center lg:pb-12">
@@ -168,36 +135,39 @@ export function BannerPortada() {
               animate={{ rotate: 0, scale: 1 }}
               transition={{ duration: 1.8, ease: TINTA }}
             >
-              <IlustracionPlato
-                platoId="encebollado-albacora"
-                className="size-full drop-shadow-[0_28px_36px_rgb(0_0_0/0.45)]"
+              <Image
+                src="/platos/encebollado-albacora-cenital.webp"
+                alt="Encebollado de albacora con yuca, cebolla curtida y culantro, visto desde arriba"
+                fill
+                sizes="(min-width: 1024px) 31rem, (min-width: 640px) 25rem, 19rem"
+                loading="eager"
+                fetchPriority="high"
+                className="object-contain drop-shadow-[0_28px_36px_rgb(0_0_0/0.45)]"
               />
             </motion.div>
             <Vapor reducir={reducir} />
           </div>
 
-          <motion.div className="absolute top-16 left-2 size-14 sm:left-6 lg:top-[7%] lg:left-[20%] lg:size-20" {...flota(0.25, -18)}>
-            <Limon className="size-full" />
-          </motion.div>
-          <motion.div
-            className="absolute right-[34%] bottom-[4%] hidden size-14 sm:block lg:right-[30%] lg:bottom-[6%] lg:size-16"
-            {...flota(0.4, 32)}
-          >
-            <Limon className="size-full" />
-          </motion.div>
-          <Granos className="absolute top-[42%] left-3 w-10 sm:left-10 lg:top-[44%] lg:left-[6%] lg:w-12" />
+          <Granos className="absolute top-[56%] left-6 w-10 sm:left-10 lg:top-[44%] lg:left-[6%] lg:w-12" />
           <Granos className="absolute top-[8%] right-[8%] hidden w-10 rotate-90 lg:block" />
 
+          {/* Los chifles, el acompañante de siempre. */}
           <motion.div
             aria-hidden="true"
-            className="absolute right-0 bottom-[10%] hidden size-36 lg:block"
-            {...flota(0.55, -10)}
+            className="absolute top-16 left-0 size-28 sm:left-4 sm:size-36 lg:top-auto lg:right-[-2%] lg:bottom-[12%] lg:left-auto lg:size-44"
+            {...flota(0.4, -8)}
           >
-            <IlustracionPlato platoId="jugo-natural" className="size-full" />
+            <Image
+              src="/platos/chifles.webp"
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 11rem, (min-width: 640px) 9rem, 7rem"
+              className="object-contain drop-shadow-[0_16px_20px_rgb(0_0_0/0.4)]"
+            />
           </motion.div>
 
-          <Anotacion platoId="encebollado-albacora" className="bottom-1 left-0 sm:left-4 lg:bottom-[16%] lg:left-[2%]" />
-          <Anotacion platoId="jugo-natural" className="right-[2%] bottom-[2%] hidden lg:flex" />
+          <Anotacion platoId="encebollado-albacora" className="bottom-1 left-0 max-w-[7.5rem] sm:left-4 sm:max-w-[10rem] lg:bottom-[3%] lg:left-[4%]" />
+          <Anotacion platoId="chifles" className="right-[4%] bottom-[2%] hidden lg:flex" />
         </div>
 
         {/* Texto y acción. */}

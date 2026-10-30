@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, MotionConfig } from "motion/react";
 import { ArrowRight, RotateCcw, Undo2 } from "lucide-react";
-import { IlustracionPlato } from "@/components/menu/ilustracion-plato";
+import { FotoPlato } from "@/components/menu/foto-plato";
 import { brand } from "@/config/brand";
 import { avisoCambioGrande, leerPrecio, precioEditable } from "@/lib/admin";
 import { precio } from "@/lib/formato";
@@ -330,8 +330,10 @@ function FilaAdmin({
         !plato.disponible && "bg-[color-mix(in_oklab,var(--aji)_9%,var(--crema))]",
       )}
     >
-      <IlustracionPlato
+      <FotoPlato
         platoId={plato.id}
+        imagen={plato.imagen}
+        sizes="56px"
         className={cn("size-14 transition-opacity", !plato.disponible && "opacity-45 grayscale-[.6]")}
       />
       <div className="min-w-0">

@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { IlustracionPlato } from "@/components/menu/ilustracion-plato";
+import { FotoPlato } from "@/components/menu/foto-plato";
 import { precio } from "@/lib/formato";
 import { tienePrecioVariable } from "@/lib/pedido";
 import { cn } from "@/lib/utils";
@@ -25,10 +25,12 @@ export function FilaPlato({ plato, onElegir }: { plato: Plato; onElegir: (plato:
         }
         className="group grid w-full grid-cols-[76px_1fr_auto] items-center gap-4 rounded-2xl py-4 text-left transition-colors outline-offset-[-2px] enabled:hover:bg-crema/[0.04] sm:grid-cols-[92px_1fr_auto] lg:px-3"
       >
-        <IlustracionPlato
+        <FotoPlato
           platoId={plato.id}
+          imagen={plato.imagen}
+          sizes="(min-width: 640px) 92px, 76px"
           className={cn(
-            "size-[76px] transition-transform duration-500 ease-out motion-safe:group-enabled:group-hover:rotate-[8deg] sm:size-[92px]",
+            "size-[76px] transition-transform duration-500 ease-out motion-safe:group-enabled:group-hover:scale-[1.06] motion-safe:group-enabled:group-hover:-rotate-3 sm:size-[92px]",
             agotado && "opacity-40 grayscale-[.6]",
           )}
         />

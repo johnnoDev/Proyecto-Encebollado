@@ -16,7 +16,7 @@
       "nombre": "Encebollado de albacora",
       "descripcion": "Caldo de albacora con yuca, cebolla curtida, tomate y culantro.",
       "precio": 3.5,
-      "imagen": null,
+      "imagen": "/platos/encebollado-albacora.webp",
       "disponible": true,
       "etiqueta": "El clásico",
       "grupos": [
@@ -59,7 +59,7 @@
       "nombre": "Encebollado mixto",
       "descripcion": "Albacora y camarón en el mismo caldo. Para los que vienen con hambre.",
       "precio": 4.5,
-      "imagen": null,
+      "imagen": "/platos/encebollado-mixto.webp",
       "disponible": true,
       "etiqueta": "El más cargado",
       "grupos": [
@@ -102,7 +102,7 @@
       "nombre": "Encebollado de camarón",
       "descripcion": "Camarón de la costa en caldo de yuca, con cebolla curtida y culantro.",
       "precio": 4,
-      "imagen": null,
+      "imagen": "/platos/encebollado-camaron.webp",
       "disponible": true,
       "grupos": [
         {
@@ -144,7 +144,7 @@
       "nombre": "Chifles",
       "descripcion": "Láminas de verde fritas, crujientes.",
       "precio": 1,
-      "imagen": null,
+      "imagen": "/platos/chifles.webp",
       "disponible": true,
       "grupos": []
     },
@@ -154,7 +154,7 @@
       "nombre": "Pan",
       "descripcion": "Pan suave para mojar en el caldo.",
       "precio": 0.5,
-      "imagen": null,
+      "imagen": "/platos/pan.webp",
       "disponible": true,
       "grupos": []
     },
@@ -164,7 +164,7 @@
       "nombre": "Porción de yuca",
       "descripcion": "Yuca cocida, tierna.",
       "precio": 1,
-      "imagen": null,
+      "imagen": "/platos/yuca.webp",
       "disponible": true,
       "grupos": []
     },
@@ -174,7 +174,7 @@
       "nombre": "Aguacate",
       "descripcion": "Medio aguacate maduro, para el caldo.",
       "precio": 1.25,
-      "imagen": null,
+      "imagen": "/platos/aguacate.webp",
       "disponible": true,
       "grupos": []
     },
@@ -184,7 +184,7 @@
       "nombre": "Camarones adicionales",
       "descripcion": "Porción extra de camarón para tu encebollado.",
       "precio": 2,
-      "imagen": null,
+      "imagen": "/platos/camarones-adicionales.webp",
       "disponible": false,
       "grupos": []
     },
