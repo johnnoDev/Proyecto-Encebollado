@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import Image from "next/image";
+import { PideAhora } from "@/components/portada/pide-ahora";
 import { CONDICIONES, gsap, TINTA, useGSAP } from "@/lib/gsap";
 
 const pasos = [
@@ -20,9 +21,10 @@ const EN_BLANCO = "inset(0 100% 0 0)";
  * «Cómo pedir» contado como lo que es: una comanda que la mesera presenta.
  *
  * Movimiento (GSAP, solo con movimiento permitido):
- * - Escritorio: el conjunto se fija mientras bajas y cada tramo de scroll
- *   escribe un paso; al llegar al final cae el sello «A COCINA» (no ligado al
- *   scroll: es un golpe). Sin snap: el scroll nunca se secuestra.
+ * - Escritorio: la sección entera (con su título) se fija mientras bajas; el
+ *   primer paso ya está escrito y cada tramo de scroll escribe el siguiente.
+ *   Al final cae el sello «A COCINA» (un golpe, no ligado al scroll) y la
+ *   tercera columna ofrece «Pide ahora». Sin snap: el scroll nunca se secuestra.
  * - Celular y tablet: sin fijar; cada paso se escribe al entrar en pantalla.
  * Las instrucciones están siempre en el HTML y en orden.
  */
@@ -44,26 +46,41 @@ export function ComandaComoPedir() {
         );
 
         if (escritorio) {
+          // Se fija toda la sección (título incluido) para que nunca se vea una hoja sin contexto.
+          const seccion = raiz.current?.closest<HTMLElement>("[data-relato]") ?? raiz.current;
+          const cierre = gsap.fromTo(
+            q("[data-cierre]"),
+            { autoAlpha: 0, y: 18 },
+            { autoAlpha: 1, y: 0, duration: 0.6, delay: 0.25, ease: TINTA, paused: true },
+          );
           const relato = gsap.timeline({
             defaults: { ease: "none" },
             scrollTrigger: {
-              trigger: raiz.current,
-              start: "center center",
-              end: "+=120%",
-              pin: true,
+              trigger: seccion,
+              start: "top 6%",
+              end: "+=80%",
+              pin: seccion,
               scrub: 0.5,
               // El golpe del sello va aparte: cae al terminar de escribir y se levanta si vuelves.
               onUpdate: (st) => {
-                if (st.progress > 0.86 && sello.progress() === 0) sello.play();
-                else if (st.progress < 0.7 && sello.progress() > 0) sello.reverse();
+                if (st.progress > 0.86 && sello.progress() === 0) {
+                  sello.play();
+                  cierre.play();
+                } else if (st.progress < 0.7 && sello.progress() > 0) {
+                  sello.reverse();
+                  cierre.reverse();
+                }
               },
             },
           });
-          lineas.forEach((linea, i) => {
+          // El primer paso ya está escrito: la comanda arranca con contenido.
+          const [primera, ...siguientes] = lineas;
+          gsap.set(primera, { clipPath: ESCRITA });
+          siguientes.forEach((linea, i) => {
             relato.fromTo(linea, { clipPath: EN_BLANCO }, { clipPath: ESCRITA, duration: 1 }, i * 1.15);
           });
           // La mesera se acerca a la mesa a medida que se completa el pedido.
-          relato.fromTo(q("[data-mesera]"), { x: -18 }, { x: 14, duration: lineas.length * 1.15 }, 0);
+          relato.fromTo(q("[data-mesera]"), { x: -18 }, { x: 14, duration: siguientes.length * 1.15 }, 0);
           relato.to({}, { duration: 0.6 });
         } else {
           for (const linea of lineas) {
@@ -108,7 +125,7 @@ export function ComandaComoPedir() {
       {/* La mesera presenta el encebollado; en celular asoma detrás de la comanda. */}
       <div
         data-mesera
-        className="relative mx-auto h-56 w-52 overflow-hidden lg:mx-0 lg:h-[34rem] lg:w-auto lg:justify-self-end lg:overflow-visible"
+        className="relative mx-auto h-56 w-52 overflow-hidden lg:mx-0 lg:h-[min(34rem,58svh)] lg:w-auto lg:justify-self-end lg:overflow-visible"
       >
         <Image
           src="/local/mesera.webp"
@@ -154,6 +171,15 @@ export function ComandaComoPedir() {
         >
           <span className="block font-heading text-display leading-none font-black tracking-[0.06em]">A COCINA</span>
         </div>
+      </div>
+
+      {/* Escritorio: la tercera columna cierra el relato con la acción, cuando cae el sello. */}
+      <div data-cierre className="hidden self-center text-left lg:block">
+        <p className="font-heading text-titular leading-tight font-bold text-balance">
+          Listo: tu pedido ya está en la cocina.
+        </p>
+        <p className="mt-3 max-w-xs text-cuerpo text-pretty text-crema/80">Ahora te toca a ti.</p>
+        <PideAhora className="mt-6" />
       </div>
     </div>
   );

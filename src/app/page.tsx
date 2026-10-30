@@ -45,7 +45,7 @@ export default function Portada() {
           aria-labelledby="titulo-como-pedir"
           className={cn(dentado, "-mt-px scroll-mt-4 overflow-x-clip bg-oceano pt-16 pb-24 sm:pt-20")}
         >
-          <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
+          <div data-relato className="mx-auto max-w-6xl px-4 text-center sm:px-6">
             <h2 id="titulo-como-pedir" className="font-heading text-display font-bold">
               Cómo pedir
             </h2>
@@ -54,7 +54,8 @@ export default function Portada() {
               Sin esperar al mesero: desde tu celular, en tu mesa.
             </p>
             <ComandaComoPedir />
-            <PideAhora className="mt-16" />
+            {/* En escritorio la acción vive en la tercera columna del relato. */}
+            <PideAhora className="mt-16 lg:hidden" />
           </div>
         </section>
 
