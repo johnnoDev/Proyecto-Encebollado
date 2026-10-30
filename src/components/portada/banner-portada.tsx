@@ -158,7 +158,9 @@ export function BannerPortada() {
 
       <div className="mx-auto grid max-w-6xl px-4 pb-16 sm:px-6 lg:min-h-[calc(100svh-4.25rem)] lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-center lg:pb-12">
         {/* Escena: el tazón, su nombre de fondo y la mesa alrededor. */}
-        <div className="relative h-[22rem] sm:h-[30rem] lg:order-2 lg:h-[40rem]">
+        {/* En celular y tablet la escena se mide con la altura visible (svh): así «Pide ahora»
+            entra en la primera pantalla aun con las barras del navegador. */}
+        <div className="relative h-[clamp(13rem,40svh,22rem)] sm:h-[clamp(20rem,42svh,30rem)] lg:order-2 lg:h-[40rem]">
           <p
             aria-hidden="true"
             data-revela
@@ -168,7 +170,7 @@ export function BannerPortada() {
             {brand.nombre.replace(/^La\s+/, "")}
           </p>
 
-          <div className="absolute top-12 -right-16 size-[19rem] sm:top-14 sm:right-0 sm:size-[25rem] lg:top-1/2 lg:right-auto lg:left-1/2 lg:size-[31rem] lg:-translate-x-1/2 lg:-translate-y-1/2">
+          <div className="absolute top-[10%] -right-14 size-[clamp(11rem,35svh,19rem)] sm:top-[6%] sm:right-auto sm:left-1/2 sm:size-[clamp(18rem,38svh,25rem)] sm:-translate-x-1/2 lg:top-1/2 lg:size-[31rem] lg:-translate-y-1/2">
             {/* Aros finos alrededor del tazón. */}
             <svg
               viewBox="0 0 100 100"
@@ -194,14 +196,14 @@ export function BannerPortada() {
             </div>
           </div>
 
-          <Granos className="absolute top-[56%] left-6 w-10 sm:left-10 lg:top-[44%] lg:left-[6%] lg:w-12" />
+          <Granos className="absolute top-[44%] left-[6%] hidden w-12 lg:block" />
           <Granos className="absolute top-[8%] right-[8%] hidden w-10 rotate-90 lg:block" />
 
           {/* Los chifles, el acompañante de siempre. */}
           <div
             aria-hidden="true"
             data-profundidad="18"
-            className="absolute top-16 left-0 size-28 sm:left-4 sm:size-36 lg:top-auto lg:right-[-2%] lg:bottom-[12%] lg:left-auto lg:size-44"
+            className="absolute top-3 left-0 size-20 sm:top-[8%] sm:left-4 sm:size-36 lg:top-auto lg:right-[-2%] lg:bottom-[12%] lg:left-auto lg:size-44"
           >
             <div data-revela data-satelite className="relative size-full">
               <Image
@@ -222,7 +224,7 @@ export function BannerPortada() {
         </div>
 
         {/* Texto y acción. */}
-        <div className="relative z-10 mt-6 lg:order-1 lg:mt-0">
+        <div className="relative z-10 mt-4 sm:mt-6 lg:order-1 lg:mt-0">
           <h1 id="titulo-portada" className="font-heading text-portada font-bold tracking-[-0.025em]">
             <span className="sr-only">{brand.nombre}: </span>
             {/* Cada línea sube desde su propia máscara; el relleno inferior deja ver la tilde y los descendentes. */}
@@ -239,16 +241,17 @@ export function BannerPortada() {
             </span>
             <span className="sr-only">{resto.join(" ")}</span>
           </h1>
-          <div data-revela data-ornamento className="mt-6 w-fit lg:mt-8">
+          <div data-revela data-ornamento className="mt-4 w-fit sm:mt-6 lg:mt-8">
             <Ornamento />
           </div>
-          <p data-revela data-apoyo className="mt-5 font-heading text-titulo text-balance">
+          <p data-revela data-apoyo className="mt-4 font-heading text-titulo text-balance sm:mt-5">
             {brand.bienvenida}
           </p>
-          <p data-revela data-apoyo className="mt-2 max-w-md text-linea text-pretty text-crema/80">
+          {/* En celular la bienvenida basta: el eslogan dice lo mismo y empujaría el botón fuera de pantalla. */}
+          <p data-revela data-apoyo className="mt-2 hidden max-w-md text-linea text-pretty text-crema/80 sm:block">
             {brand.eslogan}.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
+          <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3 sm:mt-8">
             <PideAhora />
             <a
               href="#como-pedir"
