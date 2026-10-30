@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { MapPin, Phone } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, ChefHat, MapPin, Phone, SlidersHorizontal } from "lucide-react";
 import { ViewTransition } from "react";
 import { BannerPortada } from "@/components/portada/banner-portada";
 import { BarraPortada } from "@/components/portada/barra-portada";
@@ -116,9 +117,73 @@ export default function Portada() {
             </div>
           </MovimientoLocal>
         </section>
+
+        {/* Para quien evalúa el demo: la otra mitad del producto, a un toque. */}
+        <section
+          aria-labelledby="titulo-duenos"
+          className={cn(dentado, "-mt-px bg-oceano pt-16 pb-16 sm:pt-20")}
+        >
+          <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
+            <div>
+              <h2 id="titulo-duenos" className="font-heading text-display font-bold text-balance">
+                ¿Tienes un restaurante?
+              </h2>
+              <Ornamento className="mt-4" />
+              <p className="mt-5 max-w-md text-linea text-pretty text-crema/80">
+                Esto es lo que ve tu equipo mientras tus clientes piden desde la mesa.
+              </p>
+              <p className="mt-6 max-w-md font-heading text-titulo leading-snug text-balance text-dorado">
+                Abre la cocina en otra pestaña, pide algo en{" "}
+                <Link
+                  href="/menu"
+                  transitionTypes={["a-la-carta"]}
+                  className="underline decoration-dorado/50 decoration-2 underline-offset-[5px] hover:decoration-dorado"
+                >
+                  la carta
+                </Link>{" "}
+                y míralo llegar.
+              </p>
+            </div>
+            <ul className="lg:pt-2">
+              {[
+                {
+                  href: "/cocina",
+                  nombre: "La cocina",
+                  detalle: "Cada pedido llega al instante con su mesa, y pasa de nuevo a listo y entregado.",
+                  Icono: ChefHat,
+                },
+                {
+                  href: "/admin",
+                  nombre: "El panel del local",
+                  detalle: "Cambia precios y marca platos agotados; la carta se actualiza en el momento.",
+                  Icono: SlidersHorizontal,
+                },
+              ].map(({ href, nombre, detalle, Icono }) => (
+                <li key={href} className="border-b border-dashed border-crema/20 first:border-t">
+                  <a
+                    href={href}
+                    target="_blank"
+                    className="group grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-start gap-4 py-6"
+                  >
+                    <Icono className="mt-1 size-7 text-dorado" aria-hidden="true" />
+                    <span>
+                      <span className="block font-heading text-titular leading-tight font-bold">{nombre}</span>
+                      <span className="mt-1.5 block text-cuerpo text-pretty text-crema/80">{detalle}</span>
+                      <span className="sr-only"> (se abre en otra pestaña)</span>
+                    </span>
+                    <ArrowUpRight
+                      className="mt-1.5 size-6 text-crema/70 transition-[translate,color] duration-300 ease-out group-hover:text-dorado motion-safe:group-hover:translate-x-1 motion-safe:group-hover:-translate-y-1"
+                      aria-hidden="true"
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
       </main>
 
-      <footer className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-8 sm:px-6">
+      <footer className="mx-auto flex max-w-6xl items-center gap-3 border-t border-crema/15 px-4 py-8 sm:px-6">
         <Image src="/brand/logo-mark.svg" alt="" width={36} height={36} className="size-9" />
         <p className="text-sm text-crema/75">
           <span className="font-heading text-linea font-bold text-crema">{brand.nombre}</span> · {brand.descriptor}
