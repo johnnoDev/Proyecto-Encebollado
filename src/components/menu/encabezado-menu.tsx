@@ -1,5 +1,6 @@
 "use client";
 
+import { ViewTransition } from "react";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
@@ -20,7 +21,10 @@ export function EncabezadoMenu({ mesa, selectorAbierto, onSelector, onElegirMesa
   return (
     <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 pt-5 pb-4 sm:px-6">
       <div className="flex min-w-0 items-center gap-3">
-        <Image src="/brand/logo-mark.svg" alt="" width={44} height={44} priority className="size-11 shrink-0" />
+        {/* El símbolo llega desde la barra de la portada. */}
+        <ViewTransition name="marca" share="marca" default="none">
+          <Image src="/brand/logo-mark.svg" alt="" width={44} height={44} priority className="size-11 shrink-0" />
+        </ViewTransition>
         <div className="min-w-0">
           <p className="truncate font-heading text-titulo leading-none font-bold text-crema">{brand.nombre}</p>
           <p className="mt-1 truncate text-nota text-crema/75">{brand.descriptor}</p>

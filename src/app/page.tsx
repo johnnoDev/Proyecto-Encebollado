@@ -1,9 +1,11 @@
 import Image from "next/image";
-import Link from "next/link";
 import { MapPin, Phone } from "lucide-react";
+import { ViewTransition } from "react";
 import { BannerPortada } from "@/components/portada/banner-portada";
+import { BarraPortada } from "@/components/portada/barra-portada";
 import { ComandaComoPedir } from "@/components/portada/comanda-como-pedir";
 import { EncebolladosDestacados } from "@/components/portada/encebollados-destacados";
+import { MovimientoLocal } from "@/components/portada/movimiento-local";
 import { Ornamento } from "@/components/portada/ornamento";
 import { PideAhora } from "@/components/portada/pide-ahora";
 import { brand } from "@/config/brand";
@@ -15,36 +17,10 @@ const dentado = "[mask:radial-gradient(circle_at_9px_0,transparent_6px,#000_6.5p
 export default function Portada() {
   const telefono = brand.telefono.replace(/\s/g, "");
   return (
+    // Al ir a la carta, la portada se aparta hacia arriba (ver «a-la-carta» en globals.css).
+    <ViewTransition exit={{ "a-la-carta": "a-la-carta", default: "none" }} default="none">
     <div className="bg-oceano text-crema">
-      <header className="relative z-20 mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-3 sm:px-6 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
-        <p className="flex items-center gap-2.5">
-          <Image src="/brand/logo-mark.svg" alt="" width={40} height={40} priority className="size-10" />
-          <span className="font-heading text-plato font-bold">{brand.nombre}</span>
-        </p>
-        <nav aria-label="Secciones">
-          <ul className="flex items-center gap-1 text-sm font-semibold">
-            <li>
-              <Link href="/menu" className="flex h-11 items-center rounded-full px-3 hover:bg-crema/10">
-                Carta
-              </Link>
-            </li>
-            <li className="max-sm:hidden">
-              <a href="#como-pedir" className="flex h-11 items-center rounded-full px-3 hover:bg-crema/10">
-                Cómo pedir
-              </a>
-            </li>
-            <li className="max-sm:hidden">
-              <a href="#donde-estamos" className="flex h-11 items-center rounded-full px-3 hover:bg-crema/10">
-                Dónde estamos
-              </a>
-            </li>
-          </ul>
-        </nav>
-        <p className="hidden min-w-0 items-center justify-self-end gap-2 text-sm text-crema/80 lg:flex">
-          <MapPin className="size-4 shrink-0 text-dorado" aria-hidden="true" />
-          <span className="truncate">{brand.direccion}</span>
-        </p>
-      </header>
+      <BarraPortada />
 
       <main>
         <BannerPortada />
@@ -86,10 +62,10 @@ export default function Portada() {
           aria-labelledby="titulo-donde"
           className={cn(dentado, "-mt-px scroll-mt-4 bg-crema pt-16 pb-20 text-tostado sm:pt-20")}
         >
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:grid lg:grid-cols-2 lg:items-center lg:gap-16">
+          <MovimientoLocal className="mx-auto max-w-6xl px-4 sm:px-6 lg:grid lg:grid-cols-2 lg:items-center lg:gap-16">
             {/* Dos fotos del local, apoyadas sobre el papel como recuerdos. */}
-            <div className="relative mx-auto h-[19rem] w-full max-w-md sm:h-[24rem] lg:order-2 lg:h-[30rem] lg:max-w-none">
-              <figure className="absolute top-0 left-0 w-[80%] -rotate-3 bg-white p-2 pb-9 shadow-[0_14px_28px_-10px_rgb(0_0_0/0.35)]">
+            <div data-fotos-local className="relative mx-auto h-[19rem] w-full max-w-md sm:h-[24rem] lg:order-2 lg:h-[30rem] lg:max-w-none">
+              <figure data-foto-local className="absolute top-0 left-0 w-[80%] -rotate-3 bg-white transition-[rotate] duration-500 ease-out hover:rotate-0 p-2 pb-9 shadow-[0_14px_28px_-10px_rgb(0_0_0/0.35)]">
                 <Image
                   src="/local/servicio.webp"
                   alt="Un comensal sonríe al recibir su encebollado en la mesa"
@@ -102,7 +78,7 @@ export default function Portada() {
                   A la mesa
                 </figcaption>
               </figure>
-              <figure className="absolute right-0 bottom-0 w-[44%] rotate-3 bg-white p-2 pb-9 shadow-[0_14px_28px_-10px_rgb(0_0_0/0.35)]">
+              <figure data-foto-local className="absolute right-0 bottom-0 w-[44%] rotate-3 bg-white transition-[rotate] duration-500 ease-out hover:rotate-0 p-2 pb-9 shadow-[0_14px_28px_-10px_rgb(0_0_0/0.35)]">
                 <Image
                   src="/local/cocina.webp"
                   alt="En la cocina se sirven los encebollados del día"
@@ -124,7 +100,7 @@ export default function Portada() {
               <Ornamento className="mx-auto mt-4 lg:mx-0" />
               <address className="mt-8 flex flex-col items-center gap-4 not-italic lg:items-start">
                 <p className="flex flex-col items-center gap-2 font-heading text-titulo leading-snug font-semibold text-balance text-oceano lg:flex-row lg:items-start">
-                  <MapPin className="size-7 shrink-0 text-aji-texto lg:mt-0.5" aria-hidden="true" />
+                  <MapPin data-pin className="size-7 shrink-0 text-aji-texto lg:mt-0.5" aria-hidden="true" />
                   {brand.direccion}
                 </p>
                 <a
@@ -138,7 +114,7 @@ export default function Portada() {
               <p className="mt-10 text-cuerpo text-pretty text-tostado/80">¿Ya estás en tu mesa? Escanea el QR o:</p>
               <PideAhora className="mt-4" />
             </div>
-          </div>
+          </MovimientoLocal>
         </section>
       </main>
 
@@ -149,5 +125,6 @@ export default function Portada() {
         </p>
       </footer>
     </div>
+    </ViewTransition>
   );
 }
