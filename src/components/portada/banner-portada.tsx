@@ -97,6 +97,14 @@ export function BannerPortada() {
             0.6,
           )
           .from(q("[data-anotacion]"), { clipPath: "inset(0 100% 0 0)", duration: 0.8, stagger: 0.12 }, 0.95);
+        // Si el navegador no está animando (pestaña en segundo plano, capturas sin
+        // requestAnimationFrame), la entrada se completa de golpe: el título y el
+        // tazón nunca quedan invisibles. El temporizador corre aunque no haya cuadros.
+        const cuadroInicial = gsap.ticker.frame;
+        const respaldo = window.setTimeout(() => {
+          if (gsap.ticker.frame - cuadroInicial < 2) entrada.progress(1);
+        }, 2000);
+
         // Las entradas ya fijaron su estado inicial: ahora sí puede mostrarse lo protegido.
         gsap.set(q("[data-revela]"), { visibility: "visible" });
 
@@ -115,23 +123,25 @@ export function BannerPortada() {
         });
 
         // Profundidad mínima con mouse: cada acompañante se corre según su plano.
-        if (puntero) {
-          const capas = q("[data-profundidad]").map((el) => ({
-            k: Number(el.getAttribute("data-profundidad")),
-            x: gsap.quickTo(el, "x", { duration: 0.9, ease: "power3.out" }),
-            y: gsap.quickTo(el, "y", { duration: 0.9, ease: "power3.out" }),
-          }));
-          const mover = (e: PointerEvent) => {
-            const dx = e.clientX / window.innerWidth - 0.5;
-            const dy = e.clientY / window.innerHeight - 0.5;
-            for (const c of capas) {
-              c.x(dx * c.k);
-              c.y(dy * c.k);
-            }
-          };
-          window.addEventListener("pointermove", mover);
-          return () => window.removeEventListener("pointermove", mover);
-        }
+        if (!puntero) return () => window.clearTimeout(respaldo);
+        const capas = q("[data-profundidad]").map((el) => ({
+          k: Number(el.getAttribute("data-profundidad")),
+          x: gsap.quickTo(el, "x", { duration: 0.9, ease: "power3.out" }),
+          y: gsap.quickTo(el, "y", { duration: 0.9, ease: "power3.out" }),
+        }));
+        const mover = (e: PointerEvent) => {
+          const dx = e.clientX / window.innerWidth - 0.5;
+          const dy = e.clientY / window.innerHeight - 0.5;
+          for (const c of capas) {
+            c.x(dx * c.k);
+            c.y(dy * c.k);
+          }
+        };
+        window.addEventListener("pointermove", mover);
+        return () => {
+          window.clearTimeout(respaldo);
+          window.removeEventListener("pointermove", mover);
+        };
       });
     },
     { scope: raiz },

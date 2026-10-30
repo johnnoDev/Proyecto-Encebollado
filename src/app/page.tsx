@@ -27,7 +27,7 @@ export default function Portada() {
         <BannerPortada />
 
         {/* El papel de la comanda se abre sobre el océano. */}
-        <section aria-labelledby="los-encebollados" className={cn(dentado, "bg-crema pt-16 pb-20 text-tostado sm:pt-20")}>
+        <section data-superficie="clara" aria-labelledby="los-encebollados" className={cn(dentado, "bg-crema pt-16 pb-20 text-tostado sm:pt-20")}>
           <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
             <h2 id="los-encebollados" className="font-heading text-display font-bold text-oceano">
               Los encebollados
@@ -60,6 +60,7 @@ export default function Portada() {
 
         <section
           id="donde-estamos"
+          data-superficie="clara"
           aria-labelledby="titulo-donde"
           className={cn(dentado, "-mt-px scroll-mt-4 bg-crema pt-16 pb-20 text-tostado sm:pt-20")}
         >
