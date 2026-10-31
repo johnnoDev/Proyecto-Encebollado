@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Check, ChefHat } from "lucide-react";
 import { brand } from "@/config/brand";
 import { precio } from "@/lib/formato";
 import { fechaPedido, indicacionPedidoEntregado, indicacionPedidoListo } from "@/lib/seguimiento";
@@ -93,6 +93,22 @@ export function PedidoCliente() {
           <p className="mt-6 max-w-sm text-sm leading-relaxed text-crema/80">
             Si necesitas corregir algo, avisa al personal con el número de tu pedido.
           </p>
+          {/* Solo del demo: quien lo evalúa ve el otro lado del circuito con su propio pedido. */}
+          <aside aria-label="Demo para restaurantes" className="mt-8 max-w-sm border-t border-dashed border-crema/20 pt-5">
+            <p className="text-sm leading-relaxed text-crema/80">
+              <span className="font-semibold text-crema">¿Tienes un restaurante?</span> Este pedido ya está en la pantalla de la cocina.
+            </p>
+            <a
+              href="/cocina"
+              target="_blank"
+              className="group mt-3 inline-flex min-h-11 items-center gap-2 font-semibold text-dorado underline decoration-dorado/50 decoration-2 underline-offset-[5px] hover:decoration-dorado"
+            >
+              <ChefHat className="size-5 shrink-0" aria-hidden="true" />
+              Míralo en la cocina
+              <ArrowUpRight className="size-4 shrink-0 transition-transform duration-300 ease-out motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5" aria-hidden="true" />
+              <span className="sr-only"> (se abre en otra pestaña)</span>
+            </a>
+          </aside>
         </section>
 
         <div className="min-w-0 drop-shadow-[0_18px_30px_rgb(0_0_0/0.35)]">

@@ -136,8 +136,9 @@ export default function Portada() {
 
         {/* Para quien evalúa el demo: la otra mitad del producto, a un toque. */}
         <section
+          id="duenos"
           aria-labelledby="titulo-duenos"
-          className={cn(dentado, "-mt-px bg-oceano pt-16 pb-16 sm:pt-20")}
+          className={cn(dentado, "-mt-px scroll-mt-4 bg-oceano pt-16 pb-16 sm:pt-20")}
         >
           <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
             <div>

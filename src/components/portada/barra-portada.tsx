@@ -8,8 +8,10 @@ import { brand } from "@/config/brand";
 import { cn } from "@/lib/utils";
 
 const SECCIONES = [
-  { id: "como-pedir", nombre: "Cómo pedir" },
-  { id: "donde-estamos", nombre: "Dónde estamos" },
+  { id: "como-pedir", nombre: "Cómo pedir", corto: null },
+  { id: "donde-estamos", nombre: "Dónde estamos", corto: null },
+  // Quien evalúa el demo llega a la cocina y al panel desde la primera pantalla.
+  { id: "duenos", nombre: "Para dueños", corto: "Dueños" },
 ] as const;
 
 /** Subrayado de los enlaces: crece desde la izquierda; dorado en la sección donde estás. */
@@ -102,7 +104,7 @@ export function BarraPortada() {
               </Link>
             </li>
             {SECCIONES.map((s) => (
-              <li key={s.id} className="max-sm:hidden">
+              <li key={s.id} className={cn(!s.corto && "max-sm:hidden")}>
                 <a
                   href={`#${s.id}`}
                   aria-current={activa === s.id ? "location" : undefined}
@@ -111,7 +113,14 @@ export function BarraPortada() {
                     activa === s.id ? "text-crema" : "text-crema/85 hover:text-crema",
                   )}
                 >
-                  {s.nombre}
+                  {s.corto ? (
+                    <>
+                      <span className="sm:hidden">{s.corto}</span>
+                      <span className="max-sm:hidden">{s.nombre}</span>
+                    </>
+                  ) : (
+                    s.nombre
+                  )}
                   <Subrayado activo={activa === s.id} />
                 </a>
               </li>
