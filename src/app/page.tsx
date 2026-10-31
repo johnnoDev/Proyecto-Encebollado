@@ -128,7 +128,7 @@ export default function Portada() {
                   {brand.telefono}
                 </a>
               </address>
-              <p className="mt-10 text-cuerpo text-pretty text-tostado/80">¿Ya estás en tu mesa? Escanea el QR o:</p>
+              <p className="mt-10 text-cuerpo text-pretty text-tostado/80">¿Ya estás en tu mesa? Escanea su QR o pide desde aquí.</p>
               <PideAhora className="mt-4" />
             </div>
           </MovimientoLocal>
@@ -166,7 +166,7 @@ export default function Portada() {
                 {
                   href: "/cocina",
                   nombre: "La cocina",
-                  detalle: "Cada pedido llega al instante con su mesa, y pasa de nuevo a listo y entregado.",
+                  detalle: "Cada pedido llega al instante con su mesa; tu equipo lo marca en preparación, listo y entregado.",
                   Icono: ChefHat,
                 },
                 {
