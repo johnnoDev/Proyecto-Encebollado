@@ -46,8 +46,9 @@ function Flecha({ d, punta, className }: { d: string; punta: string; className?:
  * - Escritorio: la sección entera (con su fondo y su título) se fija mientras
  *   bajas; el primer paso ya está escrito y cada tramo de scroll escribe el
  *   siguiente. Al final cae el sello «A COCINA» (un golpe, no ligado al
- *   scroll), la flecha hacia la acción se traza como tinta y la tercera
- *   columna ofrece «Pide ahora». Sin snap: el scroll nunca se secuestra.
+ *   scroll), la flecha se traza como tinta hasta «Pide ahora» y el botón late.
+ *   La tercera columna está visible desde el inicio. Sin snap: el scroll nunca
+ *   se secuestra.
  * - Celular y tablet: sin fijar; cada paso se escribe al entrar en pantalla.
  * Las instrucciones están siempre en el HTML y en orden.
  */
@@ -72,15 +73,12 @@ export function ComandaComoPedir() {
           // Se fija la sección entera: fondo, título y comanda nunca se separan.
           const seccion = raiz.current?.closest("section") ?? raiz.current;
           const haciaCocina = q("[data-flecha]")[0];
+          // El cierre está siempre visible y alcanzable con el teclado; cuando cae el
+          // sello, la flecha se traza hasta «Pide ahora» y el botón late una vez.
           const cierre = gsap
             .timeline({ paused: true })
             .fromTo(haciaCocina, { clipPath: EN_BLANCO }, { clipPath: ESCRITA, duration: 0.6, ease: TINTA })
-            .fromTo(
-              q("[data-cierre]"),
-              { autoAlpha: 0, y: 18 },
-              { autoAlpha: 1, y: 0, duration: 0.6, ease: TINTA },
-              0.2,
-            );
+            .to(q("[data-cierre] a"), { scale: 1.06, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1 }, 0.45);
           const relato = gsap.timeline({
             defaults: { ease: "none" },
             scrollTrigger: {
@@ -214,10 +212,10 @@ export function ComandaComoPedir() {
         </div>
       </div>
 
-      {/* Escritorio: la tercera columna cierra el relato con la acción, cuando cae el sello. */}
+      {/* Escritorio: la tercera columna cierra el relato con la acción; visible siempre, late cuando cae el sello. */}
       <div data-cierre className="hidden self-center text-left lg:block">
         <p className="font-heading text-titular leading-tight font-bold text-balance">
-          Listo: tu pedido ya está en la cocina.
+          Así llega tu pedido a la cocina.
         </p>
         <p className="mt-3 max-w-xs text-cuerpo text-pretty text-crema/85">Ahora te toca a ti.</p>
         <PideAhora flecha className="mt-6" />
