@@ -107,7 +107,7 @@ export function BannerPortada() {
         {/* Arriba, una sombra para leer la barra; abajo, la foto se funde con el océano. */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--oceano)_75%,transparent)_0%,transparent_28%,transparent_62%,var(--oceano)_100%)] lg:bg-[linear-gradient(to_right,color-mix(in_oklab,var(--oceano)_55%,transparent)_0%,color-mix(in_oklab,var(--oceano)_28%,transparent)_32%,transparent_50%),linear-gradient(to_bottom,color-mix(in_oklab,var(--oceano)_78%,transparent)_0%,transparent_16%,transparent_80%,color-mix(in_oklab,var(--oceano)_70%,transparent)_100%)]"
+          className="absolute inset-0 bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--oceano)_88%,transparent)_0%,color-mix(in_oklab,var(--oceano)_62%,transparent)_12%,transparent_30%,transparent_62%,var(--oceano)_100%)] lg:bg-[linear-gradient(to_right,color-mix(in_oklab,var(--oceano)_55%,transparent)_0%,color-mix(in_oklab,var(--oceano)_28%,transparent)_32%,transparent_50%),linear-gradient(to_bottom,color-mix(in_oklab,var(--oceano)_90%,transparent)_0%,color-mix(in_oklab,var(--oceano)_72%,transparent)_8%,transparent_20%,transparent_80%,color-mix(in_oklab,var(--oceano)_70%,transparent)_100%)]"
         />
       </div>
 

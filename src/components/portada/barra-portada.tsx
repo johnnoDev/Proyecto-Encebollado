@@ -127,7 +127,7 @@ export function BarraPortada() {
             ))}
           </ul>
         </nav>
-        <p className="hidden min-w-0 items-center justify-self-end gap-2 text-sm text-crema/80 lg:flex">
+        <p className="hidden min-w-0 items-center justify-self-end gap-2 text-sm text-crema lg:flex">
           <MapPin className="size-4 shrink-0 text-dorado" aria-hidden="true" />
           <span className="truncate">{brand.direccion}</span>
         </p>
