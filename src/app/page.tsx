@@ -53,7 +53,7 @@ export default function Portada() {
               alt=""
               fill
               sizes="100vw"
-              className="object-cover object-[78%_100%] lg:object-center"
+              className="object-cover object-[78%_100%] sm:object-[52%_100%] lg:object-center"
             />
             <div className="absolute inset-0 bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--oceano)_80%,transparent)_0%,color-mix(in_oklab,var(--oceano)_55%,transparent)_40%,color-mix(in_oklab,var(--oceano)_45%,transparent)_100%)] lg:bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--oceano)_70%,transparent)_0%,transparent_30%,transparent_78%,color-mix(in_oklab,var(--oceano)_55%,transparent)_100%),radial-gradient(ellipse_32%_38%_at_80%_52%,color-mix(in_oklab,var(--oceano)_70%,transparent)_0%,transparent_100%)]" />
             <PezGrabado className="absolute -top-2 -left-10 w-56 text-crema/[0.12] lg:top-[3%] lg:left-[1%] lg:w-[20rem]" />

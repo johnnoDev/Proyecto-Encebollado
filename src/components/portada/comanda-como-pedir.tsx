@@ -153,14 +153,14 @@ export function ComandaComoPedir() {
 
       <div>
         {/* La mesera presenta el encebollado y asoma detrás de la comanda. */}
-        <div data-mesera className="relative mx-auto h-56 w-52 overflow-hidden lg:h-[min(11rem,22svh)] lg:w-36">
+        <div data-mesera className="relative mx-auto h-56 w-52 overflow-hidden lg:h-[min(13rem,23svh)] lg:w-[min(11rem,21svh)]">
           <Image
             src="/local/mesera.webp"
             alt="Una mesera de La Albacora presenta un encebollado recién servido"
             width={404}
             height={1100}
-            sizes="(min-width: 1024px) 144px, 208px"
-            className="h-auto w-52 lg:w-36"
+            sizes="(min-width: 1024px) 176px, 208px"
+            className="h-auto w-52 lg:w-[min(11rem,21svh)]"
           />
         </div>
 
