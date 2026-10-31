@@ -151,13 +151,6 @@ export function ComandaComoPedir() {
       {/* Escritorio: la columna izquierda queda libre para el fondo y sus marcas de agua. */}
       <div aria-hidden="true" className="hidden lg:block" />
 
-      {/* Escritorio: de la comanda a la acción. */}
-      <Flecha
-        d="M6 16C34 46 78 52 110 30"
-        punta="M98 27l12 3-6 11"
-        className="pointer-events-none absolute top-[72%] left-[calc(50%+14.5rem)] hidden w-28 lg:block"
-      />
-
       <div>
         {/* La mesera presenta el encebollado y asoma detrás de la comanda. */}
         <div data-mesera className="relative mx-auto h-56 w-52 overflow-hidden lg:h-[min(11rem,22svh)] lg:w-36">
@@ -218,7 +211,15 @@ export function ComandaComoPedir() {
           Así llega tu pedido a la cocina.
         </p>
         <p className="mt-3 max-w-xs text-cuerpo text-pretty text-crema/85">Ahora te toca a ti.</p>
-        <PideAhora flecha className="mt-6" />
+        <div className="relative mt-6 w-fit">
+          {/* De la comanda a la acción: la flecha termina justo en el botón. */}
+          <Flecha
+            d="M4 42C32 14 72 12 102 30"
+            punta="M92 20l12 11-15 5"
+            className="pointer-events-none absolute top-1/2 right-full mr-1 hidden w-14 -translate-y-1/2 lg:block"
+          />
+          <PideAhora flecha />
+        </div>
       </div>
     </div>
   );

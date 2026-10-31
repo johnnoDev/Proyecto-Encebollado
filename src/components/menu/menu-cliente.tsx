@@ -31,6 +31,21 @@ import { volarAComanda } from "@/lib/vuelo";
 let ultimoIdAviso = 0;
 const nuevoIdAviso = () => ++ultimoIdAviso;
 
+/** Abre la ficha de ?plato= una sola vez (enlaces «Ver en la carta» de la portada). */
+function AbrirPlatoInicial({ onAbrir }: { onAbrir: (plato: Plato) => void }) {
+  const id = useSearchParams().get("plato");
+  const platos = useMenu((s) => s.platos);
+  const abierto = useRef(false);
+  useEffect(() => {
+    if (abierto.current || !id) return;
+    const plato = platos.find((p) => p.id === id && p.disponible);
+    if (!plato) return;
+    abierto.current = true;
+    onAbrir(plato);
+  }, [id, platos, onAbrir]);
+  return null;
+}
+
 /** Lee ?mesa= del QR. Aislado en su propio Suspense para que la carta se prerenderice. */
 function SincronizarMesa() {
   const valor = useSearchParams().get("mesa");
@@ -208,6 +223,7 @@ export function MenuCliente() {
     <MotionConfig reducedMotion="user">
       <Suspense fallback={null}>
         <SincronizarMesa />
+        <AbrirPlatoInicial onAbrir={setPlatoAbierto} />
       </Suspense>
       <div className="min-h-dvh bg-oceano pb-32 text-crema lg:pb-16">
         <EncabezadoMenu

@@ -66,7 +66,7 @@ export function EncebolladosDestacados() {
       {platos.map((plato) => (
         <li key={plato.id}>
           <Link
-            href="/menu#cat-encebollados"
+            href={`/menu?plato=${plato.id}`}
             transitionTypes={["a-la-carta"]}
             className="group flex flex-col items-center rounded-2xl px-2 pb-2 text-center transition-[background-color,scale] duration-200 hover:bg-tostado/[0.03] motion-safe:active:scale-[0.98]"
           >
