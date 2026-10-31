@@ -11,9 +11,6 @@
   /* Solo el titular de la portada: escala con el ancho de pantalla. */
   --text-portada: clamp(2.75rem, 7.4vw, 5.75rem);
   --text-portada--line-height: 0.98;
-  /* Palabra gigante y tenue detrás del plato de la portada (decorativa). */
-  --text-fondo: clamp(3.4rem, 9vw, 8.5rem);
-  --text-fondo--line-height: 1;
   --text-display: 2.25rem;
   --text-display--line-height: 1;
   --text-titular: 1.875rem;

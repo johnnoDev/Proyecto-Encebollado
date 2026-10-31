@@ -2,13 +2,14 @@
 
 import { useRef } from "react";
 import Image from "next/image";
+import { QrCode, Send, Soup, type LucideIcon } from "lucide-react";
 import { PideAhora } from "@/components/portada/pide-ahora";
 import { CONDICIONES, gsap, TINTA, useGSAP } from "@/lib/gsap";
 
-const pasos = [
-  { titulo: "Escanea el QR de tu mesa", detalle: "La carta se abre con tu mesa ya anotada." },
-  { titulo: "Anota tus platos", detalle: "Tamaño, con o sin cebolla, limón y ají aparte." },
-  { titulo: "Envía a cocina", detalle: "Sigue tu pedido en el celular hasta que llega a tu mesa." },
+const pasos: { titulo: string; detalle: string; Icono: LucideIcon }[] = [
+  { titulo: "Escanea el QR de tu mesa", detalle: "La carta se abre con tu mesa ya anotada.", Icono: QrCode },
+  { titulo: "Anota tus platos", detalle: "Tamaño, con o sin cebolla, limón y ají aparte.", Icono: Soup },
+  { titulo: "Envía a cocina", detalle: "Sigue tu pedido en el celular hasta que llega a tu mesa.", Icono: Send },
 ];
 
 const papel =
@@ -17,14 +18,36 @@ const papel =
 const ESCRITA = "inset(0 0% 0 0)";
 const EN_BLANCO = "inset(0 100% 0 0)";
 
+/** Flecha punteada a mano alzada, en dorado: lleva de la comanda a la acción. */
+function Flecha({ d, punta, className }: { d: string; punta: string; className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 120 60"
+      aria-hidden="true"
+      focusable="false"
+      data-flecha
+      className={className}
+      fill="none"
+      stroke="var(--dorado)"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d={d} strokeDasharray="1 7" />
+      <path d={punta} />
+    </svg>
+  );
+}
+
 /**
  * «Cómo pedir» contado como lo que es: una comanda que la mesera presenta.
  *
  * Movimiento (GSAP, solo con movimiento permitido):
- * - Escritorio: la sección entera (con su título) se fija mientras bajas; el
- *   primer paso ya está escrito y cada tramo de scroll escribe el siguiente.
- *   Al final cae el sello «A COCINA» (un golpe, no ligado al scroll) y la
- *   tercera columna ofrece «Pide ahora». Sin snap: el scroll nunca se secuestra.
+ * - Escritorio: la sección entera (con su fondo y su título) se fija mientras
+ *   bajas; el primer paso ya está escrito y cada tramo de scroll escribe el
+ *   siguiente. Al final cae el sello «A COCINA» (un golpe, no ligado al
+ *   scroll), la flecha hacia la acción se traza como tinta y la tercera
+ *   columna ofrece «Pide ahora». Sin snap: el scroll nunca se secuestra.
  * - Celular y tablet: sin fijar; cada paso se escribe al entrar en pantalla.
  * Las instrucciones están siempre en el HTML y en orden.
  */
@@ -46,18 +69,23 @@ export function ComandaComoPedir() {
         );
 
         if (escritorio) {
-          // Se fija toda la sección (título incluido) para que nunca se vea una hoja sin contexto.
-          const seccion = raiz.current?.closest<HTMLElement>("[data-relato]") ?? raiz.current;
-          const cierre = gsap.fromTo(
-            q("[data-cierre]"),
-            { autoAlpha: 0, y: 18 },
-            { autoAlpha: 1, y: 0, duration: 0.6, delay: 0.25, ease: TINTA, paused: true },
-          );
+          // Se fija la sección entera: fondo, título y comanda nunca se separan.
+          const seccion = raiz.current?.closest("section") ?? raiz.current;
+          const haciaCocina = q("[data-flecha]")[0];
+          const cierre = gsap
+            .timeline({ paused: true })
+            .fromTo(haciaCocina, { clipPath: EN_BLANCO }, { clipPath: ESCRITA, duration: 0.6, ease: TINTA })
+            .fromTo(
+              q("[data-cierre]"),
+              { autoAlpha: 0, y: 18 },
+              { autoAlpha: 1, y: 0, duration: 0.6, ease: TINTA },
+              0.2,
+            );
           const relato = gsap.timeline({
             defaults: { ease: "none" },
             scrollTrigger: {
               trigger: seccion,
-              start: "top 6%",
+              start: "top top",
               end: "+=80%",
               pin: seccion,
               scrub: 0.5,
@@ -77,10 +105,10 @@ export function ComandaComoPedir() {
           const [primera, ...siguientes] = lineas;
           gsap.set(primera, { clipPath: ESCRITA });
           siguientes.forEach((linea, i) => {
-            relato.fromTo(linea, { clipPath: EN_BLANCO }, { clipPath: ESCRITA, duration: 1 }, i * 1.15);
+            relato.fromTo(linea, { clipPath: EN_BLANCO }, { clipPath: ESCRITA, duration: 1 }, 0.4 + i * 1.15);
           });
-          // La mesera se acerca a la mesa a medida que se completa el pedido.
-          relato.fromTo(q("[data-mesera]"), { x: -18 }, { x: 14, duration: siguientes.length * 1.15 }, 0);
+          // La mesera se asoma un poco más a medida que se completa el pedido.
+          relato.fromTo(q("[data-mesera]"), { y: 14 }, { y: 0, duration: 0.4 + siguientes.length * 1.15 }, 0);
           relato.to({}, { duration: 0.6 });
         } else {
           for (const linea of lineas) {
@@ -120,56 +148,69 @@ export function ComandaComoPedir() {
   return (
     <div
       ref={raiz}
-      className="mt-10 lg:grid lg:grid-cols-[minmax(0,1fr)_28rem_minmax(0,1fr)] lg:items-end lg:gap-10"
+      className="relative mt-10 lg:mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_28rem_minmax(0,1fr)] lg:items-center lg:gap-10"
     >
-      {/* La mesera presenta el encebollado; en celular asoma detrás de la comanda. */}
-      <div
-        data-mesera
-        className="relative mx-auto h-56 w-52 overflow-hidden lg:mx-0 lg:h-[min(34rem,58svh)] lg:w-auto lg:justify-self-end lg:overflow-visible"
-      >
-        <Image
-          src="/local/mesera.webp"
-          alt="Una mesera de La Albacora presenta un encebollado recién servido"
-          width={404}
-          height={1100}
-          sizes="(min-width: 1024px) 200px, 208px"
-          className="h-auto w-52 lg:h-full lg:w-auto"
-        />
-      </div>
+      {/* Escritorio: la columna izquierda queda libre para el fondo y sus marcas de agua. */}
+      <div aria-hidden="true" className="hidden lg:block" />
 
-      <div className="relative z-10 mx-auto -mt-6 max-w-md drop-shadow-[0_18px_30px_rgb(0_0_0/0.35)] lg:mt-0 lg:mb-6">
-        <div className={`${papel} rounded-b-[14px] px-6 pt-7 pb-8 text-left`}>
-          <div className="flex items-baseline justify-between border-b-2 border-tostado pb-3">
-            <p className="font-heading text-titular leading-none font-bold text-oceano">Comanda</p>
-            <p className="text-sm text-tostado/75">Así se pide</p>
-          </div>
-          <ol>
-            {pasos.map((paso) => (
-              <li
-                key={paso.titulo}
-                data-revela
-                data-paso
-                className="grid grid-cols-[2.25rem_minmax(0,1fr)] border-b border-dashed border-tostado/25 py-4"
-              >
-                <span aria-hidden="true" className="font-heading text-linea font-bold text-oceano">
-                  1 ×
-                </span>
-                <div>
-                  <p className="font-heading text-linea leading-snug font-semibold">{paso.titulo}</p>
-                  <p className="mt-0.5 text-cuerpo text-pretty text-tostado/80">{paso.detalle}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
+      {/* Escritorio: de la comanda a la acción. */}
+      <Flecha
+        d="M6 16C34 46 78 52 110 30"
+        punta="M98 27l12 3-6 11"
+        className="pointer-events-none absolute top-[72%] left-[calc(50%+14.5rem)] hidden w-28 lg:block"
+      />
+
+      <div>
+        {/* La mesera presenta el encebollado y asoma detrás de la comanda. */}
+        <div data-mesera className="relative mx-auto h-56 w-52 overflow-hidden lg:h-[min(11rem,22svh)] lg:w-36">
+          <Image
+            src="/local/mesera.webp"
+            alt="Una mesera de La Albacora presenta un encebollado recién servido"
+            width={404}
+            height={1100}
+            sizes="(min-width: 1024px) 144px, 208px"
+            className="h-auto w-52 lg:w-36"
+          />
         </div>
-        <div
-          aria-hidden="true"
-          data-revela
-          data-sello
-          style={{ transform: "rotate(-9deg)" }}
-          className="absolute -right-2 -bottom-5 rounded-md border-[3.5px] border-aji-texto bg-crema/90 px-4 pt-1.5 pb-2 text-center text-aji-texto shadow-[0_0_0_4px_var(--crema),0_0_0_5.5px_var(--aji-texto)] sm:-right-8"
-        >
-          <span className="block font-heading text-display leading-none font-black tracking-[0.06em]">A COCINA</span>
+
+        <div className="relative z-10 mx-auto -mt-6 max-w-md drop-shadow-[0_18px_30px_rgb(0_0_0/0.35)] lg:-mt-4">
+          <div className={`${papel} rounded-b-[14px] px-6 pt-7 pb-8 text-left`}>
+            <div className="flex items-baseline justify-between border-b-2 border-tostado pb-3">
+              <p className="font-heading text-titular leading-none font-bold text-oceano">Comanda</p>
+              <p className="text-sm text-tostado/75">Así se pide</p>
+            </div>
+            <ol>
+              {pasos.map(({ titulo, detalle, Icono }, i) => (
+                <li
+                  key={titulo}
+                  data-revela
+                  data-paso
+                  className="grid grid-cols-[2rem_2.5rem_minmax(0,1fr)] items-start gap-x-3 border-b border-dashed border-tostado/25 py-4 lg:py-3"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="grid size-8 place-items-center rounded-full bg-dorado font-heading text-base font-bold text-tostado tabular-nums"
+                  >
+                    {i + 1}
+                  </span>
+                  <Icono className="mt-0.5 size-9 text-oceano" strokeWidth={1.5} aria-hidden="true" />
+                  <div>
+                    <p className="font-heading text-linea leading-snug font-semibold">{titulo}</p>
+                    <p className="mt-0.5 text-cuerpo text-pretty text-tostado/80">{detalle}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div
+            aria-hidden="true"
+            data-revela
+            data-sello
+            style={{ transform: "rotate(-9deg)" }}
+            className="absolute -right-2 -bottom-5 rounded-md border-[3.5px] border-aji-texto bg-crema/90 px-4 pt-1.5 pb-2 text-center text-aji-texto shadow-[0_0_0_4px_var(--crema),0_0_0_5.5px_var(--aji-texto)] sm:-right-8"
+          >
+            <span className="block font-heading text-display leading-none font-black tracking-[0.06em]">A COCINA</span>
+          </div>
         </div>
       </div>
 
@@ -178,8 +219,8 @@ export function ComandaComoPedir() {
         <p className="font-heading text-titular leading-tight font-bold text-balance">
           Listo: tu pedido ya está en la cocina.
         </p>
-        <p className="mt-3 max-w-xs text-cuerpo text-pretty text-crema/80">Ahora te toca a ti.</p>
-        <PideAhora className="mt-6" />
+        <p className="mt-3 max-w-xs text-cuerpo text-pretty text-crema/85">Ahora te toca a ti.</p>
+        <PideAhora flecha className="mt-6" />
       </div>
     </div>
   );

@@ -8,56 +8,35 @@ import { brand } from "@/config/brand";
 import { precio } from "@/lib/formato";
 import { CONDICIONES, gsap, TINTA, useGSAP } from "@/lib/gsap";
 import { tienePrecioVariable } from "@/lib/pedido";
-import { cn } from "@/lib/utils";
 import { useRehidratar } from "@/store/hidratar";
 import { useMenu } from "@/store/menu";
 
-/** Granos de pimienta y ají picado esparcidos sobre la mesa. */
-function Granos({ className }: { className?: string }) {
-  const puntos: [number, number, number, string][] = [
-    [8, 10, 2.4, "aji"],
-    [20, 4, 1.8, "dorado"],
-    [26, 16, 2.2, "aji"],
-    [14, 24, 1.6, "dorado"],
-    [36, 8, 1.4, "aji"],
-  ];
-  return (
-    <svg viewBox="0 0 44 30" aria-hidden="true" focusable="false" className={className}>
-      {puntos.map(([x, y, r, c]) => (
-        <circle key={`${x}-${y}`} cx={x} cy={y} r={r} style={{ fill: `var(--${c})` }} opacity={0.85} />
-      ))}
-    </svg>
-  );
-}
-
-/** Nombre y precio vigente de un plato, anotados junto a su foto. */
-function Anotacion({ platoId, className }: { platoId: string; className?: string }) {
-  const plato = useMenu((s) => s.platos.find((p) => p.id === platoId));
+/** El plato de la foto, con su precio vigente (respeta los ajustes de /admin). */
+function EnLaFoto() {
+  const plato = useMenu((s) => s.platos.find((p) => p.id === "encebollado-albacora"));
   if (!plato) return null;
   const valor = !plato.disponible
     ? "Agotado por hoy"
     : `${tienePrecioVariable(plato) ? "desde " : ""}${precio(plato.precio)}`;
   return (
-    <p
-      data-revela
-      data-anotacion
-      className={cn("absolute z-10 flex max-w-[10rem] flex-col gap-1 lg:max-w-[12rem]", className)}
-    >
-      <span aria-hidden="true" className="mb-1 h-px w-12 bg-dorado/70" />
-      <span className="text-nota leading-snug font-semibold text-crema sm:text-sm">{plato.nombre}</span>{" "}
-      <span className="font-heading text-linea font-semibold tabular-nums text-dorado">{valor}</span>
+    <p data-revela data-anotacion className="mt-8 flex items-center gap-3 text-sm text-crema/80">
+      <span aria-hidden="true" className="h-px w-10 shrink-0 bg-dorado/70" />
+      <span>
+        En la foto: <span className="font-semibold text-crema">{plato.nombre}</span>{" "}
+        <span className="font-heading text-linea font-semibold whitespace-nowrap tabular-nums text-dorado">{valor}</span>
+      </span>
     </p>
   );
 }
 
 /**
- * Banner de la portada: el encebollado servido es el protagonista, sobre el
- * océano, con su nombre gigante detrás y la mesa puesta alrededor.
+ * Banner de la portada: una mesa costeña servida sobre madera azul. El tazón de
+ * la foto es el protagonista; el texto vive en la madera, a la izquierda.
  *
- * Movimiento (GSAP, solo con movimiento permitido): el tazón se descubre con una
- * máscara circular mientras gira, el título sube línea por línea y la mesa se
- * arma alrededor. Al bajar, el tazón se queda atrás y el papel crema lo tapa.
- * «Pide ahora» nunca espera: está visible e interactivo desde el primer cuadro.
+ * Movimiento (GSAP, solo con movimiento permitido): la foto se asienta con un
+ * acercamiento lento, el título sube línea por línea y el precio se escribe. Al
+ * bajar, la foto se queda atrás y el papel crema la tapa. «Pide ahora» nunca
+ * espera: está visible e interactivo desde el primer cuadro.
  */
 export function BannerPortada() {
   useRehidratar();
@@ -67,39 +46,21 @@ export function BannerPortada() {
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
-      mm.add(CONDICIONES, (contexto) => {
-        const { movimiento, puntero } = contexto.conditions as Record<keyof typeof CONDICIONES, boolean>;
-        if (!movimiento) return;
+      mm.add(CONDICIONES.movimiento, () => {
         const q = gsap.utils.selector(raiz);
 
         const entrada = gsap.timeline({ defaults: { ease: TINTA } });
         entrada
-          // La máscara arranca ya abierta: la foto (el elemento más grande) se pinta desde el inicio.
-          .fromTo(
-            q("[data-tazon-entrada]"),
-            { clipPath: "circle(34% at 50% 50%)", rotate: -20, scale: 0.96 },
-            { clipPath: "circle(72% at 50% 50%)", rotate: 0, scale: 1, duration: 1.4 },
-            0,
-          )
-          .from(q("[data-linea]"), { yPercent: 110, duration: 0.9, stagger: 0.09 }, 0.12)
+          // La foto es el elemento más grande: se pinta desde el inicio y solo se asienta.
+          .fromTo(q("[data-banner]"), { scale: 1.08 }, { scale: 1, duration: 2.2 }, 0)
+          .from(q("[data-linea]"), { yPercent: 110, duration: 0.9, stagger: 0.09 }, 0.15)
           .from(q("[data-ornamento]"), { scaleX: 0, duration: 0.7 }, 0.5)
           .from(q("[data-apoyo]"), { y: 14, autoAlpha: 0, duration: 0.7, stagger: 0.07 }, 0.55)
-          .from(q("[data-fondo]"), { xPercent: 5, autoAlpha: 0, duration: 1.3 }, 0.4)
-          .from(
-            q("[data-satelite]"),
-            {
-              y: 26,
-              rotate: (i: number) => [-24, 18, -14][i % 3],
-              autoAlpha: 0,
-              duration: 1.1,
-              stagger: 0.09,
-            },
-            0.6,
-          )
-          .from(q("[data-anotacion]"), { clipPath: "inset(0 100% 0 0)", duration: 0.8, stagger: 0.12 }, 0.95);
+          .from(q("[data-anotacion]"), { clipPath: "inset(0 100% 0 0)", duration: 0.9 }, 0.95);
+
         // Si el navegador no está animando (pestaña en segundo plano, capturas sin
-        // requestAnimationFrame), la entrada se completa de golpe: el título y el
-        // tazón nunca quedan invisibles. El temporizador corre aunque no haya cuadros.
+        // requestAnimationFrame), la entrada se completa de golpe: el título y la
+        // foto nunca quedan invisibles. El temporizador corre aunque no haya cuadros.
         const cuadroInicial = gsap.ticker.frame;
         const respaldo = window.setTimeout(() => {
           if (gsap.ticker.frame - cuadroInicial < 2) entrada.progress(1);
@@ -108,133 +69,51 @@ export function BannerPortada() {
         // Las entradas ya fijaron su estado inicial: ahora sí puede mostrarse lo protegido.
         gsap.set(q("[data-revela]"), { visibility: "visible" });
 
-        // Al bajar, el tazón gira y se queda atrás; el papel de la siguiente sección lo tapa.
-        gsap.to(q("[data-tazon-scroll]"), {
-          rotate: 24,
-          yPercent: 14,
-          scale: 0.92,
-          ease: "none",
-          scrollTrigger: { trigger: raiz.current, start: "top top", end: "bottom top", scrub: 0.6 },
-        });
-        gsap.to(q("[data-fondo]"), {
-          xPercent: -8,
+        // Al bajar, la foto se queda atrás; el papel de la siguiente sección la tapa.
+        gsap.to(q("[data-banner-scroll]"), {
+          yPercent: 12,
           ease: "none",
           scrollTrigger: { trigger: raiz.current, start: "top top", end: "bottom top", scrub: 0.6 },
         });
 
-        // Profundidad mínima con mouse: cada acompañante se corre según su plano.
-        if (!puntero) return () => window.clearTimeout(respaldo);
-        const capas = q("[data-profundidad]").map((el) => ({
-          k: Number(el.getAttribute("data-profundidad")),
-          x: gsap.quickTo(el, "x", { duration: 0.9, ease: "power3.out" }),
-          y: gsap.quickTo(el, "y", { duration: 0.9, ease: "power3.out" }),
-        }));
-        const mover = (e: PointerEvent) => {
-          const dx = e.clientX / window.innerWidth - 0.5;
-          const dy = e.clientY / window.innerHeight - 0.5;
-          for (const c of capas) {
-            c.x(dx * c.k);
-            c.y(dy * c.k);
-          }
-        };
-        window.addEventListener("pointermove", mover);
-        return () => {
-          window.clearTimeout(respaldo);
-          window.removeEventListener("pointermove", mover);
-        };
+        return () => window.clearTimeout(respaldo);
       });
     },
     { scope: raiz },
   );
 
   return (
-    // Sube bajo la barra superior (4.25rem) para que el pozo de luz no deje costura.
+    // Sube bajo la barra superior (4.25rem) para que la foto llegue al borde de arriba.
     <section
       ref={raiz}
       aria-labelledby="titulo-portada"
-      className="relative isolate -mt-[4.25rem] overflow-hidden pt-[4.25rem]"
+      className="relative isolate -mt-[4.25rem] overflow-hidden lg:flex lg:min-h-svh lg:items-center"
     >
-      {/* Pozo de luz donde se apoya el tazón. */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_68%_24%,color-mix(in_oklab,var(--oceano)_84%,var(--crema))_0%,transparent_58%)] lg:bg-[radial-gradient(circle_at_70%_50%,color-mix(in_oklab,var(--oceano)_84%,var(--crema))_0%,transparent_46%)]"
-      />
-      {/* La canasta de pan asoma en la esquina, como en una mesa servida. */}
-      <div aria-hidden="true" data-profundidad="10" className="absolute -bottom-20 -left-16 hidden size-64 lg:block">
-        <div data-revela data-satelite className="relative size-full">
-          <Image src="/platos/pan.webp" alt="" fill sizes="256px" className="object-contain" />
+      {/* La foto: en celular y tablet, una franja arriba centrada en el tazón; en escritorio, todo el fondo. */}
+      <div className="relative h-[clamp(17rem,48svh,30rem)] overflow-hidden lg:absolute lg:inset-0 lg:-z-10 lg:h-auto">
+        <div data-banner-scroll className="absolute inset-0">
+          <div data-banner className="absolute inset-0">
+            <Image
+              src="/portada/banner-hero.webp"
+              alt="Encebollado de albacora servido sobre una mesa de madera azul, con limón, cebolla curtida, culantro y chifles"
+              fill
+              sizes="100vw"
+              loading="eager"
+              fetchPriority="high"
+              className="object-cover object-[76%_50%] lg:object-[70%_50%]"
+            />
+          </div>
         </div>
+        {/* Arriba, una sombra para leer la barra; abajo, la foto se funde con el océano. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--oceano)_75%,transparent)_0%,transparent_28%,transparent_62%,var(--oceano)_100%)] lg:bg-[linear-gradient(to_right,color-mix(in_oklab,var(--oceano)_55%,transparent)_0%,color-mix(in_oklab,var(--oceano)_28%,transparent)_32%,transparent_50%),linear-gradient(to_bottom,color-mix(in_oklab,var(--oceano)_78%,transparent)_0%,transparent_16%,transparent_80%,color-mix(in_oklab,var(--oceano)_70%,transparent)_100%)]"
+        />
       </div>
 
-      <div className="mx-auto grid max-w-6xl px-4 pb-16 sm:px-6 lg:min-h-[calc(100svh-4.25rem)] lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-center lg:pb-12">
-        {/* Escena: el tazón, su nombre de fondo y la mesa alrededor. */}
-        {/* En celular y tablet la escena se mide con la altura visible (svh): así «Pide ahora»
-            entra en la primera pantalla aun con las barras del navegador. */}
-        <div className="relative h-[clamp(13rem,40svh,22rem)] sm:h-[clamp(20rem,42svh,30rem)] lg:order-2 lg:h-[40rem]">
-          <p
-            aria-hidden="true"
-            data-revela
-            data-fondo
-            className="absolute top-1 right-0 font-heading text-fondo font-bold tracking-[-0.03em] whitespace-nowrap text-crema/[0.07] select-none lg:top-6"
-          >
-            {brand.nombre.replace(/^La\s+/, "")}
-          </p>
-
-          <div className="absolute top-[10%] -right-14 size-[clamp(11rem,35svh,19rem)] sm:top-[6%] sm:right-auto sm:left-1/2 sm:size-[clamp(18rem,38svh,25rem)] sm:-translate-x-1/2 lg:top-1/2 lg:size-[31rem] lg:-translate-y-1/2">
-            {/* Aros finos alrededor del tazón. */}
-            <svg
-              viewBox="0 0 100 100"
-              aria-hidden="true"
-              focusable="false"
-              className="pointer-events-none absolute -inset-[22%] size-[144%]"
-            >
-              <circle cx={50} cy={50} r={36} fill="none" stroke="var(--crema)" strokeOpacity={0.09} strokeWidth={0.25} />
-              <circle cx={50} cy={50} r={49} fill="none" stroke="var(--crema)" strokeOpacity={0.06} strokeWidth={0.2} />
-            </svg>
-            <div data-tazon-scroll className="size-full">
-              <div data-tazon-entrada className="relative size-full">
-                <Image
-                  src="/platos/encebollado-albacora-cenital.webp"
-                  alt="Encebollado de albacora con yuca, cebolla curtida y culantro, visto desde arriba"
-                  fill
-                  sizes="(min-width: 1024px) 31rem, (min-width: 640px) 25rem, 19rem"
-                  loading="eager"
-                  fetchPriority="high"
-                  className="object-contain drop-shadow-[0_28px_36px_rgb(0_0_0/0.45)]"
-                />
-              </div>
-            </div>
-          </div>
-
-          <Granos className="absolute top-[44%] left-[6%] hidden w-12 lg:block" />
-          <Granos className="absolute top-[8%] right-[8%] hidden w-10 rotate-90 lg:block" />
-
-          {/* Los chifles, el acompañante de siempre. */}
-          <div
-            aria-hidden="true"
-            data-profundidad="18"
-            className="absolute top-3 left-0 size-20 sm:top-[8%] sm:left-4 sm:size-36 lg:top-auto lg:right-[-2%] lg:bottom-[12%] lg:left-auto lg:size-44"
-          >
-            <div data-revela data-satelite className="relative size-full">
-              <Image
-                src="/platos/chifles.webp"
-                alt=""
-                fill
-                sizes="(min-width: 1024px) 11rem, (min-width: 640px) 9rem, 7rem"
-                className="object-contain drop-shadow-[0_16px_20px_rgb(0_0_0/0.4)]"
-              />
-            </div>
-          </div>
-
-          <Anotacion
-            platoId="encebollado-albacora"
-            className="bottom-1 left-0 max-w-[7.5rem] sm:left-4 sm:max-w-[10rem] lg:bottom-[3%] lg:left-[4%]"
-          />
-          <Anotacion platoId="chifles" className="right-[4%] bottom-[2%] hidden lg:flex" />
-        </div>
-
-        {/* Texto y acción. */}
-        <div className="relative z-10 mt-4 sm:mt-6 lg:order-1 lg:mt-0">
+      {/* Texto y acción, sobre la madera. */}
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 lg:pt-[4.25rem] lg:pb-12">
+        <div className="-mt-10 max-w-xl sm:-mt-14 lg:mt-0">
           <h1 id="titulo-portada" className="font-heading text-portada font-bold tracking-[-0.025em]">
             <span className="sr-only">{brand.nombre}: </span>
             {/* Cada línea sube desde su propia máscara; el relleno inferior deja ver la tilde y los descendentes. */}
@@ -270,6 +149,7 @@ export function BannerPortada() {
               ¿Cómo se pide?
             </a>
           </div>
+          <EnLaFoto />
         </div>
       </div>
     </section>

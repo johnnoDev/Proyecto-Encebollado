@@ -7,6 +7,7 @@ import { BarraPortada } from "@/components/portada/barra-portada";
 import { ComandaComoPedir } from "@/components/portada/comanda-como-pedir";
 import { EncebolladosDestacados } from "@/components/portada/encebollados-destacados";
 import { MovimientoLocal } from "@/components/portada/movimiento-local";
+import { Matasellos, PezGrabado } from "@/components/portada/marcas-de-agua";
 import { Ornamento } from "@/components/portada/ornamento";
 import { PideAhora } from "@/components/portada/pide-ahora";
 import { brand } from "@/config/brand";
@@ -43,9 +44,22 @@ export default function Portada() {
         <section
           id="como-pedir"
           aria-labelledby="titulo-como-pedir"
-          className={cn(dentado, "-mt-px scroll-mt-4 overflow-x-clip bg-oceano pt-16 pb-24 sm:pt-20")}
+          className={cn(dentado, "relative isolate -mt-px scroll-mt-4 overflow-x-clip bg-oceano pt-16 pb-24 sm:pt-20 lg:min-h-svh lg:pt-[clamp(1.5rem,5svh,3rem)]")}
         >
-          <div data-relato className="mx-auto max-w-6xl px-4 text-center sm:px-6">
+          {/* El local de fondo, en penumbra azul: la comanda y el texto siempre caen en zonas oscuras. */}
+          <div aria-hidden="true" className="absolute inset-0 -z-10 overflow-hidden">
+            <Image
+              src="/portada/fondo-como-pedir.webp"
+              alt=""
+              fill
+              sizes="100vw"
+              className="object-cover object-[78%_100%] lg:object-center"
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--oceano)_80%,transparent)_0%,color-mix(in_oklab,var(--oceano)_55%,transparent)_40%,color-mix(in_oklab,var(--oceano)_45%,transparent)_100%)] lg:bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--oceano)_70%,transparent)_0%,transparent_30%,transparent_78%,color-mix(in_oklab,var(--oceano)_55%,transparent)_100%),radial-gradient(ellipse_32%_38%_at_80%_52%,color-mix(in_oklab,var(--oceano)_70%,transparent)_0%,transparent_100%)]" />
+            <PezGrabado className="absolute -top-2 -left-10 w-56 text-crema/[0.12] lg:top-[3%] lg:left-[1%] lg:w-[20rem]" />
+            <Matasellos className="absolute top-[44%] left-[7%] hidden w-52 -rotate-12 text-crema/[0.16] lg:block" />
+          </div>
+          <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
             <h2 id="titulo-como-pedir" className="font-heading text-display font-bold">
               Cómo pedir
             </h2>
