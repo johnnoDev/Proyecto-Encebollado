@@ -8,24 +8,42 @@ import { brand } from "@/config/brand";
 import { precio } from "@/lib/formato";
 import { CONDICIONES, gsap, TINTA, useGSAP } from "@/lib/gsap";
 import { tienePrecioVariable } from "@/lib/pedido";
+import { cn } from "@/lib/utils";
 import { useRehidratar } from "@/store/hidratar";
 import { useMenu } from "@/store/menu";
 
-/** El plato de la foto, con su precio vigente (respeta los ajustes de /admin). */
-function EnLaFoto() {
+/**
+ * Comandita: el plato de la foto anotado en un papelito de comanda apoyado en
+ * la mesa, con su precio vigente (respeta los ajustes de /admin).
+ */
+function Comandita({ className }: { className?: string }) {
   const plato = useMenu((s) => s.platos.find((p) => p.id === "encebollado-albacora"));
   if (!plato) return null;
-  const valor = !plato.disponible
-    ? "Agotado por hoy"
-    : `${tienePrecioVariable(plato) ? "desde " : ""}${precio(plato.precio)}`;
   return (
-    <p data-revela data-anotacion className="mt-8 flex items-center gap-3 text-sm text-crema/80">
-      <span aria-hidden="true" className="h-px w-10 shrink-0 bg-dorado/70" />
-      <span>
-        En la foto: <span className="font-semibold text-crema">{plato.nombre}</span>{" "}
-        <span className="font-heading text-linea font-semibold whitespace-nowrap tabular-nums text-dorado">{valor}</span>
-      </span>
-    </p>
+    <div
+      data-revela
+      data-anotacion
+      className={cn(
+        "absolute z-10 w-56 -rotate-3 rounded-b-[10px] bg-crema px-4 pt-4 pb-3 text-tostado shadow-[0_14px_24px_-10px_rgb(0_0_0/0.55)] [mask:radial-gradient(circle_at_7px_0,transparent_5px,#000_5.5px)_0_0/14px_100%_repeat-x] lg:w-64",
+        className,
+      )}
+    >
+      <p className="sr-only">En la foto:</p>
+      <p className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-2 font-heading text-linea leading-snug font-semibold">
+        <span aria-hidden="true" className="font-bold text-oceano">
+          1 ×
+        </span>
+        {plato.nombre}
+      </p>
+      <p className="mt-2 flex items-baseline justify-between border-t border-dashed border-tostado/30 pt-1.5">
+        <span className="text-nota text-tostado/75">
+          {!plato.disponible ? "Hoy" : tienePrecioVariable(plato) ? "desde" : "precio"}
+        </span>
+        <span className="font-heading text-plato font-bold tabular-nums text-aji-texto">
+          {!plato.disponible ? "Agotado" : precio(plato.precio)}
+        </span>
+      </p>
+    </div>
   );
 }
 
@@ -56,7 +74,9 @@ export function BannerPortada() {
           .from(q("[data-linea]"), { yPercent: 110, duration: 0.9, stagger: 0.09 }, 0.15)
           .from(q("[data-ornamento]"), { scaleX: 0, duration: 0.7 }, 0.5)
           .from(q("[data-apoyo]"), { y: 14, autoAlpha: 0, duration: 0.7, stagger: 0.07 }, 0.55)
-          .from(q("[data-anotacion]"), { clipPath: "inset(0 100% 0 0)", duration: 0.9 }, 0.95);
+          // La comandita cae sobre la mesa y su línea se escribe como tinta.
+          .from(q("[data-anotacion]"), { y: -14, autoAlpha: 0, duration: 0.6 }, 0.9)
+          .from(q("[data-anotacion] p"), { clipPath: "inset(0 100% 0 0)", duration: 0.8, stagger: 0.15 }, 1.1);
 
         // Si el navegador no está animando (pestaña en segundo plano, capturas sin
         // requestAnimationFrame), la entrada se completa de golpe: el título y la
@@ -109,6 +129,8 @@ export function BannerPortada() {
           aria-hidden="true"
           className="absolute inset-0 bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--oceano)_88%,transparent)_0%,color-mix(in_oklab,var(--oceano)_62%,transparent)_12%,transparent_30%,transparent_62%,var(--oceano)_100%)] lg:bg-[linear-gradient(to_right,color-mix(in_oklab,var(--oceano)_55%,transparent)_0%,color-mix(in_oklab,var(--oceano)_28%,transparent)_32%,transparent_50%),linear-gradient(to_bottom,color-mix(in_oklab,var(--oceano)_90%,transparent)_0%,color-mix(in_oklab,var(--oceano)_72%,transparent)_8%,transparent_20%,transparent_80%,color-mix(in_oklab,var(--oceano)_70%,transparent)_100%)]"
         />
+        {/* La comandita del plato de la foto, apoyada en la mesa junto al tazón. */}
+        <Comandita className="top-[30%] left-4 sm:left-6 lg:top-auto lg:bottom-[14%] lg:left-[45%]" />
       </div>
 
       {/* Texto y acción, sobre la madera. */}
@@ -149,7 +171,6 @@ export function BannerPortada() {
               ¿Cómo se pide?
             </a>
           </div>
-          <EnLaFoto />
         </div>
       </div>
     </section>
