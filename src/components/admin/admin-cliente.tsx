@@ -76,6 +76,8 @@ export function AdminCliente() {
   // «Agotados» deja ver solo lo que hay que reactivar o revisar en medio del servicio.
   const [soloAgotados, setSoloAgotados] = useState(false);
   const [vista, setVista] = useState<Vista>("carta");
+  // Anuncio para lectores de pantalla cuando cambia la vista desde el panel.
+  const [anuncio, setAnuncio] = useState("");
   const temporizador = useRef<ReturnType<typeof setTimeout>>(undefined);
   const temporizadorConfirmar = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -181,7 +183,7 @@ export function AdminCliente() {
               type="button"
               role="tab"
               aria-selected={vista === v.id}
-              aria-controls={`panel-${v.id}`}
+              aria-controls={vista === v.id ? `panel-${v.id}` : undefined}
               tabIndex={vista === v.id ? 0 : -1}
               onClick={() => cambiarVista(v.id)}
               onKeyDown={teclaPestana}
@@ -242,119 +244,124 @@ export function AdminCliente() {
           </nav>
         )}
 
-        {vista === "indicadores" && (
-          <main
-            id="panel-indicadores"
-            role="tabpanel"
-            aria-labelledby="pestana-indicadores"
-            className="mx-auto max-w-4xl border-t border-crema/15 px-4 sm:px-6"
-          >
-            <h2 className="sr-only">Indicadores del día</h2>
-            <PanelIndicadores
-              onRevisarAgotados={() => {
-                setSoloAgotados(true);
-                cambiarVista("carta");
-              }}
-            />
-          </main>
-        )}
-
-        {vista === "carta" && (
-          <main
-            id="panel-carta"
-            role="tabpanel"
-            aria-labelledby="pestana-carta"
-            className="mx-auto max-w-4xl px-4 sm:px-6"
-          >
-            <section
-              aria-label="Resumen de la carta"
-              className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-y border-dashed border-crema/20 py-4"
+        <main>
+          {vista === "indicadores" && (
+            <div
+              id="panel-indicadores"
+              role="tabpanel"
+              aria-labelledby="pestana-indicadores"
+              className="mx-auto max-w-4xl border-t border-crema/15 px-4 sm:px-6"
             >
-              <p className="text-cuerpo text-pretty text-crema/85">
-                {montado ? (
-                  <>
-                    <strong className="font-semibold text-crema">{disponibles} disponibles</strong>
-                    {" · "}
-                    <span className={cn(agotados > 0 && "font-semibold text-aji-claro")}>
-                      {agotados} {agotados === 1 ? "agotado" : "agotados"}
-                    </span>
-                    {" · "}
-                    {preciosCambiados === 0
-                      ? "precios de la carta original"
-                      : `${preciosCambiados} ${preciosCambiados === 1 ? "precio cambiado" : "precios cambiados"}`}
-                  </>
-                ) : (
-                  <span className="inline-block h-4 w-56 rounded-full bg-crema/10 align-middle" />
+              <h2 className="sr-only">Indicadores del día</h2>
+              <PanelIndicadores
+                onRevisarAgotados={() => {
+                  setSoloAgotados(true);
+                  cambiarVista("carta");
+                  setAnuncio("Carta filtrada: solo los platos agotados.");
+                  // El foco sigue al cambio de vista: va a la pestaña «Carta».
+                  requestAnimationFrame(() => document.getElementById("pestana-carta")?.focus());
+                }}
+              />
+            </div>
+          )}
+
+          {vista === "carta" && (
+            <div
+              id="panel-carta"
+              role="tabpanel"
+              aria-labelledby="pestana-carta"
+              className="mx-auto max-w-4xl px-4 sm:px-6"
+            >
+              <section
+                aria-label="Resumen de la carta"
+                className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-y border-dashed border-crema/20 py-4"
+              >
+                <p className="text-cuerpo text-pretty text-crema/85">
+                  {montado ? (
+                    <>
+                      <strong className="font-semibold text-crema">{disponibles} disponibles</strong>
+                      {" · "}
+                      <span className={cn(agotados > 0 && "font-semibold text-aji-claro")}>
+                        {agotados} {agotados === 1 ? "agotado" : "agotados"}
+                      </span>
+                      {" · "}
+                      {preciosCambiados === 0
+                        ? "precios de la carta original"
+                        : `${preciosCambiados} ${preciosCambiados === 1 ? "precio cambiado" : "precios cambiados"}`}
+                    </>
+                  ) : (
+                    <span className="inline-block h-4 w-56 rounded-full bg-crema/10 align-middle" />
+                  )}
+                </p>
+                {montado && hayCambios && (
+                  <button
+                    type="button"
+                    onClick={restablecerTodo}
+                    className={cn(
+                      "flex h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors",
+                      confirmar
+                        ? "border-aji bg-aji-texto text-white"
+                        : "border-crema/30 text-crema/90 hover:border-crema/60",
+                    )}
+                  >
+                    <RotateCcw className="size-4" aria-hidden="true" />
+                    {confirmar ? "¿Seguro? Toca otra vez" : "Restablecer toda la carta"}
+                  </button>
                 )}
+              </section>
+
+              <p className="mt-4 text-sm text-pretty text-crema/75">
+                Los cambios se ven al instante en la carta del comensal. Lo ya anotado en un pedido mantiene su precio.
               </p>
-              {montado && hayCambios && (
-                <button
-                  type="button"
-                  onClick={restablecerTodo}
-                  className={cn(
-                    "flex h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors",
-                    confirmar
-                      ? "border-aji bg-aji-texto text-white"
-                      : "border-crema/30 text-crema/90 hover:border-crema/60",
-                  )}
-                >
-                  <RotateCcw className="size-4" aria-hidden="true" />
-                  {confirmar ? "¿Seguro? Toca otra vez" : "Restablecer toda la carta"}
-                </button>
+
+              {soloAgotados && montado && agotados === 0 && (
+                <p className="mt-8 rounded-xl border border-dashed border-crema/25 px-4 py-8 text-center text-cuerpo text-pretty text-crema/75">
+                  No hay platos agotados. Todo lo de la carta se puede pedir.
+                </p>
               )}
-            </section>
 
-            <p className="mt-4 text-sm text-pretty text-crema/75">
-              Los cambios se ven al instante en la carta del comensal. Lo ya anotado en un pedido mantiene su precio.
-            </p>
-
-            {soloAgotados && montado && agotados === 0 && (
-              <p className="mt-8 rounded-xl border border-dashed border-crema/25 px-4 py-8 text-center text-cuerpo text-pretty text-crema/75">
-                No hay platos agotados. Todo lo de la carta se puede pedir.
-              </p>
-            )}
-
-            {categorias.map((categoria) => {
-              const visibles = platos.filter(
-                (p) => p.categoriaId === categoria.id && (!soloAgotados || !p.disponible),
-              );
-              if (visibles.length === 0) return null;
-              const conOpciones = visibles.some((p) => p.grupos.length > 0);
-              return (
-                <section
-                  key={categoria.id}
-                  id={`cat-${categoria.id}`}
-                  aria-labelledby={`titulo-${categoria.id}`}
-                  className="mt-8 scroll-mt-20"
-                >
-                  <h2 id={`titulo-${categoria.id}`} className="font-heading text-plato font-bold">
-                    {categoria.nombre}
-                  </h2>
-                  {/* Una sola vez por categoría, no repetido en cada plato. */}
-                  {conOpciones && (
-                    <p className="mt-1 text-sm text-pretty text-crema/75">
-                      Los precios son la base; las opciones (tamaño, sabor) suman encima.
-                    </p>
-                  )}
-                  <div className="mt-3 drop-shadow-[0_10px_16px_rgb(0_0_0/0.3)]">
-                    <ul data-superficie="clara" className={cn(papel, "rounded-b-[14px] px-4 pt-3 pb-1 sm:px-5")}>
-                      {visibles.map((plato) => (
-                        <FilaAdmin
-                          key={plato.id}
-                          plato={plato}
-                          montado={montado}
-                          cambiado={ajustes[plato.id] !== undefined}
-                          onCambiar={cambiar}
-                          onOriginal={() => volverAlOriginal(plato)}
-                        />
-                      ))}
-                    </ul>
-                  </div>
-                </section>
-              );
-            })}
-          </main>
-        )}
+              {categorias.map((categoria) => {
+                const visibles = platos.filter(
+                  (p) => p.categoriaId === categoria.id && (!soloAgotados || !p.disponible),
+                );
+                if (visibles.length === 0) return null;
+                const conOpciones = visibles.some((p) => p.grupos.length > 0);
+                return (
+                  <section
+                    key={categoria.id}
+                    id={`cat-${categoria.id}`}
+                    aria-labelledby={`titulo-${categoria.id}`}
+                    className="mt-8 scroll-mt-20"
+                  >
+                    <h2 id={`titulo-${categoria.id}`} className="font-heading text-plato font-bold">
+                      {categoria.nombre}
+                    </h2>
+                    {/* Una sola vez por categoría, no repetido en cada plato. */}
+                    {conOpciones && (
+                      <p className="mt-1 text-sm text-pretty text-crema/75">
+                        Los precios son la base; las opciones (tamaño, sabor) suman encima.
+                      </p>
+                    )}
+                    <div className="mt-3 drop-shadow-[0_10px_16px_rgb(0_0_0/0.3)]">
+                      <ul data-superficie="clara" className={cn(papel, "rounded-b-[14px] px-4 pt-3 pb-1 sm:px-5")}>
+                        {visibles.map((plato) => (
+                          <FilaAdmin
+                            key={plato.id}
+                            plato={plato}
+                            montado={montado}
+                            cambiado={ajustes[plato.id] !== undefined}
+                            onCambiar={cambiar}
+                            onOriginal={() => volverAlOriginal(plato)}
+                          />
+                        ))}
+                      </ul>
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+          )}
+        </main>
 
         <AnimatePresence>
           {aviso && (
@@ -389,7 +396,7 @@ export function AdminCliente() {
           )}
         </AnimatePresence>
         <p aria-live="polite" className="sr-only">
-          {aviso?.texto ?? ""}
+          {aviso?.texto ?? anuncio}
         </p>
       </div>
     </MotionConfig>

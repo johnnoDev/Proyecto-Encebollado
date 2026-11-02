@@ -152,6 +152,10 @@
   [data-slot="sheet-content"] :focus-visible {
     outline-color: var(--oceano);
   }
+  /* Sobre dorado (el aviso de datos de ejemplo), el foco pasa a tostado. */
+  [data-superficie="dorada"] :focus-visible {
+    outline-color: var(--tostado);
+  }
 }
 
 /* Las hojas mantienen un fundido breve sin desplazarse con movimiento reducido. */

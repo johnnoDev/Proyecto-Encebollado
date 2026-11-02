@@ -93,17 +93,17 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
     <div className="pb-6">
       {hayEjemplo && (
         <div
-          role="status"
+          data-superficie="dorada"
           className="mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-lg bg-dorado px-4 py-3 text-tostado"
         >
-          <p className="flex items-center gap-2 font-semibold">
+          <p role="status" className="flex items-center gap-2 font-semibold">
             <FlaskConical className="size-5 shrink-0" aria-hidden="true" />
             Datos de ejemplo, no corresponden a un servicio real
           </p>
           <button
             type="button"
             onClick={borrarEjemplo}
-            className="flex h-10 items-center gap-1.5 rounded-full px-3 text-sm font-semibold underline decoration-tostado/40 underline-offset-4 hover:bg-tostado/10"
+            className="flex h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold underline decoration-tostado/40 underline-offset-4 hover:bg-tostado/10"
           >
             <Trash2 className="size-4" aria-hidden="true" />
             Borrar datos de ejemplo
