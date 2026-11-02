@@ -284,29 +284,26 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
           )}
         </section>
 
-        <div>
-          <section aria-labelledby="titulo-modalidades">
-            <h2 id="titulo-modalidades" className="font-heading text-plato font-bold">
-              Cómo pidieron
-            </h2>
-            <ul className="mt-4 space-y-3">
-              {(Object.keys(nombresModalidad) as Modalidad["id"][]).map((m) => {
-                const n = ind.modalidades[m];
-                const pct = ind.pedidos === 0 ? 0 : Math.round((n / ind.pedidos) * 100);
-                return (
-                  <li key={m} className="flex items-center gap-3">
-                    <span className="w-24 shrink-0 text-cuerpo">{nombresModalidad[m]}</span>
-                    <Barra fraccion={ind.pedidos === 0 ? 0 : n / ind.pedidos} />
-                    <span className="w-20 shrink-0 text-right text-sm font-semibold tabular-nums">
-                      {n} <span className="font-normal text-crema/70">· {pct} %</span>
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-
-        </div>
+        <section aria-labelledby="titulo-modalidades">
+          <h2 id="titulo-modalidades" className="font-heading text-plato font-bold">
+            Cómo pidieron
+          </h2>
+          <ul className="mt-4 space-y-3">
+            {(Object.keys(nombresModalidad) as Modalidad["id"][]).map((m) => {
+              const n = ind.modalidades[m];
+              const pct = ind.pedidos === 0 ? 0 : Math.round((n / ind.pedidos) * 100);
+              return (
+                <li key={m} className="flex items-center gap-3">
+                  <span className="w-24 shrink-0 text-cuerpo">{nombresModalidad[m]}</span>
+                  <Barra fraccion={ind.pedidos === 0 ? 0 : n / ind.pedidos} />
+                  <span className="w-20 shrink-0 text-right text-sm font-semibold tabular-nums">
+                    {n} <span className="font-normal text-crema/70">· {pct} %</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       </div>
 
       {/* Sin pedidos, el estado vacío ya ofrece el día de ejemplo: un solo botón a la vista. */}
