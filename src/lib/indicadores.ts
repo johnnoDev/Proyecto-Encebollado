@@ -82,7 +82,7 @@ export function masVendidos(pedidos: Pedido[], ahora: number, limite = 5): Plato
       porPlato.set(l.platoId, actual);
     }
   }
-  return [...porPlato.values()]
+  return Array.from(porPlato.values())
     .sort((a, b) => b.cantidad - a.cantidad || a.nombre.localeCompare(b.nombre, brand.locale))
     .slice(0, limite);
 }

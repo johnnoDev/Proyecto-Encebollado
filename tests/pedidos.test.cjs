@@ -184,3 +184,68 @@ test("la confirmación de entrega corresponde a cada modalidad", () => {
   assert.match(indicacionPedidoEntregado({ modalidad: "retiro" }), /retiraste/);
   for (const modalidad of ["llevar", "retiro"]) assert.doesNotMatch(indicacionPedidoEntregado({ modalidad }), /mesa/);
 });
+
+// Indicadores: «ahora» fijo a las 12:00 en Guayaquil (UTC−5) del 1 de noviembre de 2026.
+const AHORA = Date.UTC(2026, 10, 1, 17, 0);
+const MIN = 60_000;
+const pedidoIndicador = (datos) => ({
+  id: datos.id, numero: datos.id, estado: "nuevo", modalidad: "mesa", mesa: "4", total: 3.5,
+  creadoEn: AHORA - 20 * MIN, lineas: [{ ...linea(), platoId: "albacora", nombre: "Encebollado de albacora" }],
+  ...datos,
+});
+
+test("indicadores: un día sin pedidos da ceros y listas vacías, nunca NaN", () => {
+  const { calcularIndicadores } = cargar("src/lib/indicadores.ts");
+  const platos = [{ id: "pan", nombre: "Pan", disponible: false }, { id: "yuca", nombre: "Yuca", disponible: true }];
+  const r = calcularIndicadores([], platos, AHORA);
+  for (const valor of [r.pedidos, r.vendido, r.ticket, r.minutosListo, r.demorados.cantidad, r.demorados.porcentaje]) {
+    assert.equal(valor, 0);
+  }
+  assert.equal(JSON.stringify(r.modalidades), JSON.stringify({ mesa: 0, llevar: 0, retiro: 0 }));
+  assert.equal(r.masVendidos.length, 0);
+  assert.equal(JSON.stringify(r.agotados), JSON.stringify([{ id: "pan", nombre: "Pan" }]));
+});
+
+test("indicadores: los pedidos de ayer no cuentan, aunque en UTC sean de hoy", () => {
+  const { calcularIndicadores } = cargar("src/lib/indicadores.ts");
+  // 23:30 del 31 de octubre en Guayaquil = 04:30 UTC del 1 de noviembre.
+  const anoche = pedidoIndicador({ id: "anoche", total: 9, creadoEn: Date.UTC(2026, 10, 1, 4, 30) });
+  const ayer = pedidoIndicador({ id: "ayer", total: 20, creadoEn: AHORA - 24 * 60 * MIN });
+  const hoy1 = pedidoIndicador({ id: "hoy1", total: 3.5 });
+  const hoy2 = pedidoIndicador({ id: "hoy2", total: 4.15, modalidad: "llevar" });
+  const r = calcularIndicadores([anoche, ayer, hoy1, hoy2], [], AHORA);
+  assert.equal(r.pedidos, 2);
+  assert.equal(r.vendido, 7.65);
+  assert.equal(r.ticket, 3.83);
+  assert.equal(JSON.stringify(r.modalidades), JSON.stringify({ mesa: 1, llevar: 1, retiro: 0 }));
+});
+
+test("indicadores: un pedido que volvió atrás no entra en el tiempo promedio y sigue su espera", () => {
+  const { calcularIndicadores, esDemorado } = cargar("src/lib/indicadores.ts");
+  const listo = pedidoIndicador({ id: "listo", estado: "listo", creadoEn: AHORA - 30 * MIN, listoEn: AHORA - 22 * MIN });
+  // Estuvo listo, la cocina lo devolvió a preparación: perdió listoEn.
+  const devuelto = pedidoIndicador({ id: "devuelto", estado: "preparando", creadoEn: AHORA - 12 * MIN });
+  const r = calcularIndicadores([listo, devuelto], [], AHORA);
+  assert.equal(r.minutosListo, 8);
+  assert.equal(esDemorado(devuelto, AHORA), true);
+  assert.equal(esDemorado(devuelto, AHORA - 3 * MIN), false);
+});
+
+test("indicadores: porcentaje de demorados con listos y pendientes, desde MINUTOS_DEMORA exacto", () => {
+  const { demorados, masVendidos } = cargar("src/lib/indicadores.ts");
+  const { MINUTOS_DEMORA } = cargar("src/lib/cocina.ts");
+  const datos = [
+    pedidoIndicador({ id: "listoTarde", estado: "listo", creadoEn: AHORA - 40 * MIN, listoEn: AHORA - 40 * MIN + MINUTOS_DEMORA * MIN }),
+    pedidoIndicador({ id: "listoATiempo", estado: "entregado", creadoEn: AHORA - 40 * MIN, listoEn: AHORA - 35 * MIN }),
+    pedidoIndicador({ id: "esperando", estado: "preparando", creadoEn: AHORA - 15 * MIN }),
+    pedidoIndicador({ id: "recien", estado: "nuevo", creadoEn: AHORA - 3 * MIN,
+      lineas: [{ ...linea(), platoId: "pan", nombre: "Pan", cantidad: 3 }] }),
+  ];
+  const r = demorados(datos, AHORA);
+  assert.equal(r.cantidad, 2);
+  assert.equal(r.porcentaje, 50);
+  const top = masVendidos(datos, AHORA);
+  assert.equal(top[0].platoId, "albacora");
+  assert.equal(top[0].cantidad, 3);
+  assert.equal(top[1].nombre, "Pan");
+});
