@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import Link from "next/link";
-import { ArrowRight, FlaskConical, Trash2 } from "lucide-react";
+import { ArrowRight, CircleAlert, CircleCheck, FlaskConical, Trash2 } from "lucide-react";
 import { CifraRodante } from "@/components/menu/cifra-rodante";
 import { brand } from "@/config/brand";
 import { MINUTOS_DEMORA } from "@/lib/cocina";
@@ -36,8 +36,26 @@ const minutos = new Intl.NumberFormat(brand.locale, { maximumFractionDigits: 1 }
 
 const nombresModalidad: Record<Modalidad["id"], string> = { mesa: "En mesa", llevar: "Para llevar", retiro: "Retiro" };
 
-/** Un renglón del cierre: etiqueta, cifra en tinta y su contexto. */
-function Cifra({ etiqueta, valor, numero, detalle }: { etiqueta: string; valor: string; numero: number; detalle: string }) {
+type Sello = { bien: boolean; texto: string };
+
+/**
+ * Un renglón del cierre: etiqueta, cifra en tinta y su contexto. El sello
+ * opcional dice si la cifra está dentro de la meta, con ícono y texto (nunca
+ * solo color).
+ */
+function Cifra({
+  etiqueta,
+  valor,
+  numero,
+  detalle,
+  sello,
+}: {
+  etiqueta: string;
+  valor: string;
+  numero: number;
+  detalle: string;
+  sello?: Sello;
+}) {
   return (
     <div className="px-4 py-4 sm:px-5">
       <dt className="text-sm text-tostado/75">{etiqueta}</dt>
@@ -47,6 +65,21 @@ function Cifra({ etiqueta, valor, numero, detalle }: { etiqueta: string; valor: 
           numero={numero}
           className="font-heading text-titular leading-none font-bold text-oceano tabular-nums sm:text-display"
         />
+        {sello && (
+          <span
+            className={cn(
+              "mt-2 flex items-center gap-1 text-nota leading-snug font-semibold",
+              sello.bien ? "text-cilantro-texto" : "text-aji-texto",
+            )}
+          >
+            {sello.bien ? (
+              <CircleCheck className="size-4 shrink-0" aria-hidden="true" />
+            ) : (
+              <CircleAlert className="size-4 shrink-0" aria-hidden="true" />
+            )}
+            {sello.texto}
+          </span>
+        )}
         <span className="mt-1.5 block text-nota leading-snug text-pretty text-tostado/70">{detalle}</span>
       </dd>
     </div>
@@ -137,6 +170,13 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
               valor={ind.minutosListo === 0 ? "—" : `${minutos.format(ind.minutosListo)} min`}
               numero={ind.minutosListo}
               detalle={`Meta: menos de ${MINUTOS_DEMORA} min`}
+              sello={
+                ind.minutosListo === 0
+                  ? undefined
+                  : ind.minutosListo < MINUTOS_DEMORA
+                    ? { bien: true, texto: "Dentro de la meta" }
+                    : { bien: false, texto: "Sobre la meta" }
+              }
             />
             <Cifra
               etiqueta="Demorados"
@@ -145,7 +185,7 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
               detalle={
                 sinPedidos
                   ? `Tardan ${MINUTOS_DEMORA} min o más`
-                  : `${ind.demorados.cantidad} de ${ind.pedidos} tardaron ${MINUTOS_DEMORA} min o más`
+                  : `${ind.demorados.cantidad} de ${ind.pedidos} tardaron o ya llevan ${MINUTOS_DEMORA} min o más`
               }
             />
           </dl>
