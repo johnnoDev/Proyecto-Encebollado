@@ -32,6 +32,9 @@ const useAhora = () => useSyncExternalStore(suscribirReloj, () => ahoraCompartid
 const fechaHoy = new Intl.DateTimeFormat(brand.locale, {
   timeZone: brand.zonaHoraria, weekday: "long", day: "numeric", month: "long",
 });
+const horaCorte = new Intl.DateTimeFormat(brand.locale, {
+  timeZone: brand.zonaHoraria, hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+});
 const minutos = new Intl.NumberFormat(brand.locale, { maximumFractionDigits: 1 });
 
 const nombresModalidad: Record<Modalidad["id"], string> = { mesa: "En mesa", llevar: "Para llevar", retiro: "Retiro" };
@@ -86,10 +89,14 @@ function Cifra({
   );
 }
 
-/** Barra horizontal de una sola serie: crece desde la izquierda, extremo redondeado. */
-function Barra({ fraccion }: { fraccion: number }) {
+/**
+ * Barra horizontal de una sola serie: crece desde la izquierda, extremo
+ * redondeado. Con `pista`, el fondo marca el 100 %: es una parte del total,
+ * no una comparación contra el primero.
+ */
+function Barra({ fraccion, pista }: { fraccion: number; pista?: boolean }) {
   return (
-    <span aria-hidden="true" className="block h-2 flex-1 overflow-hidden">
+    <span aria-hidden="true" className={cn("block h-2 flex-1 overflow-hidden", pista && "rounded-r-[4px] bg-crema/12")}>
       <span
         className="block h-full rounded-r-[4px] bg-dorado transition-[width] duration-500 ease-out motion-reduce:transition-none"
         style={{ width: `${Math.max(fraccion > 0 ? 3 : 0, Math.round(fraccion * 100))}%` }}
@@ -159,9 +166,12 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
         <div data-superficie="clara" className={cn(papel, "rounded-b-[14px] pt-5")}>
           <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b-2 border-tostado px-4 pb-3 sm:px-5">
             <h2 id="titulo-cierre" className="font-heading text-titular leading-none font-bold text-oceano">
-              Cierre del día
+              Hoy
             </h2>
-            <p className="text-sm text-tostado/75 first-letter:uppercase">{fechaHoy.format(ahora)}</p>
+            {/* El día sigue abierto: las cifras son hasta la hora del reloj del panel. */}
+            <p className="text-sm text-tostado/75 first-letter:uppercase">
+              {fechaHoy.format(ahora)} · hasta las {horaCorte.format(ahora)}
+            </p>
           </header>
           <dl className="grid grid-cols-2 divide-tostado/25 md:grid-cols-4 [&>div]:border-dashed [&>div]:border-tostado/25 [&>div:nth-child(-n+2)]:border-b md:[&>div:nth-child(-n+2)]:border-b-0 [&>div:nth-child(odd)]:border-r md:[&>div:not(:last-child)]:border-r">
             <Cifra
@@ -175,7 +185,7 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
               valor={String(ind.pedidos)}
               numero={ind.pedidos}
               detalle={
-                sinPedidos ? "Aún no llega ninguno" : ind.enCocina === 0 ? "Ninguno en cocina ahora" : `${ind.enCocina} siguen en cocina`
+                sinPedidos ? "Aún no llega ninguno" : ind.enCocina === 0 ? "Ninguno en cocina ahora" : ind.enCocina === 1 ? "1 sigue en cocina" : `${ind.enCocina} siguen en cocina`
               }
             />
             <Cifra
@@ -304,7 +314,7 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
               return (
                 <li key={m} className="flex items-center gap-3">
                   <span className="w-24 shrink-0 text-cuerpo">{nombresModalidad[m]}</span>
-                  <Barra fraccion={ind.pedidos === 0 ? 0 : n / ind.pedidos} />
+                  <Barra pista fraccion={ind.pedidos === 0 ? 0 : n / ind.pedidos} />
                   <span className="w-20 shrink-0 text-right text-sm font-semibold tabular-nums">
                     {n} <span className="font-normal text-crema/70">· {pct} %</span>
                   </span>
