@@ -244,6 +244,7 @@ test("indicadores: porcentaje de demorados con listos y pendientes, desde MINUTO
   const r = demorados(datos, AHORA);
   assert.equal(r.cantidad, 2);
   assert.equal(r.porcentaje, 50);
+  assert.equal(cargar("src/lib/indicadores.ts").calcularIndicadores(datos, [], AHORA).enCocina, 2);
   const top = masVendidos(datos, AHORA);
   assert.equal(top[0].platoId, "albacora");
   assert.equal(top[0].cantidad, 3);

@@ -163,7 +163,9 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
               etiqueta="Pedidos"
               valor={String(ind.pedidos)}
               numero={ind.pedidos}
-              detalle={sinPedidos ? "Aún no llega ninguno" : `${ind.modalidades.mesa} en mesa`}
+              detalle={
+                sinPedidos ? "Aún no llega ninguno" : ind.enCocina === 0 ? "Ninguno en cocina ahora" : `${ind.enCocina} siguen en cocina`
+              }
             />
             <Cifra
               etiqueta="Tiempo hasta listo"
@@ -219,6 +221,41 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
         </div>
       )}
 
+      {/* Lo único que pide acción va primero: qué no se puede pedir ahora mismo. */}
+      <section
+        aria-labelledby="titulo-agotados"
+        className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-dashed border-crema/20 py-3"
+      >
+        <h2 id="titulo-agotados" className="font-heading text-linea font-bold">
+          Agotados ahora
+        </h2>
+        {ind.agotados.length === 0 ? (
+          <p className="text-cuerpo text-crema/75">Nada: toda la carta se puede pedir.</p>
+        ) : (
+          <>
+            <ul className="flex flex-wrap gap-2">
+              {ind.agotados.map((p) => (
+                <li
+                  key={p.id}
+                  className="flex items-center gap-2 rounded-full border border-crema/25 px-3 py-1 text-sm font-semibold"
+                >
+                  <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-aji-claro" />
+                  {p.nombre}
+                </li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              onClick={onRevisarAgotados}
+              className="flex h-11 items-center gap-1.5 text-sm font-semibold text-dorado underline decoration-dorado/50 underline-offset-4 hover:decoration-dorado sm:ml-auto"
+            >
+              Revisar en la carta
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </button>
+          </>
+        )}
+      </section>
+
       <div className="mt-8 grid gap-8 md:grid-cols-2 md:gap-10">
         <section aria-labelledby="titulo-vendidos">
           <h2 id="titulo-vendidos" className="font-heading text-plato font-bold">
@@ -247,7 +284,7 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
           )}
         </section>
 
-        <div className="space-y-8">
+        <div>
           <section aria-labelledby="titulo-modalidades">
             <h2 id="titulo-modalidades" className="font-heading text-plato font-bold">
               Cómo pidieron
@@ -269,33 +306,6 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
             </ul>
           </section>
 
-          <section aria-labelledby="titulo-agotados">
-            <h2 id="titulo-agotados" className="font-heading text-plato font-bold">
-              Agotados ahora
-            </h2>
-            {ind.agotados.length === 0 ? (
-              <p className="mt-3 text-cuerpo text-crema/75">Nada agotado: toda la carta se puede pedir.</p>
-            ) : (
-              <>
-                <ul className="mt-3 divide-y divide-dashed divide-crema/20">
-                  {ind.agotados.map((p) => (
-                    <li key={p.id} className="flex items-center gap-2.5 py-2.5 text-cuerpo">
-                      <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-aji-claro" />
-                      {p.nombre}
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  type="button"
-                  onClick={onRevisarAgotados}
-                  className="mt-3 flex h-11 items-center gap-1.5 text-sm font-semibold text-dorado underline decoration-dorado/50 underline-offset-4 hover:decoration-dorado"
-                >
-                  Revisar en la carta
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </button>
-              </>
-            )}
-          </section>
         </div>
       </div>
 
@@ -321,16 +331,6 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
               <FlaskConical className="size-4" aria-hidden="true" />
               {hayEjemplo ? "Generar otro día de ejemplo" : "Cargar día de ejemplo"}
             </button>
-            {hayEjemplo && (
-              <button
-                type="button"
-                onClick={borrarEjemplo}
-                className="flex h-11 items-center gap-1.5 rounded-full border border-crema/30 px-4 font-semibold text-crema/90 hover:border-crema/60"
-              >
-                <Trash2 className="size-4" aria-hidden="true" />
-                Borrar datos de ejemplo
-              </button>
-            )}
           </div>
         </section>
       )}

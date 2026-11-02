@@ -92,8 +92,14 @@ export function agotados(platos: Plato[]): Pick<Plato, "id" | "nombre">[] {
   return platos.filter((p) => !p.disponible).map(({ id, nombre }) => ({ id, nombre }));
 }
 
+/** Pedidos de hoy que siguen en cocina (nuevos o en preparación). */
+export function enCocina(pedidos: Pedido[], ahora: number): number {
+  return pedidosDeHoy(pedidos, ahora).filter(pendiente).length;
+}
+
 export type Indicadores = {
   pedidos: number;
+  enCocina: number;
   vendido: number;
   ticket: number;
   minutosListo: number;
@@ -108,6 +114,7 @@ export function calcularIndicadores(pedidos: Pedido[], platos: Plato[], ahora: n
   const hoy = pedidosDeHoy(pedidos, ahora);
   return {
     pedidos: hoy.length,
+    enCocina: enCocina(hoy, ahora),
     vendido: vendidoHoy(hoy, ahora),
     ticket: ticketPromedio(hoy, ahora),
     minutosListo: tiempoPromedioListo(hoy, ahora),
