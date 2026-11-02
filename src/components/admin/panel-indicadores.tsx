@@ -155,7 +155,7 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
           <dl className="grid grid-cols-2 divide-tostado/25 md:grid-cols-4 [&>div]:border-dashed [&>div]:border-tostado/25 [&>div:nth-child(-n+2)]:border-b md:[&>div:nth-child(-n+2)]:border-b-0 [&>div:nth-child(odd)]:border-r md:[&>div:not(:last-child)]:border-r">
             <Cifra
               etiqueta="Vendido hoy"
-              valor={precio(ind.vendido)}
+              valor={sinPedidos ? "—" : precio(ind.vendido)}
               numero={ind.vendido}
               detalle={sinPedidos ? "Sin pedidos todavía" : `Ticket promedio ${precio(ind.ticket)}`}
             />
@@ -180,7 +180,7 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
             />
             <Cifra
               etiqueta="Demorados"
-              valor={`${ind.demorados.porcentaje} %`}
+              valor={sinPedidos ? "—" : `${ind.demorados.porcentaje} %`}
               numero={ind.demorados.porcentaje}
               detalle={
                 sinPedidos
@@ -299,38 +299,41 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
         </div>
       </div>
 
-      <section
-        aria-labelledby="titulo-ejemplo"
-        className="mt-10 border-t border-dashed border-crema/20 pt-5 text-sm text-crema/75"
-      >
-        <h2 id="titulo-ejemplo" className="font-semibold text-crema">
-          Para presentaciones
-        </h2>
-        <p className="mt-1 max-w-prose text-pretty">
-          Un día de ejemplo simula unos 40 pedidos de hoy para mostrar el panel. Solo se ve aquí: no llega a la cocina ni a
-          los comensales, y no se mezcla con los pedidos reales.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => cargarEjemplo(generarDiaDeEjemplo(platos, Date.now()))}
-            className="flex h-11 items-center gap-1.5 rounded-full border border-crema/30 px-4 font-semibold text-crema/90 hover:border-crema/60"
-          >
-            <FlaskConical className="size-4" aria-hidden="true" />
-            {hayEjemplo ? "Generar otro día de ejemplo" : "Cargar día de ejemplo"}
-          </button>
-          {hayEjemplo && (
+      {/* Sin pedidos, el estado vacío ya ofrece el día de ejemplo: un solo botón a la vista. */}
+      {!sinPedidos && (
+        <section
+          aria-labelledby="titulo-ejemplo"
+          className="mt-10 border-t border-dashed border-crema/20 pt-5 text-sm text-crema/75"
+        >
+          <h2 id="titulo-ejemplo" className="font-semibold text-crema">
+            Para presentaciones
+          </h2>
+          <p className="mt-1 max-w-prose text-pretty">
+            Un día de ejemplo simula unos 40 pedidos de hoy para mostrar el panel. Solo se ve aquí: no llega a la cocina ni a
+            los comensales, y no se mezcla con los pedidos reales.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-3">
             <button
               type="button"
-              onClick={borrarEjemplo}
+              onClick={() => cargarEjemplo(generarDiaDeEjemplo(platos, Date.now()))}
               className="flex h-11 items-center gap-1.5 rounded-full border border-crema/30 px-4 font-semibold text-crema/90 hover:border-crema/60"
             >
-              <Trash2 className="size-4" aria-hidden="true" />
-              Borrar datos de ejemplo
+              <FlaskConical className="size-4" aria-hidden="true" />
+              {hayEjemplo ? "Generar otro día de ejemplo" : "Cargar día de ejemplo"}
             </button>
-          )}
-        </div>
-      </section>
+            {hayEjemplo && (
+              <button
+                type="button"
+                onClick={borrarEjemplo}
+                className="flex h-11 items-center gap-1.5 rounded-full border border-crema/30 px-4 font-semibold text-crema/90 hover:border-crema/60"
+              >
+                <Trash2 className="size-4" aria-hidden="true" />
+                Borrar datos de ejemplo
+              </button>
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
