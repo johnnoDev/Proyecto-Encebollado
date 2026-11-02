@@ -124,7 +124,8 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
   const realesOcultos = hayEjemplo && ahora > 0 ? pedidosDeHoy(pedidos.filter((p) => !p.ejemplo), ahora).length : 0;
 
   if (ahora === 0) {
-    return <div aria-hidden="true" className="mt-6 h-72 rounded-b-[14px] bg-crema/10" />;
+    // Misma altura que el ticket (2×2 en celular, una fila desde md) para que nada salte al montar.
+    return <div aria-hidden="true" className="mt-6 h-[20.5rem] rounded-b-[14px] bg-crema/10 md:h-[12.5rem]" />;
   }
 
   const ind = calcularIndicadores(fuente, platos, ahora);
