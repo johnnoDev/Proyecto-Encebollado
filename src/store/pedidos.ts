@@ -21,6 +21,9 @@ type PedidosState = {
   contador: number;
   crear: (datos: NuevoPedido) => Pedido;
   cambiarEstado: (id: string, estado: EstadoPedido) => void;
+  /** Reemplaza el día de ejemplo (pedidos con `ejemplo: true`); los reales no se tocan. */
+  cargarEjemplo: (pedidos: Pedido[]) => void;
+  borrarEjemplo: () => void;
 };
 
 export const usePedidos = create<PedidosState>()(
@@ -44,6 +47,9 @@ export const usePedidos = create<PedidosState>()(
         set((s) => ({
           pedidos: s.pedidos.map((p) => (p.id === id ? conEstado(p, estado, Date.now()) : p)),
         })),
+      cargarEjemplo: (ejemplo) =>
+        set((s) => ({ pedidos: [...ejemplo.map((p) => ({ ...p, ejemplo: true })), ...s.pedidos.filter((p) => !p.ejemplo)] })),
+      borrarEjemplo: () => set((s) => ({ pedidos: s.pedidos.filter((p) => !p.ejemplo) })),
     }),
     { name: "pedidos" },
   ),

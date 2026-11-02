@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, MotionConfig, useReducedMotion } from "motion/react";
@@ -83,7 +83,9 @@ function tocarTimbre(ctx: AudioContext) {
 
 export function CocinaCliente() {
   const montado = useMontado();
-  const pedidos = usePedidos((s) => s.pedidos);
+  const todos = usePedidos((s) => s.pedidos);
+  // Los pedidos del día de ejemplo (Indicadores) no existen para cocina: ni columnas ni timbre.
+  const pedidos = useMemo(() => todos.filter((p) => !p.ejemplo), [todos]);
   const cambiarEstado = usePedidos((s) => s.cambiarEstado);
   // Para probar el circuito: la carta se abre en la mesa siguiente a la del último pedido.
   const mesaDemo = (usePedidos((s) => s.contador) % brand.mesas) + 1;

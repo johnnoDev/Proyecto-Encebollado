@@ -75,4 +75,6 @@ export type Pedido = {
   creadoEn: number;
   /** Cuándo quedó listo: en cocina se mide desde aquí cuánto lleva esperando para salir. */
   listoEn?: number;
+  /** Pedido simulado del «día de ejemplo» de Indicadores: nunca llega a cocina ni al comensal. */
+  ejemplo?: boolean;
 };

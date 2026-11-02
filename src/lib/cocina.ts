@@ -33,7 +33,8 @@ export const siguienteEstado: Record<EstadoPedido, EstadoPedido | null> = {
  * nuevo (se cocina en orden de llegada); los listos, del más reciente.
  */
 export function columnasCocina(pedidos: Pedido[]): Record<ColumnaCocina, Pedido[]> {
-  const porLlegada = [...pedidos].sort((a, b) => a.creadoEn - b.creadoEn);
+  // Los pedidos del día de ejemplo (Indicadores) nunca llegan a cocina.
+  const porLlegada = pedidos.filter((p) => !p.ejemplo).sort((a, b) => a.creadoEn - b.creadoEn);
   return {
     nuevo: porLlegada.filter((p) => p.estado === "nuevo"),
     preparando: porLlegada.filter((p) => p.estado === "preparando"),

@@ -249,3 +249,50 @@ test("indicadores: porcentaje de demorados con listos y pendientes, desde MINUTO
   assert.equal(top[0].cantidad, 3);
   assert.equal(top[1].nombre, "Pan");
 });
+
+// Azar reproducible para el día de ejemplo.
+function azarFijo(semilla) {
+  let a = semilla;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+test("día de ejemplo: 40 pedidos de hoy, marcados, con demoras y pendientes", () => {
+  const { generarDiaDeEjemplo } = cargar("src/lib/ejemplo.ts");
+  const { calcularIndicadores, esDeHoy } = cargar("src/lib/indicadores.ts");
+  const menu = JSON.parse(fs.readFileSync("src/data/menu.json", "utf8"));
+  const pedidos = generarDiaDeEjemplo(menu.platos, AHORA, { azar: azarFijo(7) });
+  assert.equal(pedidos.length, 40);
+  assert.ok(pedidos.every((p) => p.ejemplo === true && p.numero.startsWith("EJ-")));
+  assert.ok(pedidos.every((p) => esDeHoy(p.creadoEn, AHORA) && p.creadoEn <= AHORA));
+  assert.ok(pedidos.every((p) => Math.abs(p.total - p.lineas.reduce((s, l) => s + l.precioUnitario * l.cantidad, 0)) < 0.005));
+  const r = calcularIndicadores(pedidos, menu.platos, AHORA);
+  assert.equal(r.pedidos, 40);
+  assert.ok(r.demorados.cantidad > 0 && r.demorados.porcentaje < 100);
+  assert.ok(pedidos.some((p) => p.estado === "nuevo" || p.estado === "preparando"));
+  assert.ok(!Number.isNaN(r.minutosListo) && r.minutosListo > 0);
+  // Reproducible con la misma semilla.
+  const otra = generarDiaDeEjemplo(menu.platos, AHORA, { azar: azarFijo(7) });
+  assert.equal(JSON.stringify(otra), JSON.stringify(pedidos));
+});
+
+test("día de ejemplo: no llega a cocina ni al comensal, y se borra sin tocar los reales", () => {
+  const { usePedidos } = cargar("src/store/pedidos.ts");
+  const { columnasCocina } = cargar("src/lib/cocina.ts");
+  const { pedidosParaMesa } = cargar("src/lib/seguimiento.ts");
+  const real = usePedidos.getState().crear({ lineas: [linea()], total: 3.5, modalidad: "mesa", mesa: "4" });
+  usePedidos.getState().cargarEjemplo([pedidoIndicador({ id: "ej", mesa: "4" })]);
+  const todos = usePedidos.getState().pedidos;
+  assert.equal(todos.length, 2);
+  assert.equal(todos.find((p) => p.id === "ej").ejemplo, true);
+  assert.equal(columnasCocina(todos).nuevo.length, 1);
+  assert.equal(pedidosParaMesa(todos, "4").length, 1);
+  usePedidos.getState().borrarEjemplo();
+  assert.equal(usePedidos.getState().pedidos.length, 1);
+  assert.equal(usePedidos.getState().pedidos[0].id, real.id);
+  assert.equal(real.numero, "ALB-001");
+});

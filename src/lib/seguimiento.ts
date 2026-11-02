@@ -12,7 +12,9 @@ const terminado = (p: Pedido) => p.estado === "listo" || p.estado === "entregado
 
 /** Mantiene pendientes y los tres últimos terminados (listos o entregados) en cada mesa. */
 export function pedidosParaMesa(pedidos: Pedido[], mesa: string | null): Pedido[] {
-  const deEstaMesa = pedidos.filter((p) => mesa ? p.modalidad === "mesa" && p.mesa === mesa : p.modalidad !== "mesa");
+  const deEstaMesa = pedidos.filter(
+    (p) => !p.ejemplo && (mesa ? p.modalidad === "mesa" && p.mesa === mesa : p.modalidad !== "mesa"),
+  );
   const recientes = [...deEstaMesa].sort((a, b) => b.creadoEn - a.creadoEn);
   const terminados = new Set(recientes.filter(terminado).slice(0, 3).map((p) => p.id));
   return recientes.filter((p) => !terminado(p) || terminados.has(p.id));
