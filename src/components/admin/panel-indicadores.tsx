@@ -172,22 +172,20 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
               valor={ind.minutosListo === 0 ? "—" : `${minutos.format(ind.minutosListo)} min`}
               numero={ind.minutosListo}
               detalle={`Meta: menos de ${MINUTOS_DEMORA} min`}
-              sello={
-                ind.minutosListo === 0
-                  ? undefined
-                  : ind.minutosListo < MINUTOS_DEMORA
-                    ? { bien: true, texto: "Dentro de la meta" }
-                    : { bien: false, texto: "Sobre la meta" }
-              }
             />
             <Cifra
               etiqueta="Demorados"
               valor={sinPedidos ? "—" : `${ind.demorados.porcentaje} %`}
               numero={ind.demorados.porcentaje}
-              detalle={
+              detalle={`Tardaron o llevan ${MINUTOS_DEMORA} min o más`}
+              // El único veredicto de cocina: cuántos salieron a tiempo. Verde solo si ninguno se demoró.
+              sello={
                 sinPedidos
-                  ? `Tardan ${MINUTOS_DEMORA} min o más`
-                  : `${ind.demorados.cantidad} de ${ind.pedidos} tardaron o ya llevan ${MINUTOS_DEMORA} min o más`
+                  ? undefined
+                  : {
+                      bien: ind.demorados.cantidad === 0,
+                      texto: `${ind.pedidos - ind.demorados.cantidad} de ${ind.pedidos} a tiempo`,
+                    }
               }
             />
           </dl>
