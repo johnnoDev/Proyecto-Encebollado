@@ -8,7 +8,7 @@ import { brand } from "@/config/brand";
 import { MINUTOS_DEMORA } from "@/lib/cocina";
 import { generarDiaDeEjemplo } from "@/lib/ejemplo";
 import { precio } from "@/lib/formato";
-import { calcularIndicadores } from "@/lib/indicadores";
+import { calcularIndicadores, pedidosDeHoy } from "@/lib/indicadores";
 import { cn } from "@/lib/utils";
 import { useMenu } from "@/store/menu";
 import { usePedidos } from "@/store/pedidos";
@@ -113,6 +113,8 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
 
   const hayEjemplo = pedidos.some((p) => p.ejemplo);
   const fuente = pedidos.filter((p) => Boolean(p.ejemplo) === hayEjemplo);
+  // Con el ejemplo a la vista, los pedidos reales de hoy no se cuentan: el aviso dice cuántos hay.
+  const realesOcultos = hayEjemplo && ahora > 0 ? pedidosDeHoy(pedidos.filter((p) => !p.ejemplo), ahora).length : 0;
 
   if (ahora === 0) {
     return <div aria-hidden="true" className="mt-6 h-72 rounded-b-[14px] bg-crema/10" />;
@@ -129,10 +131,19 @@ export function PanelIndicadores({ onRevisarAgotados }: { onRevisarAgotados: () 
           data-superficie="dorada"
           className="mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-lg bg-dorado px-4 py-3 text-tostado"
         >
-          <p role="status" className="flex items-center gap-2 font-semibold">
-            <FlaskConical className="size-5 shrink-0" aria-hidden="true" />
-            Datos de ejemplo, no corresponden a un servicio real
-          </p>
+          <div className="min-w-0">
+            <p className="flex items-center gap-2 font-semibold">
+              <FlaskConical className="size-5 shrink-0" aria-hidden="true" />
+              Datos de ejemplo, no corresponden a un servicio real
+            </p>
+            {/* Se anuncia al cambiar: si llega un pedido real durante la demo, se oye y se ve. */}
+            <p aria-live="polite" className="mt-0.5 pl-7 text-sm">
+              {realesOcultos > 0 &&
+                (realesOcultos === 1
+                  ? "Hay 1 pedido real de hoy oculto. Borra el ejemplo para verlo."
+                  : `Hay ${realesOcultos} pedidos reales de hoy ocultos. Borra el ejemplo para verlos.`)}
+            </p>
+          </div>
           <button
             type="button"
             onClick={borrarEjemplo}
